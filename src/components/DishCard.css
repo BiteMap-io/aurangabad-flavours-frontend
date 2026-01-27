@@ -1,0 +1,131 @@
+.dish-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.dish-image-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--glass-surface);
+  border: 2px solid var(--glass-border);
+  transition: all 0.3s ease;
+}
+
+.dish-card:hover .dish-image-wrapper {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+}
+
+.dish-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.dish-card:hover .dish-image {
+  transform: scale(1.1);
+}
+
+.dish-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
+  pointer-events: none;
+}
+
+.dish-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+  transition: color 0.3s ease;
+}
+
+.dish-card:hover .dish-name {
+  color: var(--accent-purple);
+}
+
+@media (max-width: 768px) {
+  .dish-card {
+    min-width: 100px;
+  }
+
+  .dish-image-wrapper {
+    width: 90px;
+    height: 90px;
+  }
+
+  .dish-name {
+    font-size: 0.85rem;
+    max-width: 90px;
+  }
+}
+
+/* Light Mode DishCard Styles */
+[data-theme="light"] .dish-image-wrapper {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .dish-card:hover .dish-image-wrapper {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+}
+
+[data-theme="light"] .dish-overlay {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+}
+
+[data-theme="light"] .dish-name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+[data-theme="light"] .dish-card:hover .dish-name {
+  color: var(--accent-purple);
+}
+
+/* Enhanced responsiveness for light mode */
+@media (max-width: 480px) {
+  [data-theme="light"] .dish-card {
+    min-width: 85px;
+  }
+
+  [data-theme="light"] .dish-image-wrapper {
+    width: 75px;
+    height: 75px;
+    border-width: 1.5px;
+  }
+
+  [data-theme="light"] .dish-name {
+    font-size: 0.8rem;
+    max-width: 75px;
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,28 @@
+.meal-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  background: rgba(138, 43, 226, 0.15);
+  border: 1px solid rgba(138, 43, 226, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  backdrop-filter: blur(10px);
+}
+
+.meal-time-emoji {
+  font-size: 0.85rem;
+}
+
+.meal-time-text {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .meal-time-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+}

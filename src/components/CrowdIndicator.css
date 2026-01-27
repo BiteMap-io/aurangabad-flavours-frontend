@@ -1,0 +1,42 @@
+.crowd-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.625rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  backdrop-filter: blur(10px);
+}
+
+.crowd-label {
+  color: var(--crowd-color);
+  font-weight: 600;
+}
+
+.crowd-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--crowd-color);
+  border-radius: 50%;
+  animation: crowdPulse 2s ease-in-out infinite;
+}
+
+@keyframes crowdPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .crowd-indicator {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+}

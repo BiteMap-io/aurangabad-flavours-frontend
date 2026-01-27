@@ -1,0 +1,121 @@
+.lanyard-simple-container {
+  position: fixed;
+  top: 12px;
+  left: 20px;
+  z-index: 30;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Hook/Connector at top */
+.lanyard-simple-hook {
+  width: 10px;
+  height: 10px;
+  background: #000;
+  border-radius: 50%;
+  margin-bottom: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Black Ribbon/Strap */
+.lanyard-simple-ribbon {
+  width: 4px;
+  height: 90px;
+  background: linear-gradient(to bottom, #000 0%, #1a1a1a 50%, #000 100%);
+  transform-origin: top center;
+  box-shadow: 
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    2px 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Hanging Card */
+.lanyard-simple-card {
+  width: 85px;
+  height: 55px;
+  background: linear-gradient(135deg, #F8F8F5 0%, #F0F0EB 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transform-origin: top center;
+  margin-top: -2px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+/* Subtle texture overlay */
+.lanyard-simple-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
+    );
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.lanyard-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+.lanyard-card-text {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #1A1A1A;
+  text-align: center;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Hole punch effect at top of card */
+.lanyard-simple-card::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #D0D0C8;
+  border-radius: 50%;
+  box-shadow: 
+    inset 0 1px 2px rgba(0, 0, 0, 0.3),
+    0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .lanyard-simple-container {
+    display: none;
+  }
+}
+
+/* Hover effect (optional) */
+@media (hover: hover) {
+  .lanyard-simple-container:hover .lanyard-simple-card {
+    filter: brightness(1.05);
+  }
+}
