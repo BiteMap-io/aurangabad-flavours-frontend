@@ -50,9 +50,9 @@ function App() {
                     </ProtectedRoute>
                   }>
                     <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="hotels" element={<HotelsManagement />} />
-                    <Route path="events" element={<EventsManagement />} />
-                    <Route path="articles" element={<ArticlesManagement />} />
+                    <Route path="hotels/add" element={<HotelsManagement />} />
+                    <Route path="hotels/events" element={<EventsManagement />} />
+                    <Route path="hotels/articles" element={<ArticlesManagement />} />
                     <Route path="media" element={<MediaManager />} />
                     <Route path="settings" element={<Settings />} />
                     <Route index element={<AdminDashboard />} />

@@ -29,7 +29,7 @@ const AdminLogin = () => {
       ...prev,
       [name]: value
     }))
-    // Clear error when user starts typing
+
     if (error) setError('')
   }
 
@@ -39,13 +39,13 @@ const AdminLogin = () => {
     setError('')
 
     const result = await login(formData)
-    
+
     if (result.success) {
       navigate('/admin/dashboard')
     } else {
       setError(result.error || 'Login failed')
     }
-    
+
     setLoading(false)
   }
 
@@ -112,11 +112,16 @@ const AdminLogin = () => {
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setShowPassword(prev => !prev)}
                   disabled={loading}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
+
+
+
               </div>
             </div>
 
