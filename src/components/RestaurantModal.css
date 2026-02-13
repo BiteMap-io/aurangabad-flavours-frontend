@@ -6,26 +6,33 @@
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.85);
+  /* Slightly darker for better focus */
+  backdrop-filter: blur(8px);
+  /* Increased blur for premium feel */
   z-index: 2000;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .modal-content {
   width: 90vw;
-  max-width: 1200px;
-  max-height: 90vh;
-  min-height: 500px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--glass-border);
+  max-width: 1100px;
+  max-height: 85vh;
+  background: rgba(12, 12, 14, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-xl);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   z-index: 2001;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   margin: 0;
+  position: relative;
 }
 
 .modal-close {
@@ -89,11 +96,17 @@
 }
 
 .modal-info h1 {
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin: 0;
   color: var(--text-primary);
-  line-height: 1.2;
-  font-weight: 700;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(to right, #fff, #ccc);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .modal-cuisine {
@@ -154,8 +167,8 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--glass-surface);
+  padding: 0.6rem 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -165,23 +178,24 @@
   margin-top: var(--spacing-sm);
   transition: all 0.3s ease;
   width: fit-content;
+  position: relative;
+  overflow: hidden;
 }
 
 .directions-btn:hover {
   background: var(--glass-hover);
   border-color: var(--accent-purple);
-  box-shadow: 0 0 15px var(--accent-purple);
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+  transform: translateY(-2px);
 }
 
 .modal-body {
   display: flex;
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-  min-height: 0;
-  max-height: calc(90vh - 420px); /* Account for gallery + header */
+  flex-shrink: 0;
+  height: auto;
+  min-height: min-content;
 }
 
 .modal-main {
@@ -190,8 +204,7 @@
   flex-direction: column;
   gap: var(--spacing-md);
   min-width: 0;
-  overflow-y: auto;
-  padding-right: var(--spacing-xs);
+  height: auto;
 }
 
 .modal-section {
@@ -201,11 +214,20 @@
 }
 
 .modal-section h2 {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: var(--text-primary);
   margin: 0;
-  padding-bottom: var(--spacing-xs);
-  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(to right, rgba(138, 43, 226, 0.5), transparent) 1;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
 }
 
 .modal-section p {
@@ -221,12 +243,23 @@
 }
 
 .facility-tag {
-  padding: var(--spacing-xs) var(--spacing-md);
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  padding: 0.4rem 0.9rem;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.08), rgba(88, 28, 135, 0.04));
+  border: 1px solid rgba(138, 43, 226, 0.15);
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.25s ease;
+  cursor: default;
+}
+
+.facility-tag:hover {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.18), rgba(88, 28, 135, 0.1));
+  border-color: rgba(138, 43, 226, 0.4);
   color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.15);
 }
 
 .menu-list {
@@ -239,10 +272,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm);
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  padding: 0.85rem 1rem;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-md);
+  transition: all 0.25s ease;
+}
+
+.menu-item:hover {
+  background: rgba(138, 43, 226, 0.06);
+  border-color: rgba(138, 43, 226, 0.2);
+  transform: translateX(4px);
+  box-shadow: -2px 0 0 0 rgba(138, 43, 226, 0.6);
 }
 
 .menu-item-info {
@@ -274,10 +315,17 @@
 }
 
 .review-item {
-  padding: var(--spacing-sm);
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-md);
+  transition: all 0.25s ease;
+  border-left: 3px solid rgba(138, 43, 226, 0.3);
+}
+
+.review-item:hover {
+  background: rgba(138, 43, 226, 0.04);
+  border-left-color: rgba(138, 43, 226, 0.7);
 }
 
 .review-header {
@@ -445,21 +493,44 @@
 }
 
 .modal-sidebar {
-  flex: 1;
+  flex: 0 0 280px;
+  width: 280px;
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-sm);
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
+}
+
+.map-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .map-container {
-  position: sticky;
-  top: var(--spacing-sm);
-  height: 240px;
-  min-height: 220px;
-  background: var(--glass-surface);
-  border: 1px solid var(--glass-border);
+  position: relative;
+  height: 180px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(138, 43, 226, 0.15);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  z-index: 1;
+  z-index: 0;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(138, 43, 226, 0.05);
+  transition: all 0.3s ease;
+}
+
+.map-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(138, 43, 226, 0.15), 0 0 0 1px rgba(138, 43, 226, 0.3);
+  border-color: rgba(138, 43, 226, 0.4);
 }
 
 /* Leaflet Map Styling */
@@ -532,18 +603,24 @@
 }
 
 @media (max-width: 968px) {
-  .modal-content {
-    width: 95vw;
-    max-height: 95vh;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  .map-container {
+    height: 160px;
+    /* Reduced for desktop */
+    background: var(--bg-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    z-index: 0;
+    /* ✅ Remove z-index: 1, it conflicts with Leaflet layers */
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .modal-header {
     padding: var(--spacing-md);
   }
-  
+
   .modal-info h1 {
     font-size: 1.3rem;
   }
@@ -576,17 +653,18 @@
   .modal-body {
     flex-direction: column;
     padding: var(--spacing-sm) var(--spacing-md);
-    max-height: calc(95vh - 380px); /* Account for mobile gallery */
   }
 
   .modal-sidebar {
-    order: -1;
+    width: 100%;
+    min-width: 100%;
+    flex: 1;
+    align-self: stretch;
+    position: static;
   }
 
   .map-container {
-    position: relative;
-    height: 200px;
-    min-height: 180px;
+    height: 130px;
   }
 
   .modal-main {
@@ -628,22 +706,17 @@
     font-size: 0.8rem;
   }
 
-  .modal-body {
-    max-height: calc(95vh - 360px); /* Account for tablet gallery */
-  }
-
   .map-container {
-    height: 180px;
-    min-height: 160px;
+    height: 120px;
   }
 }
 
 /* Mobile specific adjustments */
 @media (max-width: 480px) {
   .modal-content {
-    width: 98vw;
-    max-height: 98vh;
-    min-height: 400px;
+    transform: none;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .modal-header {
@@ -701,12 +774,10 @@
 
   .modal-body {
     padding: var(--spacing-xs) var(--spacing-sm);
-    max-height: calc(98vh - 320px); /* Account for mobile gallery */
   }
 
   .map-container {
-    height: 160px;
-    min-height: 140px;
+    height: 120px;
   }
 
   .modal-section h2 {
@@ -1264,4 +1335,3 @@
     padding: var(--spacing-lg);
   }
 }
-

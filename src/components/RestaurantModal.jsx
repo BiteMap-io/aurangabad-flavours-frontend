@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, MapPin, Clock, Star, Navigation, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import './RestaurantModal.css'
 
@@ -13,6 +13,17 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
+
+const MapInvalidator = () => {
+  const map = useMap()
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [map])
+  return null
+}
 
 const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
   const { t } = useTranslation()
@@ -78,8 +89,8 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
           <motion.div
             className="modal-content"
             initial={{ opacity: 0, scale: 0.9, x: '-50%', y: '-50%' }}
-            animate={{ 
-              opacity: 1, 
+            animate={{
+              opacity: 1,
               scale: 1,
               x: '-50%',
               y: '-50%'
@@ -99,12 +110,12 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
             {/* Photo Gallery Header */}
             <div className="modal-gallery">
               <div className="gallery-main">
-                <img 
-                  src={images[currentImageIndex]} 
+                <img
+                  src={images[currentImageIndex]}
                   alt={`${restaurant.name} - Image ${currentImageIndex + 1}`}
                   className="gallery-main-image"
                 />
-                
+
                 {images.length > 1 && (
                   <>
                     <button className="gallery-nav gallery-prev" onClick={prevImage}>
@@ -116,7 +127,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   </>
                 )}
 
-                <button 
+                <button
                   className={`favorite-btn ${isFavorite ? 'active' : ''}`}
                   onClick={() => setIsFavorite(!isFavorite)}
                 >
@@ -306,18 +317,23 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
               </div>
 
               <div className="modal-sidebar">
+                <span className="map-label">
+                  <MapPin size={14} />
+                  Location
+                </span>
                 <div className="map-container">
                   <MapContainer
                     center={[19.8762, 75.3433]}
                     zoom={13}
                     scrollWheelZoom={false}
-                    style={{ height: '100%', width: '100%', borderRadius: 'var(--radius-lg)' }}
+                    style={{ height: '180px', width: '100%', borderRadius: 'var(--radius-lg)' }}
                     key={restaurant.id}
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <MapInvalidator />
                     <Marker position={[19.8762, 75.3433]}>
                       <Popup>
                         <strong>{restaurant.name}</strong>
