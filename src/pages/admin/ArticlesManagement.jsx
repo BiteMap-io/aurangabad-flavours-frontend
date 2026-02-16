@@ -33,12 +33,13 @@ const ArticlesManagement = () => {
 
   const loadArticles = async () => {
     try {
-      setLoading(true)
-      const response = await articlesApi.getAll()
-      if (response.success) {
-        setArticles(response.data)
+      setLoading(true);
+      const response = await articlesApi.getAll();
+      const data = response.data || response;
+      if (Array.isArray(data)) {
+        setArticles(data);
       } else {
-        showToast.error('Error', 'Failed to load articles')
+        showToast.error('Error', 'Failed to load articles');
       }
     } catch (error) {
       showToast.error('Error', 'Failed to load articles')
@@ -72,12 +73,13 @@ const ArticlesManagement = () => {
 
   const handleDelete = async (article) => {
     try {
-      const response = await articlesApi.delete(article.id)
-      if (response.success) {
-        setArticles(articles.filter(a => a.id !== article.id))
+      const articleId = article._id || article.id
+      const response = await articlesApi.delete(articleId)
+      if (response.success || response) {
+        setArticles(articles.filter(a => (a._id || a.id) !== articleId))
         showToast.success('Success', `${article.title} has been deleted`)
       } else {
-        showToast.error('Error', response.error || 'Failed to delete article')
+        showToast.error('Error', 'Failed to delete article')
       }
     } catch (error) {
       showToast.error('Error', 'Failed to delete article')
@@ -86,16 +88,13 @@ const ArticlesManagement = () => {
 
   const toggleStatus = async (id) => {
     try {
-      const article = articles.find(a => a.id === id)
-      const newStatus = article.status === 'published' ? 'draft' : 'published'
-      const updatedArticle = { ...article, status: newStatus }
-      
-      const response = await articlesApi.update(id, updatedArticle)
-      if (response.success) {
-        setArticles(articles.map(a => a.id === id ? response.data : a))
-        showToast.success('Success', `Article ${newStatus}`)
+      const response = await articlesApi.toggleStatus(id)
+      const updatedArticle = response.data || response
+      if (updatedArticle && updatedArticle._id) {
+        setArticles(articles.map(a => (a._id || a.id) === id ? updatedArticle : a))
+        showToast.success('Success', `Article ${updatedArticle.status}`)
       } else {
-        showToast.error('Error', response.error || 'Failed to update article status')
+        showToast.error('Error', 'Failed to update article status')
       }
     } catch (error) {
       showToast.error('Error', 'Failed to update article status')
@@ -214,9 +213,11 @@ const ArticlesManagement = () => {
         </div>
       ) : (
         <div className="articles-grid">
-          {filteredArticles.map((article, index) => (
-            <motion.div
-              key={article.id}
+          {filteredArticles.map((article, index) => {
+            const articleId = article._id || article.id
+            return (
+              <motion.div
+                key={articleId}
               className="article-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -261,7 +262,7 @@ const ArticlesManagement = () => {
 
                 <div className="article-actions">
                   <Link 
-                    to={`/admin/articles/edit/${article.id}`}
+                    to={`/admin/articles/edit/${articleId}`}
                     className="action-btn edit"
                     title="Edit Article"
                   >
@@ -275,7 +276,7 @@ const ArticlesManagement = () => {
                   </button>
                   <button
                     className={`action-btn status ${article.status === 'published' ? 'published' : 'draft'}`}
-                    onClick={() => toggleStatus(article.id)}
+                    onClick={() => toggleStatus(articleId)}
                     title={`${article.status === 'published' ? 'Unpublish' : 'Publish'} Article`}
                   >
                     <FileText size={16} />
@@ -290,7 +291,7 @@ const ArticlesManagement = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
       )}
 

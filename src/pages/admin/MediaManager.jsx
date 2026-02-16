@@ -37,8 +37,9 @@ const MediaManager = () => {
     try {
       setLoading(true)
       const response = await mediaApi.getAll()
-      if (response.success) {
-        setMedia(response.data)
+      const data = response.data || response
+      if (Array.isArray(data)) {
+        setMedia(data)
       } else {
         showToast.error('Error', 'Failed to load media')
       }
@@ -75,8 +76,9 @@ const MediaManager = () => {
     const uploadPromises = Array.from(files).map(async (file) => {
       try {
         const response = await mediaApi.upload(file)
-        if (response.success) {
-          return response.data
+        const data = response.data || response
+        if (data && data.url) {
+          return data
         } else {
           showToast.error('Error', `Failed to upload ${file.name}`)
           return null
@@ -97,12 +99,12 @@ const MediaManager = () => {
     
     setUploading(false)
   }
-
   const handleDelete = async (mediaItem) => {
     try {
-      const response = await mediaApi.delete(mediaItem.id)
-      if (response.success) {
-        setMedia(media.filter(m => m.id !== mediaItem.id))
+      const itemId = mediaItem._id || mediaItem.id
+      const response = await mediaApi.delete(itemId)
+      if (response.success || response) {
+        setMedia(media.filter(m => (m._id || m.id) !== itemId))
         showToast.success('Success', `${mediaItem.name} has been deleted`)
       } else {
         showToast.error('Error', 'Failed to delete media')
@@ -247,9 +249,11 @@ const MediaManager = () => {
         </div>
       ) : (
         <div className="media-grid">
-          {filteredMedia.map((mediaItem, index) => (
-            <motion.div
-              key={mediaItem.id}
+          {filteredMedia.map((mediaItem, index) => {
+            const itemId = mediaItem._id || mediaItem.id
+            return (
+              <motion.div
+                key={itemId}
               className="media-card"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -301,7 +305,7 @@ const MediaManager = () => {
                 </button>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
       )}
 

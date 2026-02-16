@@ -25,6 +25,9 @@ import EventsManagement from './pages/admin/EventsManagement'
 import ArticlesManagement from './pages/admin/ArticlesManagement'
 import MediaManager from './pages/admin/MediaManager'
 import Settings from './pages/admin/Settings'
+import HotelForm from './pages/admin/HotelForm'
+import EventForm from './pages/admin/EventForm'
+import ArticleForm from './pages/admin/ArticleForm'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import ToastContainer from './components/admin/Toast'
 
@@ -50,9 +53,18 @@ function App() {
                     </ProtectedRoute>
                   }>
                     <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="hotels/add" element={<HotelsManagement />} />
-                    <Route path="hotels/events" element={<EventsManagement />} />
-                    <Route path="hotels/articles" element={<ArticlesManagement />} />
+                    <Route path="hotels" element={<HotelsManagement />} />
+                    <Route path="hotels/add" element={<HotelForm />} />
+                    <Route path="hotels/edit/:id" element={<HotelForm />} />
+                    
+                    <Route path="events" element={<EventsManagement />} />
+                    <Route path="events/add" element={<EventForm />} />
+                    <Route path="events/edit/:id" element={<EventForm />} />
+                    
+                    <Route path="articles" element={<ArticlesManagement />} />
+                    <Route path="articles/add" element={<ArticleForm />} />
+                    <Route path="articles/edit/:id" element={<ArticleForm />} />
+                    
                     <Route path="media" element={<MediaManager />} />
                     <Route path="settings" element={<Settings />} />
                     <Route index element={<AdminDashboard />} />

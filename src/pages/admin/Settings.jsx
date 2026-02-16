@@ -45,8 +45,9 @@ const Settings = () => {
     try {
       setLoading(true)
       const response = await settingsApi.get()
-      if (response.success) {
-        setSettings(response.data)
+      const data = response.data || response
+      if (data && typeof data === 'object') {
+        setSettings(data)
       } else {
         showToast.error('Error', 'Failed to load settings')
       }
@@ -61,7 +62,7 @@ const Settings = () => {
     try {
       setSaving(true)
       const response = await settingsApi.update(settings)
-      if (response.success) {
+      if (response.success || response) {
         showToast.success('Success', 'Settings saved successfully')
       } else {
         showToast.error('Error', 'Failed to save settings')

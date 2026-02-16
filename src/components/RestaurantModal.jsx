@@ -297,7 +297,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                     {restaurant.reviews?.map((review, idx) => (
                       <div key={idx} className="review-item">
                         <div className="review-header">
-                          <span className="review-user">{review.user}</span>
+                          <span className="review-user">{typeof review.user === 'object' ? review.user.name : (review.user || 'Anonymous')}</span>
                           <div className="review-rating">
                             {[...Array(5)].map((_, i) => (
                               <Star
@@ -322,19 +322,19 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   Location
                 </span>
                 <div className="map-container">
-                  <MapContainer
-                    center={[19.8762, 75.3433]}
-                    zoom={13}
-                    scrollWheelZoom={false}
-                    style={{ height: '180px', width: '100%', borderRadius: 'var(--radius-lg)' }}
-                    key={restaurant.id}
-                  >
+                    <MapContainer
+                      center={restaurant.location?.coordinates ? [restaurant.location.coordinates[1], restaurant.location.coordinates[0]] : [19.8762, 75.3433]}
+                      zoom={13}
+                      scrollWheelZoom={false}
+                      style={{ height: '180px', width: '100%', borderRadius: 'var(--radius-lg)' }}
+                      key={restaurant._id || restaurant.id}
+                    >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     <MapInvalidator />
-                    <Marker position={[19.8762, 75.3433]}>
+                    <Marker position={restaurant.location?.coordinates ? [restaurant.location.coordinates[1], restaurant.location.coordinates[0]] : [19.8762, 75.3433]}>
                       <Popup>
                         <strong>{restaurant.name}</strong>
                         <br />

@@ -24,11 +24,12 @@ const AdminDashboard = () => {
         dashboardApi.getRecentActivity()
       ])
 
-      if (statsResponse.success) {
+      const statsRaw = statsResponse.data || statsResponse
+      if (statsRaw && (typeof statsRaw === 'object')) {
         const statsData = [
           {
             title: 'Total Hotels',
-            value: statsResponse.data.totalHotels.toString(),
+            value: (statsRaw.totalHotels || 0).toString(),
             change: '+3',
             changeType: 'positive',
             icon: Building2,
@@ -36,7 +37,7 @@ const AdminDashboard = () => {
           },
           {
             title: 'Active Events',
-            value: statsResponse.data.activeEvents.toString(),
+            value: (statsRaw.activeEvents || 0).toString(),
             change: '+2',
             changeType: 'positive',
             icon: Calendar,
@@ -44,7 +45,7 @@ const AdminDashboard = () => {
           },
           {
             title: 'Published Articles',
-            value: statsResponse.data.publishedArticles.toString(),
+            value: (statsRaw.publishedArticles || 0).toString(),
             change: '+12',
             changeType: 'positive',
             icon: FileText,
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
           },
           {
             title: 'Monthly Views',
-            value: statsResponse.data.monthlyViews,
+            value: (statsRaw.monthlyViews || 0).toString(),
             change: '+8.2%',
             changeType: 'positive',
             icon: Eye,
@@ -62,8 +63,9 @@ const AdminDashboard = () => {
         setStats(statsData)
       }
 
-      if (activitiesResponse.success) {
-        setRecentActivities(activitiesResponse.data)
+      const activitiesData = activitiesResponse.data || activitiesResponse
+      if (Array.isArray(activitiesData)) {
+        setRecentActivities(activitiesData)
       }
     } catch (error) {
       showToast.error('Error', 'Failed to load dashboard data')
@@ -159,7 +161,7 @@ const AdminDashboard = () => {
                 const Icon = stat.icon
                 return (
                   <motion.div
-                    key={stat.title}
+                    key={`stat-${index}`}
                     className={`stat-card ${stat.color}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -193,8 +195,8 @@ const AdminDashboard = () => {
                   <p>Latest updates and changes</p>
                 </div>
                 <div className="activity-list">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="activity-item">
+                  {recentActivities.map((activity, index) => (
+                    <div key={activity._id || activity.id || `activity-${index}`} className="activity-item">
                       <div className={`activity-type ${activity.type}`}>
                         {activity.type === 'hotel' && <Building2 size={16} />}
                         {activity.type === 'article' && <FileText size={16} />}

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import api from '../services/api'
 
 const AdminAuthContext = createContext()
 
@@ -39,31 +40,25 @@ export const AdminAuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      // Mock authentication - replace with real API call
-      const { email, password } = credentials
+      const response = await api.post('/auth/login', credentials);
       
-      // Demo admin credentials
-      if (email === 'admin@aurangabadflavors.com' && password === 'admin123') {
-        const adminData = {
-          id: 1,
-          name: 'Admin User',
-          email: 'admin@aurangabadflavors.com',
-          role: 'admin'
-        }
+      if (response.token) {
+        const { token, user } = response;
         
         // Store auth data
-        localStorage.setItem('adminToken', 'mock-admin-token')
-        localStorage.setItem('adminUser', JSON.stringify(adminData))
+        localStorage.setItem('adminToken', token);
+        localStorage.setItem('adminUser', JSON.stringify(user));
         
-        setAdminUser(adminData)
-        setIsAuthenticated(true)
+        setAdminUser(user);
+        setIsAuthenticated(true);
         
-        return { success: true }
+        return { success: true };
       } else {
-        return { success: false, error: 'Invalid credentials' }
+        return { success: false, error: response.error || 'Invalid credentials' };
       }
     } catch (error) {
-      return { success: false, error: 'Login failed' }
+      console.error('Login error:', error);
+      return { success: false, error: error.message || 'Login failed' };
     }
   }
 

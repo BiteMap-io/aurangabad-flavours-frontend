@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FilterBar from '../components/FilterBar'
-import { restaurants } from '../data/restaurants'
+import { hotelsApi } from '../services/adminApi'
 import { getDishRestaurants, getDishById } from '../data/dishes'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
@@ -15,7 +15,24 @@ const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
   const { isTouristMode } = useTouristMode()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await hotelsApi.getAll()
+        const data = response.data || response
+        setRestaurants(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch restaurants:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
   
   const dishParam = searchParams.get('dish')
   const selectedDish = dishParam ? getDishById(dishParam) : null
@@ -184,39 +201,43 @@ const Explore = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {filteredRestaurants.length > 0 ? (
-            filteredRestaurants.map((restaurant, index) => (
-              <motion.div
-                key={restaurant.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-              >
-                <RestaurantCard
-                  restaurant={restaurant}
-                  onClick={() => handleRestaurantClick(restaurant)}
-                />
-              </motion.div>
-            ))
+          {loading ? (
+            <div className="loading-spinner">Searching for flavours...</div>
           ) : (
-            <div className="no-results">
-              <p>No restaurants found matching your criteria.</p>
-              <button
-                className="clear-filters-btn"
-                onClick={() => setFilters({
-                  establishmentType: '',
-                  cuisine: '',
-                  priceRange: '',
-                  rating: '',
-                  facilities: [],
-                  area: '',
-                  dish: '',
-                  nearMe: false,
-                })}
-              >
-                Clear Filters
-              </button>
-            </div>
+            filteredRestaurants.length > 0 ? (
+              filteredRestaurants.map((restaurant, index) => (
+                <motion.div
+                  key={restaurant._id || restaurant.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  <RestaurantCard
+                    restaurant={restaurant}
+                    onClick={() => handleRestaurantClick(restaurant)}
+                  />
+                </motion.div>
+              ))
+            ) : (
+              <div className="no-results">
+                <p>No restaurants found matching your criteria.</p>
+                <button
+                  className="clear-filters-btn"
+                  onClick={() => setFilters({
+                    establishmentType: '',
+                    cuisine: '',
+                    priceRange: '',
+                    rating: '',
+                    facilities: [],
+                    area: '',
+                    dish: '',
+                    nearMe: false,
+                  })}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )
           )}
         </motion.div>
       </div>

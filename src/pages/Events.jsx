@@ -1,38 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, MapPin, Clock, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { eventsApi } from '../services/adminApi'
 import './Events.css'
 
 const Events = () => {
   const [selectedImage, setSelectedImage] = useState(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const events = [
-    {
-      id: 1,
-      title: 'Aurangabad Food Festival 2024',
-      date: 'March 15-20, 2024',
-      location: 'City Center',
-      description: 'A week-long celebration of Aurangabad\'s diverse culinary heritage featuring local and international cuisines.',
-      image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800',
-    },
-    {
-      id: 2,
-      title: 'Chef\'s Special Week',
-      date: 'Ongoing',
-      location: 'Multiple Locations',
-      description: 'Exclusive chef-curated menus at participating restaurants. Limited time special dishes.',
-      image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800',
-    },
-    {
-      id: 3,
-      title: 'Street Food Tour',
-      date: 'Every Saturday',
-      location: 'Downtown',
-      description: 'Guided tour of Aurangabad\'s best street food vendors. Experience authentic local flavors.',
-      image: 'https://images.unsplash.com/photo-1562967914-608f82629710?w=800',
-    },
-  ]
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await eventsApi.getAll()
+        const data = response.data || response
+        setEvents(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch events:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchEvents()
+  }, [])
 
   const pastEventsGallery = [
     {
@@ -114,34 +105,42 @@ const Events = () => {
       </div>
 
       <div className="events-grid">
-        {events.map((event, index) => (
-          <motion.div
-            key={event.id}
-            className="event-card"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ scale: 1.02, y: -4 }}
-          >
-            <div className="event-image">
-              <img src={event.image} alt={event.title} />
-            </div>
-            <div className="event-content">
-              <h2>{event.title}</h2>
-              <div className="event-meta">
-                <div className="event-meta-item">
-                  <Calendar size={18} />
-                  <span>{event.date}</span>
+        {loading ? (
+          <div className="loading-spinner">Loading festivals...</div>
+        ) : (
+          events.length > 0 ? (
+            events.map((event, index) => (
+              <motion.div
+                key={event._id || event.id}
+                className="event-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ scale: 1.02, y: -4 }}
+              >
+                <div className="event-image">
+                  <img src={event.image} alt={event.title} />
                 </div>
-                <div className="event-meta-item">
-                  <MapPin size={18} />
-                  <span>{event.location}</span>
+                <div className="event-content">
+                  <h2>{event.title}</h2>
+                  <div className="event-meta">
+                    <div className="event-meta-item">
+                      <Calendar size={18} />
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="event-meta-item">
+                      <MapPin size={18} />
+                      <span>{event.location}</span>
+                    </div>
+                  </div>
+                  <p>{event.description}</p>
                 </div>
-              </div>
-              <p>{event.description}</p>
-            </div>
-          </motion.div>
-        ))}
+              </motion.div>
+            ))
+          ) : (
+            <div className="no-events">No upcoming events found.</div>
+          )
+        )}
       </div>
 
       {/* Past Events Gallery Section */}
@@ -154,7 +153,7 @@ const Events = () => {
         <div className="gallery-grid">
           {pastEventsGallery.map((item, index) => (
             <motion.div
-              key={item.id}
+              key={item._id || item.id}
               className="gallery-item"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

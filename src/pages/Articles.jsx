@@ -2,13 +2,35 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, ArrowRight } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { articles, articleCategories, getFeaturedArticles } from '../data/articles'
+import { articlesApi } from '../services/adminApi'
 import './Articles.css'
 
 const Articles = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const articleCategories = [
+    'News', 'Features', 'Interviews', 'Local Guides', 'Where to Eat', 
+    'Best Local Restaurants', 'Best Sunday Roasts', 'Awards & Recognition', 'City Highlights'
+  ]
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        const response = await articlesApi.getAll()
+        const data = response.data || response
+        setArticles(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch articles:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchArticles()
+  }, [])
 
   // Handle URL parameters
   useEffect(() => {
@@ -35,7 +57,7 @@ const Articles = () => {
     return matchesCategory && matchesSearch
   })
 
-  const featuredArticles = getFeaturedArticles()
+  const featuredArticles = articles.filter(article => article.featured)
 
   const formatDate = (dateString) => {
     const date = new Date(dateString)
@@ -77,7 +99,7 @@ const Articles = () => {
             <div className="featured-articles-grid">
               {featuredArticles.map((article, index) => (
                 <motion.article
-                  key={article.id}
+                  key={article._id || article.id}
                   className="featured-article-card"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -95,7 +117,7 @@ const Articles = () => {
                       <div className="article-meta">
                         <span className="article-author">
                           <User size={14} />
-                          {article.author}
+                          {typeof article.author === 'object' ? article.author.name : article.author}
                         </span>
                         <span className="article-date">
                           <Calendar size={14} />
@@ -148,49 +170,52 @@ const Articles = () => {
           </div>
         </section>
 
-        {/* Articles Grid */}
         <section className="articles-grid-section">
-          <div className="articles-grid">
-            {filteredArticles.map((article, index) => (
-              <motion.article
-                key={article.id}
-                className="article-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                whileHover={{ y: -2 }}
-              >
-                <Link to={`/articles/${article.slug}`} className="article-link">
-                  <div className="article-image">
-                    <img src={article.image} alt={article.title} />
-                    <div className="article-category-badge">{article.category}</div>
-                  </div>
-                  <div className="article-content">
-                    <h3 className="article-title">{article.title}</h3>
-                    <p className="article-excerpt">{article.excerpt}</p>
-                    <div className="article-meta">
-                      <span className="article-author">
-                        <User size={14} />
-                        {article.author}
-                      </span>
-                      <span className="article-date">
-                        <Calendar size={14} />
-                        {formatDate(article.publishDate)}
-                      </span>
-                      <span className="article-read-time">
-                        <Clock size={14} />
-                        {article.readTime}
-                      </span>
+          {loading ? (
+            <div className="loading-spinner">Fetching stories...</div>
+          ) : (
+            <div className="articles-grid">
+              {filteredArticles.map((article, index) => (
+                <motion.article
+                  key={article._id || article.id}
+                  className="article-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ y: -2 }}
+                >
+                  <Link to={`/articles/${article.slug}`} className="article-link">
+                    <div className="article-image">
+                      <img src={article.image} alt={article.title} />
+                      <div className="article-category-badge">{article.category}</div>
                     </div>
-                    <div className="read-more">
-                      <span>Read Article</span>
-                      <ArrowRight size={16} />
+                    <div className="article-content">
+                      <h3 className="article-title">{article.title}</h3>
+                      <p className="article-excerpt">{article.excerpt}</p>
+                      <div className="article-meta">
+                        <span className="article-author">
+                          <User size={14} />
+                          {typeof article.author === 'object' ? article.author.name : article.author}
+                        </span>
+                        <span className="article-date">
+                          <Calendar size={14} />
+                          {formatDate(article.publishDate)}
+                        </span>
+                        <span className="article-read-time">
+                          <Clock size={14} />
+                          {article.readTime}
+                        </span>
+                      </div>
+                      <div className="read-more">
+                        <span>Read Article</span>
+                        <ArrowRight size={16} />
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.article>
-            ))}
-          </div>
+                  </Link>
+                </motion.article>
+              ))}
+            </div>
+          )}
 
           {filteredArticles.length === 0 && (
             <div className="no-articles">

@@ -32,12 +32,13 @@ const EventsManagement = () => {
 
   const loadEvents = async () => {
     try {
-      setLoading(true)
-      const response = await eventsApi.getAll()
-      if (response.success) {
-        setEvents(response.data)
+      setLoading(true);
+      const response = await eventsApi.getAll();
+      const data = response.data || response;
+      if (Array.isArray(data)) {
+        setEvents(data);
       } else {
-        showToast.error('Error', 'Failed to load events')
+        showToast.error('Error', 'Failed to load events');
       }
     } catch (error) {
       showToast.error('Error', 'Failed to load events')
@@ -72,12 +73,13 @@ const EventsManagement = () => {
 
   const handleDelete = async (event) => {
     try {
-      const response = await eventsApi.delete(event.id)
-      if (response.success) {
-        setEvents(events.filter(e => e.id !== event.id))
+      const eventId = event._id || event.id
+      const response = await eventsApi.delete(eventId)
+      if (response.success || response) {
+        setEvents(events.filter(e => (e._id || e.id) !== eventId))
         showToast.success('Success', `${event.title} has been deleted`)
       } else {
-        showToast.error('Error', response.error || 'Failed to delete event')
+        showToast.error('Error', 'Failed to delete event')
       }
     } catch (error) {
       showToast.error('Error', 'Failed to delete event')
@@ -86,15 +88,14 @@ const EventsManagement = () => {
 
   const toggleFeatured = async (id) => {
     try {
-      const event = events.find(e => e.id === id)
-      const updatedEvent = { ...event, featured: !event.featured }
-      
-      const response = await eventsApi.update(id, updatedEvent)
-      if (response.success) {
-        setEvents(events.map(e => e.id === id ? response.data : e))
+      // Toggle featured endpoint should exist or use update
+      const response = await eventsApi.update(id, { featured: !events.find(e => (e._id || e.id) === id).featured })
+      const updatedEvent = response.data || response
+      if (updatedEvent) {
+        setEvents(events.map(e => (e._id || e.id) === id ? updatedEvent : e))
         showToast.success('Success', 'Featured status updated')
       } else {
-        showToast.error('Error', response.error || 'Failed to update featured status')
+        showToast.error('Error', 'Failed to update featured status')
       }
     } catch (error) {
       showToast.error('Error', 'Failed to update featured status')
@@ -192,9 +193,11 @@ const EventsManagement = () => {
         </div>
       ) : (
         <div className="events-grid">
-          {filteredEvents.map((event, index) => (
-            <motion.div
-              key={event.id}
+          {filteredEvents.map((event, index) => {
+            const eventId = event._id || event.id
+            return (
+              <motion.div
+                key={eventId}
               className="event-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -231,7 +234,7 @@ const EventsManagement = () => {
 
                 <div className="event-actions">
                   <Link 
-                    to={`/admin/events/edit/${event.id}`}
+                    to={`/admin/events/edit/${eventId}`}
                     className="action-btn edit"
                     title="Edit Event"
                   >
@@ -245,7 +248,7 @@ const EventsManagement = () => {
                   </button>
                   <button
                     className={`action-btn feature ${event.featured ? 'active' : ''}`}
-                    onClick={() => toggleFeatured(event.id)}
+                    onClick={() => toggleFeatured(eventId)}
                     title="Toggle Featured"
                   >
                     <Star size={16} />
@@ -260,7 +263,7 @@ const EventsManagement = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
       )}
 

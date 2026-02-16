@@ -24,8 +24,8 @@ const HotelsManagement = () => {
   const loadHotels = async () => {
     try {
       setLoading(true);
-      const response = await hotelsApi.getAll();
-      if (response.success) setHotels(response.data);
+      const data = response.data || response;
+      if (Array.isArray(data)) setHotels(data);
       else showToast.error('Error', 'Failed to load hotels');
     } catch {
       showToast.error('Error', 'Failed to load hotels');
@@ -52,9 +52,10 @@ const HotelsManagement = () => {
 
   const handleDelete = async (hotel) => {
     try {
-      const response = await hotelsApi.delete(hotel.id);
-      if (response.success) {
-        setHotels(hotels.filter(h => h.id !== hotel.id));
+      const hotelId = hotel._id || hotel.id;
+      const response = await hotelsApi.delete(hotelId);
+      if (response.success || response) {
+        setHotels(hotels.filter(h => (h._id || h.id) !== hotelId));
         showToast.success('Deleted', `${hotel.name} removed successfully`);
       } else showToast.error('Error', response.error || 'Delete failed');
     } catch {
@@ -65,8 +66,9 @@ const HotelsManagement = () => {
   const toggleFeatured = async (id) => {
     try {
       const response = await hotelsApi.toggleFeatured(id);
-      if (response.success) {
-        setHotels(hotels.map(h => h.id === id ? response.data : h));
+      const updatedHotel = response.data || response;
+      if (updatedHotel) {
+        setHotels(hotels.map(h => (h._id || h.id) === id ? updatedHotel : h));
         showToast.success('Success', 'Featured status updated');
       } else showToast.error('Error', response.error || 'Update failed');
     } catch {
@@ -128,9 +130,11 @@ const HotelsManagement = () => {
         </div>
       ) : (
         <div className="hotels-grid">
-          {filteredHotels.map((hotel, index) => (
-            <motion.div
-              key={hotel.id}
+          {filteredHotels.map((hotel, index) => {
+            const hotelId = hotel._id || hotel.id;
+            return (
+              <motion.div
+                key={hotelId}
               className="hotel-card"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -159,7 +163,7 @@ const HotelsManagement = () => {
                   <p className="price-range">{hotel.priceRange}</p>
                 </div>
                 <div className="hotel-actions">
-                  <Link to={`/admin/hotels/edit/${hotel.id}`} className="action-btn edit" title="Edit">
+                  <Link to={`/admin/hotels/edit/${hotelId}`} className="action-btn edit" title="Edit">
                     <Edit size={16} />
                   </Link>
                   <button className="action-btn view" title="View">
@@ -167,7 +171,7 @@ const HotelsManagement = () => {
                   </button>
                   <button
                     className={`action-btn feature ${hotel.ihmRecommended ? 'active' : ''}`}
-                    onClick={() => toggleFeatured(hotel.id)}
+                    onClick={() => toggleFeatured(hotelId)}
                     title="Toggle Featured"
                   >
                     <Star size={16} />
@@ -178,7 +182,7 @@ const HotelsManagement = () => {
                 </div>
               </div>
             </motion.div>
-          ))}
+          )})}
         </div>
       )}
       {!loading && filteredHotels.length > 0 && (

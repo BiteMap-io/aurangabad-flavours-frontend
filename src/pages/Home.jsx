@@ -3,22 +3,43 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Star, Route } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FoodTrailCard from '../components/FoodTrailCard'
 import DishesCarousel from '../components/DishesCarousel'
 import MasonryGallery from '../components/MasonryGallery'
-import { restaurants } from '../data/restaurants'
-import { foodTrails } from '../data/foodTrails'
+import { hotelsApi, eventsApi, articlesApi } from '../services/adminApi'
+import { foodTrails } from '../data/foodTrails' // Still mock for now as it's complex
 import './Home.css'
 
 const Home = () => {
   const { t } = useTranslation()
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await hotelsApi.getAll()
+        if (response.success || Array.isArray(response)) {
+          // Response might be direct array or { success: true, data: [...] }
+          const data = response.data || response
+          setRestaurants(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch restaurants:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
   const topRated = [...restaurants]
-    .sort((a, b) => b.rating - a.rating)
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 5)
 
   const handleRestaurantClick = (restaurant) => {
@@ -84,22 +105,30 @@ const Home = () => {
               <h2>Top 5 Highest Rated</h2>
             </div>
             <div className="bento-restaurants">
-              {topRated.map((restaurant) => (
-                <div
-                  key={restaurant.id}
-                  className="bento-restaurant-item"
-                  onClick={() => handleRestaurantClick(restaurant)}
-                >
-                  <img src={restaurant.image} alt={restaurant.name} />
-                  <div className="bento-restaurant-info">
-                    <h4>{restaurant.name}</h4>
-                    <div className="bento-rating">
-                      <Star size={14} fill="#FFD700" color="#FFD700" />
-                      <span>{restaurant.rating}</span>
+              {loading ? (
+                <div className="loading-spinner">Loading best picks...</div>
+              ) : (
+                topRated.length > 0 ? (
+                  topRated.map((restaurant) => (
+                    <div
+                      key={restaurant._id || restaurant.id}
+                      className="bento-restaurant-item"
+                      onClick={() => handleRestaurantClick(restaurant)}
+                    >
+                      <img src={restaurant.image} alt={restaurant.name} />
+                      <div className="bento-restaurant-info">
+                        <h4>{restaurant.name}</h4>
+                        <div className="bento-rating">
+                          <Star size={14} fill="#FFD700" color="#FFD700" />
+                          <span>{restaurant.rating}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  ))
+                ) : (
+                  <div className="no-data">No rated restaurants yet</div>
+                )
+              )}
             </div>
           </motion.div>
 
@@ -133,13 +162,21 @@ const Home = () => {
         <section className="featured-section">
           <h2 className="section-title">Featured Restaurants</h2>
           <div className="restaurants-grid">
-            {restaurants.slice(0, 6).map((restaurant) => (
-              <RestaurantCard
-                key={restaurant.id}
-                restaurant={restaurant}
-                onClick={() => handleRestaurantClick(restaurant)}
-              />
-            ))}
+            {loading ? (
+              <div className="loading-spinner">Discovering restaurants...</div>
+            ) : (
+              restaurants.length > 0 ? (
+                restaurants.slice(0, 6).map((restaurant) => (
+                  <RestaurantCard
+                    key={restaurant._id || restaurant.id}
+                    restaurant={restaurant}
+                    onClick={() => handleRestaurantClick(restaurant)}
+                  />
+                ))
+              ) : (
+                <div className="no-data">No restaurants found currently</div>
+              )
+            )}
           </div>
         </section>
       </div>
