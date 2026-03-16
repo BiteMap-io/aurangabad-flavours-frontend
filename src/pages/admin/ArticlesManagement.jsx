@@ -63,7 +63,7 @@ const ArticlesManagement = () => {
         case 'title':
           return a.title.localeCompare(b.title)
         case 'date':
-          return new Date(b.publishedAt) - new Date(a.publishedAt)
+          return new Date(b.publishedDate) - new Date(a.publishedDate)
         case 'category':
           return a.category.localeCompare(b.category)
         default:
@@ -142,6 +142,12 @@ const ArticlesManagement = () => {
 
   const getStatusColor = (status) => {
     return status === 'published' ? 'green' : 'orange'
+  }
+
+  const getAuthorName = (author) => {
+    if (!author) return 'IHM Staff'
+    if (typeof author === 'object') return author.name || 'IHM Staff'
+    return author
   }
 
   return (
@@ -241,10 +247,10 @@ const ArticlesManagement = () => {
                   <div className="article-meta">
                     <div className="article-date">
                       <Calendar size={14} />
-                      <span>{formatDate(article.publishedAt)}</span>
+                      <span>{formatDate(article.publishedDate)}</span>
                     </div>
                     <div className="article-author">
-                      By {article.author}
+                      By {getAuthorName(article.author)}
                     </div>
                   </div>
                 </div>

@@ -53,18 +53,26 @@ const EmbeddedMap = ({
         />
         
         {restaurants.length > 0 ? (
-          restaurants.map((restaurant) => (
-            <Marker 
-              key={restaurant.id} 
-              position={center}
-            >
-              <Popup>
-                <strong>{restaurant.name}</strong>
-                <br />
-                {restaurant.area}
-              </Popup>
-            </Marker>
-          ))
+          restaurants.map((restaurant) => {
+            // Backend GeoJSON format is [lng, lat], Leaflet wants [lat, lng]
+            const coords = restaurant.location?.coordinates;
+            const position = (coords && coords.length === 2) 
+              ? [coords[1], coords[0]] 
+              : center;
+
+            return (
+              <Marker 
+                key={restaurant._id || restaurant.id} 
+                position={position}
+              >
+                <Popup>
+                  <strong>{restaurant.name}</strong>
+                  <br />
+                  {restaurant.area || restaurant.cuisine}
+                </Popup>
+              </Marker>
+            )
+          })
         ) : (
           <Marker position={center}>
             <Popup>

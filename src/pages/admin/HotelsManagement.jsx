@@ -24,9 +24,9 @@ const HotelsManagement = () => {
   const loadHotels = async () => {
     try {
       setLoading(true);
-      const data = response.data || response;
-      if (Array.isArray(data)) setHotels(data);
-      else showToast.error('Error', 'Failed to load hotels');
+      const response = await hotelsApi.getAll();
+      const data = Array.isArray(response) ? response : (response?.data ?? []);
+      setHotels(data);
     } catch {
       showToast.error('Error', 'Failed to load hotels');
     } finally {

@@ -1,245 +1,271 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Building2, Calendar, FileText, Eye, Plus, BarChart3, Loader } from 'lucide-react'
+import { 
+  Building2, Calendar, FileText, Eye, Plus, TrendingUp, 
+  Loader, ArrowUpRight, Activity, Sparkles, Star, Clock
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { dashboardApi } from '../../services/adminApi'
-import { showToast } from '../../components/admin/Toast'
+import { useAdminAuth } from '../../context/AdminAuthContext'
 import './AdminDashboard.css'
 
+const cardVariants = {
+  initial: { opacity: 0, y: 24 },
+  animate: (i) => ({ opacity: 1, y: 0, transition: { duration: 0.4, delay: i * 0.08 } })
+}
+
 const AdminDashboard = () => {
+  const { adminUser } = useAdminAuth()
   const [stats, setStats] = useState(null)
   const [recentActivities, setRecentActivities] = useState([])
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
 
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
+  useEffect(() => { loadDashboardData() }, [])
 
   const loadDashboardData = async () => {
     try {
       setLoading(true)
-      const [statsResponse, activitiesResponse] = await Promise.all([
+      const [statsRaw, activitiesRaw] = await Promise.allSettled([
         dashboardApi.getStats(),
         dashboardApi.getRecentActivity()
       ])
 
-      const statsRaw = statsResponse.data || statsResponse
-      if (statsRaw && (typeof statsRaw === 'object')) {
-        const statsData = [
-          {
-            title: 'Total Hotels',
-            value: (statsRaw.totalHotels || 0).toString(),
-            change: '+3',
-            changeType: 'positive',
-            icon: Building2,
-            color: 'blue'
-          },
-          {
-            title: 'Active Events',
-            value: (statsRaw.activeEvents || 0).toString(),
-            change: '+2',
-            changeType: 'positive',
-            icon: Calendar,
-            color: 'green'
-          },
-          {
-            title: 'Published Articles',
-            value: (statsRaw.publishedArticles || 0).toString(),
-            change: '+12',
-            changeType: 'positive',
-            icon: FileText,
-            color: 'purple'
-          },
-          {
-            title: 'Monthly Views',
-            value: (statsRaw.monthlyViews || 0).toString(),
-            change: '+8.2%',
-            changeType: 'positive',
-            icon: Eye,
-            color: 'orange'
-          }
-        ]
-        setStats(statsData)
+      if (statsRaw.status === 'fulfilled' && statsRaw.value) {
+        const d = statsRaw.value.data || statsRaw.value
+        setStats({
+          restaurants: d.totalRestaurants ?? d.totalHotels ?? 0,
+          events: d.totalEvents ?? d.activeEvents ?? 0,
+          articles: d.totalArticles ?? d.publishedArticles ?? 0,
+          views: d.monthlyViews ?? d.totalViews ?? 0,
+        })
       }
 
-      const activitiesData = activitiesResponse.data || activitiesResponse
-      if (Array.isArray(activitiesData)) {
-        setRecentActivities(activitiesData)
+      if (activitiesRaw.status === 'fulfilled' && Array.isArray(activitiesRaw.value?.data || activitiesRaw.value)) {
+        setRecentActivities(activitiesRaw.value?.data || activitiesRaw.value)
       }
-    } catch (error) {
-      showToast.error('Error', 'Failed to load dashboard data')
+    } catch (_) {
+      // silently fail — stats are cosmetic
     } finally {
       setLoading(false)
     }
   }
 
-  const quickActions = [
+  const statCards = [
     {
-      title: 'Add New Hotel',
-      description: 'Add a new restaurant or hotel',
+      label: 'Restaurants',
+      value: stats?.restaurants ?? '—',
       icon: Building2,
-      link: '/admin/hotels/add',
-      color: 'blue'
+      color: '#a855f7',
+      glow: 'rgba(168,85,247,0.15)',
+      link: '/admin/hotels',
+      change: '+3 this month'
     },
     {
-      title: 'Create Event',
-      description: 'Create a new event',
+      label: 'Events',
+      value: stats?.events ?? '—',
       icon: Calendar,
-      link: '/admin/events/add',
-      color: 'green'
+      color: '#22d3ee',
+      glow: 'rgba(34,211,238,0.15)',
+      link: '/admin/events',
+      change: '+2 this month'
     },
     {
-      title: 'Write Article',
-      description: 'Publish a new article',
+      label: 'Articles',
+      value: stats?.articles ?? '—',
       icon: FileText,
-      link: '/admin/articles/add',
-      color: 'purple'
+      color: '#f59e0b',
+      glow: 'rgba(245,158,11,0.15)',
+      link: '/admin/articles',
+      change: '+12 this month'
     },
     {
-      title: 'Upload Media',
-      description: 'Manage media files',
-      icon: Plus,
-      link: '/admin/media',
-      color: 'orange'
+      label: 'Monthly Views',
+      value: stats?.views ? stats.views.toLocaleString() : '—',
+      icon: Eye,
+      color: '#10b981',
+      glow: 'rgba(16,185,129,0.15)',
+      link: null,
+      change: '+8.2%'
     }
   ]
 
+  const quickActions = [
+    { label: 'Add Restaurant', icon: Building2, to: '/admin/hotels/add', color: '#a855f7' },
+    { label: 'Create Event', icon: Calendar, to: '/admin/events/add', color: '#22d3ee' },
+    { label: 'Write Article', icon: FileText, to: '/admin/articles/add', color: '#f59e0b' },
+    { label: 'Upload Media', icon: Plus, to: '/admin/media', color: '#10b981' },
+  ]
+
+  const activityIcon = (type) => {
+    if (type === 'restaurant' || type === 'hotel') return <Building2 size={14} />
+    if (type === 'event') return <Calendar size={14} />
+    if (type === 'article') return <FileText size={14} />
+    return <Activity size={14} />
+  }
+
+  const getGreeting = () => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Good morning'
+    if (h < 18) return 'Good afternoon'
+    return 'Good evening'
+  }
+
   return (
-    <div className="admin-dashboard-shell">
-
-      {/* SIDEBAR */}
-      <motion.aside
-        className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}
-        initial={{ x: -200 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <div className="sidebar-header">
-          <h2>Admin</h2>
-          <button
-            className="sidebar-toggle"
-            onClick={() => setSidebarOpen(prev => !prev)}
-          >
-            {sidebarOpen ? '◀' : '▶'}
-          </button>
+    <div className="adb-root">
+      {/* Header */}
+      <div className="adb-header">
+        <div>
+          <p className="adb-greeting">{getGreeting()}, {adminUser?.name || 'Admin'} 👋</p>
+          <h1 className="adb-title">Dashboard Overview</h1>
         </div>
-
-        <nav className="sidebar-nav">
-          {quickActions.map((action) => {
-            const Icon = action.icon
-            return (
-              <Link
-                key={action.title}
-                to={action.link}
-                className={`sidebar-link ${action.color}`}
-              >
-                <Icon size={18} />
-                {sidebarOpen && <span>{action.title}</span>}
-              </Link>
-            )
-          })}
-        </nav>
-      </motion.aside>
-
-      {/* MAIN CONTENT */}
-      <div className="admin-dashboard-layout">
-        <div className="dashboard-header">
-          <h1>Dashboard Overview</h1>
-          <p>Welcome back! Here's what's happening with your website.</p>
+        <div className="adb-header-badge">
+          <Sparkles size={14} />
+          <span>Live</span>
         </div>
-
-        {loading ? (
-          <div className="loading-state">
-            <Loader size={48} className="spinner" />
-            <p>Loading dashboard...</p>
-          </div>
-        ) : (
-          <>
-            <div className="stats-grid">
-              {stats?.map((stat, index) => {
-                const Icon = stat.icon
-                return (
-                  <motion.div
-                    key={`stat-${index}`}
-                    className={`stat-card ${stat.color}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                  >
-                    <div className="stat-icon">
-                      <Icon size={24} />
-                    </div>
-                    <div className="stat-content">
-                      <h3>{stat.value}</h3>
-                      <p>{stat.title}</p>
-                      <span className={`stat-change ${stat.changeType}`}>
-                        {stat.change}
-                      </span>
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </div>
-
-            <div className="dashboard-grid">
-              {/* RECENT ACTIVITY */}
-              <motion.div
-                className="dashboard-card"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <div className="card-header">
-                  <h2>Recent Activity</h2>
-                  <p>Latest updates and changes</p>
-                </div>
-                <div className="activity-list">
-                  {recentActivities.map((activity, index) => (
-                    <div key={activity._id || activity.id || `activity-${index}`} className="activity-item">
-                      <div className={`activity-type ${activity.type}`}>
-                        {activity.type === 'hotel' && <Building2 size={16} />}
-                        {activity.type === 'article' && <FileText size={16} />}
-                        {activity.type === 'event' && <Calendar size={16} />}
-                      </div>
-                      <div className="activity-content">
-                        <p>
-                          <strong>{activity.title}</strong> was {activity.action}
-                        </p>
-                        <span className="activity-time">{activity.time}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Link to="/admin/activity" className="view-all-btn">
-                  View All Activity
-                </Link>
-              </motion.div>
-
-              {/* ANALYTICS */}
-              <motion.div
-                className="dashboard-card"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
-                <div className="card-header">
-                  <h2>Analytics Overview</h2>
-                  <p>Website performance metrics</p>
-                </div>
-                <div className="analytics-content">
-                  <div className="analytics-placeholder">
-                    <BarChart3 size={48} />
-                    <h3>Analytics Dashboard</h3>
-                    <p>Detailed analytics and reporting will be available here</p>
-                    <button className="btn-secondary">View Analytics</button>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </>
-        )}
       </div>
+
+      {loading ? (
+        <div className="adb-loading">
+          <Loader size={40} className="adb-spinner" />
+          <p>Loading dashboard data...</p>
+        </div>
+      ) : (
+        <>
+          {/* Stat Cards */}
+          <div className="adb-stats-grid">
+            {statCards.map((card, i) => {
+              const Icon = card.icon
+              return (
+                <motion.div
+                  key={card.label}
+                  className="adb-stat-card"
+                  style={{ '--card-color': card.color, '--card-glow': card.glow }}
+                  variants={cardVariants}
+                  initial="initial"
+                  animate="animate"
+                  custom={i}
+                >
+                  <div className="adb-stat-icon">
+                    <Icon size={20} />
+                  </div>
+                  <div className="adb-stat-body">
+                    <span className="adb-stat-value">{card.value}</span>
+                    <span className="adb-stat-label">{card.label}</span>
+                  </div>
+                  <div className="adb-stat-footer">
+                    <TrendingUp size={12} />
+                    <span>{card.change}</span>
+                    {card.link && (
+                      <Link to={card.link} className="adb-stat-link">
+                        <ArrowUpRight size={14} />
+                      </Link>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+
+          {/* Body Grid */}
+          <div className="adb-body-grid">
+            {/* Quick Actions */}
+            <motion.div
+              className="adb-panel"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+            >
+              <div className="adb-panel-header">
+                <h2>Quick Actions</h2>
+                <p>Jump to common tasks</p>
+              </div>
+              <div className="adb-actions-grid">
+                {quickActions.map((action) => {
+                  const Icon = action.icon
+                  return (
+                    <Link
+                      key={action.label}
+                      to={action.to}
+                      className="adb-action-card"
+                      style={{ '--action-color': action.color }}
+                    >
+                      <div className="adb-action-icon">
+                        <Icon size={20} />
+                      </div>
+                      <span>{action.label}</span>
+                      <ArrowUpRight size={14} className="adb-action-arrow" />
+                    </Link>
+                  )
+                })}
+              </div>
+            </motion.div>
+
+            {/* Recent Activity */}
+            <motion.div
+              className="adb-panel"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+            >
+              <div className="adb-panel-header">
+                <h2>Recent Activity</h2>
+                <p>Latest updates across the platform</p>
+              </div>
+              <div className="adb-activity-list">
+                {recentActivities.length === 0 ? (
+                  <div className="adb-activity-empty">
+                    <Clock size={32} />
+                    <p>No recent activity yet.</p>
+                  </div>
+                ) : (
+                  recentActivities.slice(0, 8).map((item, i) => (
+                    <div key={item._id || item.id || i} className="adb-activity-item">
+                      <div className="adb-activity-icon" data-type={item.type}>
+                        {activityIcon(item.type)}
+                      </div>
+                      <div className="adb-activity-content">
+                        <span className="adb-activity-title">{item.title || item.name}</span>
+                        <span className="adb-activity-action">{item.action}</span>
+                      </div>
+                      <span className="adb-activity-time">{item.time}</span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Bottom Info row */}
+          <motion.div
+            className="adb-info-row"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+          >
+            <div className="adb-info-card">
+              <Star size={18} style={{ color: '#f59e0b' }} />
+              <div>
+                <h4>IHM Recommended</h4>
+                <p>Featured restaurants are shown on the homepage top picks section.</p>
+              </div>
+            </div>
+            <div className="adb-info-card">
+              <Activity size={18} style={{ color: '#a855f7' }} />
+              <div>
+                <h4>Content is Live</h4>
+                <p>Changes to restaurants, events, and articles are reflected publicly immediately.</p>
+              </div>
+            </div>
+            <div className="adb-info-card">
+              <FileText size={18} style={{ color: '#22d3ee' }} />
+              <div>
+                <h4>Draft Articles</h4>
+                <p>Set article status to "published" to make them visible to visitors.</p>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
     </div>
   )
 }

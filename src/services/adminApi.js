@@ -1,6 +1,32 @@
+/**
+ * adminApi.js
+ * Frontend API service layer — aligned with AURANGABAD-FLAVOURS-BACKEND v1 routes.
+ *
+ * Base URL: set in VITE_API_BASE_URL (.env)
+ * All protected endpoints require Bearer token (auto-attached by api.js interceptor from localStorage 'adminToken')
+ *
+ * Route summary:
+ *   Restaurants   GET/POST /v1/restaurants         | GET/PUT/DELETE /v1/restaurants/:id | PATCH /v1/restaurants/:id/toggle-featured
+ *   Events        GET/POST /v1/events              | GET/PUT/DELETE /v1/events/:id
+ *   Articles      GET/POST /v1/articles            | GET/PUT/DELETE /v1/articles/:id   | PATCH /v1/articles/:id/toggle-status
+ *   Media         GET      /v1/media               | POST /v1/media (multipart, field: 'file') | DELETE /v1/media/:id
+ *   Settings      GET      /v1/settings            | PUT /v1/settings
+ *   Admin         GET      /v1/admin/stats         | GET /v1/admin/recent-activity
+ *   Auth          POST     /v1/auth/login          | POST /v1/auth/signup
+ *
+ * Note on Content-Type:
+ *   - Restaurant POST/PUT: multipart/form-data (multer handles image upload to S3)
+ *   - Media POST: multipart/form-data (field name: 'file')
+ *   - Everything else: application/json
+ */
+
 import api from './api';
 
-// Hotels API
+// ─── Restaurants ────────────────────────────────────────────────────────────
+// Backend model required fields: name, establishmentType, cuisine, priceRange,
+//   rating, image (S3 URL via upload), description, location.coordinates, area
+// POST/PUT use multipart/form-data with image as binary field 'image'
+
 export const hotelsApi = {
   async getAll() {
     return await api.get('/restaurants');
@@ -11,34 +37,42 @@ export const hotelsApi = {
   },
 
   async create(hotelData) {
-    // Handle multipart if image is present
-    if (hotelData.image instanceof File) {
-      const formData = new FormData();
-      Object.keys(hotelData).forEach(key => {
-        if (key === 'location' && typeof hotelData[key] === 'object') {
-          formData.append('location[coordinates]', JSON.stringify(hotelData[key].coordinates));
-        } else {
-          formData.append(key, hotelData[key]);
-        }
-      });
-      return await api.post('/restaurants', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-    }
-    return await api.post('/restaurants', hotelData);
+    const formData = new FormData();
+    Object.entries(hotelData).forEach(([key, val]) => {
+      if (val === null || val === undefined) return;
+      if (key === 'location') {
+        // Send as JSON string; backend parses req.body
+        formData.append('location[type]', val.type || 'Point');
+        formData.append('location[coordinates][0]', String(val.coordinates[0]));
+        formData.append('location[coordinates][1]', String(val.coordinates[1]));
+      } else if (key === 'facilities' && Array.isArray(val)) {
+        val.forEach(f => formData.append('facilities', f));
+      } else {
+        formData.append(key, val);
+      }
+    });
+    return await api.post('/restaurants', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   },
 
   async update(id, hotelData) {
-    if (hotelData.image instanceof File) {
-      const formData = new FormData();
-      Object.keys(hotelData).forEach(key => {
-        formData.append(key, hotelData[key]);
-      });
-      return await api.put(`/restaurants/${id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-    }
-    return await api.put(`/restaurants/${id}`, hotelData);
+    const formData = new FormData();
+    Object.entries(hotelData).forEach(([key, val]) => {
+      if (val === null || val === undefined) return;
+      if (key === 'location') {
+        formData.append('location[type]', val.type || 'Point');
+        formData.append('location[coordinates][0]', String(val.coordinates[0]));
+        formData.append('location[coordinates][1]', String(val.coordinates[1]));
+      } else if (key === 'facilities' && Array.isArray(val)) {
+        val.forEach(f => formData.append('facilities', f));
+      } else {
+        formData.append(key, val);
+      }
+    });
+    return await api.put(`/restaurants/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   },
 
   async delete(id) {
@@ -50,7 +84,11 @@ export const hotelsApi = {
   }
 };
 
-// Events API
+// ─── Events ─────────────────────────────────────────────────────────────────
+// Backend model required fields: name, description, date, location, image,
+//   organizer, price, capacity
+// All requests use application/json
+
 export const eventsApi = {
   async getAll() {
     return await api.get('/events');
@@ -73,7 +111,11 @@ export const eventsApi = {
   }
 };
 
-// Articles API
+// ─── Articles ───────────────────────────────────────────────────────────────
+// Backend model required fields: title, slug, excerpt, content, image,
+//   author (User ObjectId), category, publishedDate, readTime (string)
+// All requests use application/json
+
 export const articlesApi = {
   async getAll() {
     return await api.get('/articles');
@@ -97,10 +139,16 @@ export const articlesApi = {
 
   async toggleStatus(id) {
     return await api.patch(`/articles/${id}/toggle-status`);
+  },
+
+  async getBySlug(slug) {
+    return await api.get(`/articles/s/${slug}`);
   }
 };
 
-// Settings API
+// ─── Settings ───────────────────────────────────────────────────────────────
+// GET is public; PUT requires admin auth
+
 export const settingsApi = {
   async get() {
     return await api.get('/settings');
@@ -111,7 +159,10 @@ export const settingsApi = {
   }
 };
 
-// Media API
+// ─── Media ──────────────────────────────────────────────────────────────────
+// GET/POST/DELETE all require admin auth
+// POST uses multipart/form-data with field name 'file'
+
 export const mediaApi = {
   async getAll() {
     return await api.get('/media');
@@ -130,7 +181,11 @@ export const mediaApi = {
   }
 };
 
-// Dashboard stats API
+// ─── Dashboard / Admin ──────────────────────────────────────────────────────
+// Both require admin auth (Bearer token)
+// GET /v1/admin/stats         → { totalRestaurants, totalEvents, totalArticles, ... }
+// GET /v1/admin/recent-activity → [{ type, title, action, time, ... }]
+
 export const dashboardApi = {
   async getStats() {
     return await api.get('/admin/stats');
@@ -138,5 +193,19 @@ export const dashboardApi = {
 
   async getRecentActivity() {
     return await api.get('/admin/recent-activity');
+  }
+};
+
+// ─── Auth ───────────────────────────────────────────────────────────────────
+// POST /v1/auth/login   → { token, user: { id, name, email, userType } }
+// POST /v1/auth/signup  → { ... }
+
+export const authApi = {
+  async login(email, password) {
+    return await api.post('/auth/login', { email, password });
+  },
+
+  async signup(name, email, password, userType = 'admin') {
+    return await api.post('/auth/signup', { name, email, password, userType });
   }
 };
