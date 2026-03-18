@@ -37,12 +37,32 @@ const HotelForm = () => {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [existingCuisines, setExistingCuisines] = useState([]);
 
   useEffect(() => {
     if (isEditMode) {
       loadHotelData();
     }
+    loadCuisines();
   }, [id]);
+
+  const loadCuisines = async () => {
+    try {
+      const response = await hotelsApi.getAll();
+      const data = response.data || response;
+      if (Array.isArray(data)) {
+        const cuisineSet = new Set();
+        data.forEach(h => {
+          if (h.cuisine) {
+            h.cuisine.split(',').forEach(c => cuisineSet.add(c.trim()));
+          }
+        });
+        setExistingCuisines(Array.from(cuisineSet).sort());
+      }
+    } catch (error) {
+      console.error('Failed to load existing cuisines:', error);
+    }
+  };
 
   const loadHotelData = async () => {
     try {
@@ -203,7 +223,13 @@ const HotelForm = () => {
                       onChange={handleInputChange}
                       required
                       placeholder="e.g. North Indian, Mughlai"
+                      list="cuisine-list"
                     />
+                    <datalist id="cuisine-list">
+                      {existingCuisines.map(c => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </div>
                 </div>
 
