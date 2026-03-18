@@ -186,7 +186,11 @@ const Explore = () => {
         </motion.div>
       )}
 
-      <FilterBar filters={filters} onFilterChange={handleFilterChange} />
+      <FilterBar 
+        filters={filters} 
+        onFilterChange={handleFilterChange} 
+        restaurants={restaurants}
+      />
 
       <div className="explore-content">
         <div className="results-header">

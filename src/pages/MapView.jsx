@@ -1,29 +1,52 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, Navigation, Clock } from 'lucide-react'
+import { MapPin, Navigation, Clock, Loader } from 'lucide-react'
 import RestaurantModal from '../components/RestaurantModal'
 import EmbeddedMap from '../components/EmbeddedMap'
-import { restaurants, areas } from '../data/restaurants'
+import { hotelsApi } from '../services/adminApi'
 import './MapView.css'
 
 const MapView = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedArea, setSelectedArea] = useState('')
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredRestaurants = selectedArea
-    ? restaurants.filter((r) => r.area === selectedArea)
-    : restaurants
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await hotelsApi.getAll()
+        const data = response.data || response
+        setRestaurants(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch restaurants for map:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
-  const areaStats = areas.map((area) => ({
-    name: area,
-    count: restaurants.filter((r) => r.area === area).length,
-  }))
+  const areaStats = useMemo(() => {
+    const stats = {}
+    restaurants.forEach(r => {
+      if (r.area) {
+        stats[r.area] = (stats[r.area] || 0) + 1
+      }
+    })
+    return Object.entries(stats).map(([name, count]) => ({ name, count }))
+  }, [restaurants])
 
   const handleRestaurantClick = (restaurant) => {
     setSelectedRestaurant(restaurant)
     setIsModalOpen(true)
   }
+
+  const filteredRestaurants = selectedArea
+    ? restaurants.filter((r) => r.area === selectedArea)
+    : restaurants
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
@@ -89,42 +112,60 @@ const MapView = () => {
               {selectedArea ? `Restaurants in ${selectedArea}` : 'All Restaurants'}
             </h2>
             <div className="map-restaurants-list">
-              {filteredRestaurants.map((restaurant) => (
-                <motion.div
-                  key={restaurant.id}
-                  className="map-restaurant-item"
-                  onClick={() => handleRestaurantClick(restaurant)}
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="map-restaurant-image">
-                    <img src={restaurant.image} alt={restaurant.name} />
-                  </div>
-                  <div className="map-restaurant-info">
-                    <h3>{restaurant.name}</h3>
-                    <p>{restaurant.cuisine}</p>
-                    <div className="map-restaurant-meta">
-                      <span>
-                        <MapPin size={14} />
-                        {restaurant.distance}
-                      </span>
-                      <span>
-                        <Clock size={14} />
-                        {restaurant.travelTime}
-                      </span>
+              {loading ? (
+                <div className="map-loading">
+                  <Loader className="spinner" />
+                  <span>Loading restaurants...</span>
+                </div>
+              ) : filteredRestaurants.length > 0 ? (
+                filteredRestaurants.map((restaurant) => (
+                  <motion.div
+                    key={restaurant._id || restaurant.id}
+                    className="map-restaurant-item"
+                    onClick={() => handleRestaurantClick(restaurant)}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="map-restaurant-image">
+                      <img src={restaurant.image} alt={restaurant.name} />
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="map-restaurant-info">
+                      <h3>{restaurant.name}</h3>
+                      <p>{restaurant.cuisine}</p>
+                      <div className="map-restaurant-meta">
+                        <span>
+                          <MapPin size={14} />
+                          {restaurant.area}
+                        </span>
+                        {restaurant.rating && (
+                          <span>
+                            ⭐ {restaurant.rating}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="map-no-results">
+                  <p>No restaurants found in this area.</p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="map-container">
-            <EmbeddedMap 
-              height="100%" 
-              zoom={14}
-              restaurants={filteredRestaurants}
-            />
+            {loading ? (
+              <div className="map-main-loading">
+                <Loader size={48} className="spinner" />
+              </div>
+            ) : (
+              <EmbeddedMap 
+                height="100%" 
+                zoom={selectedArea ? 15 : 13}
+                restaurants={filteredRestaurants}
+              />
+            )}
           </div>
         </div>
       </div>

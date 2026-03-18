@@ -1,19 +1,35 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Filter, X } from 'lucide-react'
 import {
-  cuisines,
-  areas,
-  establishmentTypes,
   priceRanges,
   ratingCategories,
-  facilities,
+  facilities as allFacilities,
 } from '../data/restaurants'
 import './FilterBar.css'
 
-const FilterBar = ({ filters, onFilterChange }) => {
+const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeFilter, setActiveFilter] = useState(null)
+
+  // Derive dynamic filter options from restaurant data
+  const { cuisines, areas, establishmentTypes } = useMemo(() => {
+    const cuisineSet = new Set()
+    const areaSet = new Set()
+    const typeSet = new Set()
+
+    restaurants.forEach(r => {
+      if (r.cuisine) r.cuisine.split(',').forEach(c => cuisineSet.add(c.trim()))
+      if (r.area) areaSet.add(r.area)
+      if (r.establishmentType) typeSet.add(r.establishmentType)
+    })
+
+    return {
+      cuisines: Array.from(cuisineSet).sort(),
+      areas: Array.from(areaSet).sort(),
+      establishmentTypes: Array.from(typeSet).sort()
+    }
+  }, [restaurants])
 
   const handleFilterChange = (key, value) => {
     if (key === 'facilities') {
@@ -76,7 +92,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
               <div className="filter-section">
                 <h3>Establishment Type</h3>
                 <div className="filter-options">
-                  {establishmentTypes.map((type) => (
+                  {establishmentTypes.length > 0 ? establishmentTypes.map((type) => (
                     <button
                       key={type}
                       className={`filter-option ${
@@ -86,27 +102,16 @@ const FilterBar = ({ filters, onFilterChange }) => {
                     >
                       {type}
                     </button>
-                  ))}
+                  )) : <p className="no-filter-data">No types found</p>}
                 </div>
               </div>
 
               <div className="filter-section">
                 <h3>Cuisine</h3>
                 <div className="filter-options">
-                  {cuisines.slice(0, 10).map((cuisine) => (
-                    <button
-                      key={cuisine}
-                      className={`filter-option ${
-                        filters.cuisine === cuisine ? 'active' : ''
-                      }`}
-                      onClick={() => handleFilterChange('cuisine', cuisine)}
-                    >
-                      {cuisine}
-                    </button>
-                  ))}
-                  {activeFilter === 'cuisine' && (
-                    <div className="filter-dropdown">
-                      {cuisines.slice(10).map((cuisine) => (
+                  {cuisines.length > 0 ? (
+                    <>
+                      {cuisines.slice(0, 10).map((cuisine) => (
                         <button
                           key={cuisine}
                           className={`filter-option ${
@@ -117,18 +122,33 @@ const FilterBar = ({ filters, onFilterChange }) => {
                           {cuisine}
                         </button>
                       ))}
-                    </div>
-                  )}
-                  {cuisines.length > 10 && (
-                    <button
-                      className="filter-more"
-                      onClick={() =>
-                        setActiveFilter(activeFilter === 'cuisine' ? null : 'cuisine')
-                      }
-                    >
-                      {activeFilter === 'cuisine' ? 'Show Less' : `+${cuisines.length - 10} More`}
-                    </button>
-                  )}
+                      {activeFilter === 'cuisine' && (
+                        <div className="filter-dropdown">
+                          {cuisines.slice(10).map((cuisine) => (
+                            <button
+                              key={cuisine}
+                              className={`filter-option ${
+                                filters.cuisine === cuisine ? 'active' : ''
+                              }`}
+                              onClick={() => handleFilterChange('cuisine', cuisine)}
+                            >
+                              {cuisine}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {cuisines.length > 10 && (
+                        <button
+                          className="filter-more"
+                          onClick={() =>
+                            setActiveFilter(activeFilter === 'cuisine' ? null : 'cuisine')
+                          }
+                        >
+                          {activeFilter === 'cuisine' ? 'Show Less' : `+${cuisines.length - 10} More`}
+                        </button>
+                      )}
+                    </>
+                  ) : <p className="no-filter-data">No cuisines found</p>}
                 </div>
               </div>
 
@@ -169,7 +189,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
               <div className="filter-section">
                 <h3>Area</h3>
                 <div className="filter-options">
-                  {areas.map((area) => (
+                  {areas.length > 0 ? areas.map((area) => (
                     <button
                       key={area}
                       className={`filter-option ${
@@ -179,14 +199,14 @@ const FilterBar = ({ filters, onFilterChange }) => {
                     >
                       {area}
                     </button>
-                  ))}
+                  )) : <p className="no-filter-data">No areas found</p>}
                 </div>
               </div>
 
               <div className="filter-section">
                 <h3>Facilities</h3>
                 <div className="filter-options">
-                  {facilities.map((facility) => (
+                  {allFacilities.map((facility) => (
                     <button
                       key={facility}
                       className={`filter-option ${

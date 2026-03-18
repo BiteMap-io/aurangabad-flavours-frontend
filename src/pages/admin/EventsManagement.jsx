@@ -49,8 +49,8 @@ const EventsManagement = () => {
 
   const filteredEvents = events
     .filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           event.location.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch = (event.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (event.location || '').toLowerCase().includes(searchTerm.toLowerCase())
       
       const matchesFilter = filterStatus === 'all' || 
                            (filterStatus === 'upcoming' && event.status === 'upcoming') ||
@@ -61,7 +61,7 @@ const EventsManagement = () => {
     .sort((a, b) => {
       switch (sortBy) {
         case 'title':
-          return a.title.localeCompare(b.title)
+          return (a.name || '').localeCompare(b.name || '')
         case 'date':
           return new Date(a.date) - new Date(b.date)
         case 'status':
@@ -77,7 +77,7 @@ const EventsManagement = () => {
       const response = await eventsApi.delete(eventId)
       if (response.success || response) {
         setEvents(events.filter(e => (e._id || e.id) !== eventId))
-        showToast.success('Success', `${event.title} has been deleted`)
+        showToast.success('Success', `${event.name} has been deleted`)
       } else {
         showToast.error('Error', 'Failed to delete event')
       }
@@ -204,7 +204,7 @@ const EventsManagement = () => {
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
               <div className="event-image">
-                <img src={event.image} alt={event.title} />
+                <img src={event.image} alt={event.name} />
                 <div className="event-badges">
                   <span className={`badge status ${getStatusColor(event.status)}`}>
                     {event.status}
@@ -217,7 +217,7 @@ const EventsManagement = () => {
 
               <div className="event-content">
                 <div className="event-header">
-                  <h3>{event.title}</h3>
+                  <h3>{event.name}</h3>
                   <div className="event-date">
                     <Calendar size={16} />
                     <span>{formatDate(event.date)}</span>
@@ -290,7 +290,7 @@ const EventsManagement = () => {
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         title="Delete Event"
-        message={`Are you sure you want to delete "${deleteModal.event?.title}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${deleteModal.event?.name}"? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
