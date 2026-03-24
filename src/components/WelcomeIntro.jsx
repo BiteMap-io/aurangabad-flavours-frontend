@@ -4,17 +4,18 @@ import './WelcomeIntro.css'
 
 const WelcomeIntro = () => {
   const [showIntro, setShowIntro] = useState(() => {
-    // DEVELOPMENT MODE: Always show intro for testing
-    // To enable production mode (show only once per session), 
-    // replace 'return true' with the commented code below:
-    return true
-    
-    // PRODUCTION MODE (uncomment when ready):
-    // try {
-    //   return !sessionStorage.getItem('introShown')
-    // } catch {
-    //   return false
-    // }
+    // Show intro for 7 days after the first visit
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+    const firstVisit = localStorage.getItem('welcomeIntro_firstVisit')
+    const now = Date.now()
+
+    if (!firstVisit) {
+      localStorage.setItem('welcomeIntro_firstVisit', now.toString())
+      return true
+    }
+
+    const timePassed = now - parseInt(firstVisit, 10)
+    return timePassed < SEVEN_DAYS_MS
   })
 
   const [displayedText, setDisplayedText] = useState('')

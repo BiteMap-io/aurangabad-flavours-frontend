@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import api from '../services/api'
+import { dashboardApi } from '../services/adminApi'
 
 const AdminAuthContext = createContext()
 
@@ -18,17 +19,19 @@ export const AdminAuthProvider = ({ children }) => {
 
   // Check for existing admin session on mount
   useEffect(() => {
-    const checkAuthStatus = () => {
+    const checkAuthStatus = async () => {
       const adminToken = localStorage.getItem('adminToken')
       const adminData = localStorage.getItem('adminUser')
       
       if (adminToken && adminData) {
         try {
+          // Verify token by calling a protected endpoint
+          await dashboardApi.getStats()
           const user = JSON.parse(adminData)
           setAdminUser(user)
           setIsAuthenticated(true)
         } catch (error) {
-          console.error('Invalid admin session data')
+          console.error('Invalid or expired admin session:', error)
           logout()
         }
       }
