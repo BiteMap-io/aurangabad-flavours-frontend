@@ -25,78 +25,6 @@ const Events = () => {
     fetchEvents()
   }, [])
 
-  const pastEventsGallery = [
-    {
-      id: 1,
-      title: 'Food Festival 2023 - Opening Ceremony',
-      image: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&q=80',
-      description: 'Grand opening with traditional dance performances'
-    },
-    {
-      id: 2,
-      title: 'Chef Competition Finals',
-      image: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&q=80',
-      description: 'Local chefs competing for the golden spatula'
-    },
-    {
-      id: 3,
-      title: 'Street Food Night Market',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&q=80',
-      description: 'Bustling night market with authentic street vendors'
-    },
-    {
-      id: 4,
-      title: 'Cultural Food Exchange',
-      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&q=80',
-      description: 'International cuisine showcase event'
-    },
-    {
-      id: 5,
-      title: 'Traditional Cooking Workshop',
-      image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80',
-      description: 'Hands-on cooking classes with local masters'
-    },
-    {
-      id: 6,
-      title: 'Food Photography Contest',
-      image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80',
-      description: 'Amateur photographers capturing culinary art'
-    },
-    {
-      id: 7,
-      title: 'Spice Market Tour',
-      image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=80',
-      description: 'Guided tour through historic spice markets'
-    },
-    {
-      id: 8,
-      title: 'Dessert Festival Finale',
-      image: 'https://images.unsplash.com/photo-1563379091339-03246963d51a?w=800&q=80',
-      description: 'Sweet ending to our annual dessert celebration'
-    }
-  ]
-
-  const openImageModal = (image, index) => {
-    setSelectedImage(image)
-    setCurrentImageIndex(index)
-  }
-
-  const closeImageModal = () => {
-    setSelectedImage(null)
-  }
-
-  const nextImage = () => {
-    const nextIndex = (currentImageIndex + 1) % pastEventsGallery.length
-    setCurrentImageIndex(nextIndex)
-    setSelectedImage(pastEventsGallery[nextIndex])
-  }
-
-  const prevImage = () => {
-    const prevIndex = currentImageIndex === 0 ? pastEventsGallery.length - 1 : currentImageIndex - 1
-    setCurrentImageIndex(prevIndex)
-    setSelectedImage(pastEventsGallery[prevIndex])
-  }
-
   return (
     <div className="events-page">
       <div className="events-header">
@@ -117,6 +45,7 @@ const Events = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ scale: 1.02, y: -4 }}
+                onClick={() => setSelectedImage(event)}
               >
                 <div className="event-image">
                   <img src={event.image} alt={event.title} />
@@ -143,37 +72,7 @@ const Events = () => {
         )}
       </div>
 
-      {/* Past Events Gallery Section */}
-      <div className="past-events-section">
-        <div className="section-header">
-          <h2>Past Events Gallery</h2>
-          <p>Relive the memorable moments from our previous culinary celebrations</p>
-        </div>
-
-        <div className="gallery-grid">
-          {pastEventsGallery.map((item, index) => (
-            <motion.div
-              key={item._id || item.id}
-              className="gallery-item"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={() => openImageModal(item, index)}
-            >
-              <div className="gallery-image">
-                <img src={item.image} alt={item.title} />
-                <div className="gallery-overlay">
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Image Modal */}
+      {/* Event Detail Modal */}
       <AnimatePresence>
         {selectedImage && (
           <motion.div
@@ -181,7 +80,7 @@ const Events = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeImageModal}
+            onClick={() => setSelectedImage(null)}
           >
             <motion.div
               className="image-modal"
@@ -190,16 +89,8 @@ const Events = () => {
               exit={{ scale: 0.8, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <button className="modal-close" onClick={closeImageModal}>
+              <button className="modal-close" onClick={() => setSelectedImage(null)}>
                 <X size={24} />
-              </button>
-              
-              <button className="modal-nav modal-prev" onClick={prevImage}>
-                <ChevronLeft size={24} />
-              </button>
-              
-              <button className="modal-nav modal-next" onClick={nextImage}>
-                <ChevronRight size={24} />
               </button>
 
               <div className="modal-image">
@@ -207,8 +98,20 @@ const Events = () => {
               </div>
               
               <div className="modal-content">
-                <h3>{selectedImage.title}</h3>
-                <p>{selectedImage.description}</p>
+                <div className="modal-event-header">
+                  <h3>{selectedImage.title}</h3>
+                  <div className="event-meta-inline">
+                    <div className="event-meta-item">
+                      <Calendar size={16} />
+                      <span>{selectedImage.date}</span>
+                    </div>
+                    <div className="event-meta-item">
+                      <MapPin size={16} />
+                      <span>{selectedImage.location}</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="modal-description">{selectedImage.description}</p>
               </div>
             </motion.div>
           </motion.div>

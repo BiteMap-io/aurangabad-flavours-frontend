@@ -1,16 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Star, Route } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
-import FoodTrailCard from '../components/FoodTrailCard'
-import DishesCarousel from '../components/DishesCarousel'
 import MasonryGallery from '../components/MasonryGallery'
-import { hotelsApi, eventsApi, articlesApi } from '../services/adminApi'
-import { foodTrails } from '../data/foodTrails' // Still mock for now as it's complex
+import { hotelsApi } from '../services/adminApi'
 import './Home.css'
 
 const Home = () => {
@@ -140,23 +136,6 @@ const Home = () => {
           >
             <MasonryGallery />
           </motion.div>
-        </section>
-
-        <DishesCarousel />
-
-        <section className="food-trails-section">
-          <div className="section-header">
-            <Route size={28} />
-            <h2 className="section-title">Curated Food Trails</h2>
-          </div>
-          <p className="section-subtitle">
-            Explore Aurangabad through themed culinary journeys
-          </p>
-          <div className="food-trails-grid">
-            {foodTrails.map((trail) => (
-              <FoodTrailCard key={trail.id} trail={trail} />
-            ))}
-          </div>
         </section>
 
         <section className="featured-section">

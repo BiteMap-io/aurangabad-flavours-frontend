@@ -6,7 +6,6 @@ import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FilterBar from '../components/FilterBar'
 import { hotelsApi } from '../services/adminApi'
-import { getDishRestaurants, getDishById } from '../data/dishes'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
 import './Explore.css'
@@ -34,8 +33,6 @@ const Explore = () => {
     fetchData()
   }, [])
   
-  const dishParam = searchParams.get('dish')
-  const selectedDish = dishParam ? getDishById(dishParam) : null
   
   const [filters, setFilters] = useState({
     establishmentType: '',
@@ -44,32 +41,20 @@ const Explore = () => {
     rating: '',
     facilities: [],
     area: '',
-    dish: dishParam || '',
     nearMe: searchParams.get('nearMe') === 'true',
   })
 
   // Update filters when URL params change
   useEffect(() => {
-    const dishFromUrl = searchParams.get('dish')
-    if (dishFromUrl && dishFromUrl !== filters.dish) {
-      setFilters(prev => ({ ...prev, dish: dishFromUrl }))
+    const nearMeFromUrl = searchParams.get('nearMe') === 'true'
+    if (nearMeFromUrl !== filters.nearMe) {
+      setFilters(prev => ({ ...prev, nearMe: nearMeFromUrl }))
     }
   }, [searchParams])
-
-  const clearDishFilter = () => {
-    setFilters(prev => ({ ...prev, dish: '' }))
-    const newParams = new URLSearchParams(searchParams)
-    newParams.delete('dish')
-    setSearchParams(newParams)
-  }
 
   const filteredRestaurants = useMemo(() => {
     let filtered = [...restaurants]
 
-    // Apply dish filter first if present
-    if (filters.dish) {
-      filtered = getDishRestaurants(filters.dish, filtered)
-    }
 
     // Apply tourist mode filter
     if (isTouristMode) {
@@ -164,27 +149,7 @@ const Explore = () => {
         </div>
       </div>
 
-      {selectedDish && (
-        <motion.div 
-          className="dish-filter-banner"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="dish-filter-content">
-            <span className="dish-filter-label">Showing restaurants serving:</span>
-            <div className="dish-filter-pill">
-              <span className="dish-filter-name">{selectedDish.name}</span>
-              <button 
-                className="dish-filter-clear"
-                onClick={clearDishFilter}
-                aria-label="Clear dish filter"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      )}
+
 
       <FilterBar 
         filters={filters} 
@@ -234,7 +199,6 @@ const Explore = () => {
                     rating: '',
                     facilities: [],
                     area: '',
-                    dish: '',
                     nearMe: false,
                   })}
                 >

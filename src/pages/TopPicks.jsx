@@ -1,20 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Award, Star, TrendingUp } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
-import { restaurants } from '../data/restaurants'
+import { hotelsApi } from '../services/adminApi'
 import './TopPicks.css'
 
 const TopPicks = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await hotelsApi.getAll()
+        const data = response.data || response
+        setRestaurants(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Failed to fetch restaurants for Top Picks:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
 
   const topRated = [...restaurants]
-    .sort((a, b) => b.rating - a.rating)
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 10)
 
-  const ihmRecommended = restaurants.filter((r) => r.ihmRecommended)
+  const ihmRecommended = restaurants.filter((r) => r.featured || r.ihmRecommended)
 
   const handleRestaurantClick = (restaurant) => {
     setSelectedRestaurant(restaurant)
@@ -39,19 +56,27 @@ const TopPicks = () => {
           <h2>IHM Recommended</h2>
         </div>
         <div className="restaurants-grid">
-          {ihmRecommended.map((restaurant, index) => (
-            <motion.div
-              key={restaurant.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-            >
-              <RestaurantCard
-                restaurant={restaurant}
-                onClick={() => handleRestaurantClick(restaurant)}
-              />
-            </motion.div>
-          ))}
+          {loading ? (
+            <div className="loading-spinner">Loading recommendations...</div>
+          ) : (
+            ihmRecommended.length > 0 ? (
+              ihmRecommended.map((restaurant, index) => (
+                <motion.div
+                  key={restaurant._id || restaurant.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  <RestaurantCard
+                    restaurant={restaurant}
+                    onClick={() => handleRestaurantClick(restaurant)}
+                  />
+                </motion.div>
+              ))
+            ) : (
+              <div className="no-data">No recommended restaurants yet.</div>
+            )
+          )}
         </div>
       </section>
 
@@ -61,19 +86,27 @@ const TopPicks = () => {
           <h2>Highest Rated</h2>
         </div>
         <div className="restaurants-grid">
-          {topRated.map((restaurant, index) => (
-            <motion.div
-              key={restaurant.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-            >
-              <RestaurantCard
-                restaurant={restaurant}
-                onClick={() => handleRestaurantClick(restaurant)}
-              />
-            </motion.div>
-          ))}
+          {loading ? (
+            <div className="loading-spinner">Loading top rated...</div>
+          ) : (
+            topRated.length > 0 ? (
+              topRated.map((restaurant, index) => (
+                <motion.div
+                  key={restaurant._id || restaurant.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  <RestaurantCard
+                    restaurant={restaurant}
+                    onClick={() => handleRestaurantClick(restaurant)}
+                  />
+                </motion.div>
+              ))
+            ) : (
+              <div className="no-data">No rated restaurants yet.</div>
+            )
+          )}
         </div>
       </section>
 

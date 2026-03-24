@@ -5,7 +5,7 @@ import {
   priceRanges,
   ratingCategories,
   facilities as allFacilities,
-} from '../data/restaurants'
+} from '../constants/filters'
 import './FilterBar.css'
 
 const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
@@ -50,7 +50,6 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
     filters.priceRange,
     filters.rating,
     filters.area,
-    filters.dish,
     filters.facilities?.length || 0,
   ].filter(Boolean).length
 
@@ -68,15 +67,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
           )}
         </button>
 
-        <div className="filter-quick">
-          <input
-            type="text"
-            placeholder="Search by dish..."
-            value={filters.dish || ''}
-            onChange={(e) => onFilterChange({ dish: e.target.value })}
-            className="dish-search"
-          />
-        </div>
+
       </div>
 
       <AnimatePresence>
@@ -232,7 +223,6 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                     rating: '',
                     facilities: [],
                     area: '',
-                    dish: '',
                   })
                 }}
               >
