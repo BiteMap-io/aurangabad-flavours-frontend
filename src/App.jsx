@@ -34,7 +34,6 @@ import ToastContainer from './components/admin/Toast'
 import { LanguageProvider } from './context/LanguageContext'
 import { TouristModeProvider } from './context/TouristModeContext'
 import { ThemeProvider } from './context/ThemeContext'
-import './App.css'
 
 function App() {
   return (
@@ -43,7 +42,7 @@ function App() {
         <LanguageProvider>
           <TouristModeProvider>
             <Router>
-              <div className="app">
+              <div className="min-h-screen flex flex-col bg-background-primary">
                 <Routes>
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<AdminLogin />} />
@@ -76,7 +75,7 @@ function App() {
                       <WelcomeIntro />
                       <LanyardSimple />
                       <Navbar />
-                      <main className="main-content">
+                      <main className="flex-1 w-full">
                         <Routes>
                           <Route path="/" element={<Home />} />
                           <Route path="/explore" element={<Explore />} />

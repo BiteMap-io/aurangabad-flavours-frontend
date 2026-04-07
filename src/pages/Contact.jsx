@@ -1,69 +1,72 @@
 import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Clock } from 'lucide-react'
-import './Contact.css'
 
 const Contact = () => {
   return (
     <motion.div
-      className="contact-page"
+      className="min-h-screen py-xl px-lg bg-background-primary data-[theme=light]:bg-background-primary"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <div className="contact-container">
-        <div className="contact-hero">
-          <h1>Contact & Help</h1>
-          <p>Get in touch with us for any queries about Aurangabad's culinary scene</p>
+      <div className="max-w-[1200px] mx-auto">
+        <div className="text-center mb-xl">
+          <h1 className="text-[2.5rem] md:text-[3rem] font-bold text-primary mb-md bg-[linear-gradient(135deg,#F8FAFC_0%,#E2E8F0_50%,#CBD5E1_100%)] bg-clip-text text-transparent data-[theme=light]:text-primary data-[theme=light]:![webkit-text-fill-color:initial] data-[theme=light]:!bg-none">
+            Contact & Help
+          </h1>
+          <p className="text-[1.2rem] text-secondary max-w-[600px] mx-auto">
+            Get in touch with us for any queries about Aurangabad's culinary scene
+          </p>
         </div>
         
-        <div className="contact-content">
-          <div className="contact-info">
-            <div className="contact-item">
-              <Mail size={24} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-lg md:gap-xl mt-xl">
+          <div className="bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg p-lg md:p-xl shadow-glass flex flex-col gap-lg data-[theme=light]:bg-[#ffffff] data-[theme=light]:border-[#e2e8f0]">
+            <div className="flex items-start gap-md">
+              <Mail size={24} className="text-accent-purple shrink-0 mt-[2px]" />
               <div>
-                <h3>Email</h3>
-                <p>info@aurangabadflavors.com</p>
+                <h3 className="text-[1.1rem] text-primary mb-xs font-semibold">Email</h3>
+                <p className="text-secondary text-[0.95rem]">info@aurangabadflavors.com</p>
               </div>
             </div>
             
-            <div className="contact-item">
-              <Phone size={24} />
+            <div className="flex items-start gap-md">
+              <Phone size={24} className="text-accent-purple shrink-0 mt-[2px]" />
               <div>
-                <h3>Phone</h3>
-                <p>+91 240 123 4567</p>
+                <h3 className="text-[1.1rem] text-primary mb-xs font-semibold">Phone</h3>
+                <p className="text-secondary text-[0.95rem]">+91 240 123 4567</p>
               </div>
             </div>
             
-            <div className="contact-item">
-              <MapPin size={24} />
+            <div className="flex items-start gap-md">
+              <MapPin size={24} className="text-accent-purple shrink-0 mt-[2px]" />
               <div>
-                <h3>Location</h3>
-                <p>Aurangabad, Maharashtra, India</p>
+                <h3 className="text-[1.1rem] text-primary mb-xs font-semibold">Location</h3>
+                <p className="text-secondary text-[0.95rem]">Aurangabad, Maharashtra, India</p>
               </div>
             </div>
             
-            <div className="contact-item">
-              <Clock size={24} />
+            <div className="flex items-start gap-md">
+              <Clock size={24} className="text-accent-purple shrink-0 mt-[2px]" />
               <div>
-                <h3>Support Hours</h3>
-                <p>Mon - Sat: 9:00 AM - 6:00 PM</p>
+                <h3 className="text-[1.1rem] text-primary mb-xs font-semibold">Support Hours</h3>
+                <p className="text-secondary text-[0.95rem]">Mon - Sat: 9:00 AM - 6:00 PM</p>
               </div>
             </div>
           </div>
           
-          <div className="help-section">
-            <h2>Frequently Asked Questions</h2>
-            <div className="faq-item">
-              <h3>How do I find restaurants near me?</h3>
-              <p>Use the "Near Me" button in the top navigation to discover restaurants based on your location.</p>
+          <div className="bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg p-lg md:p-xl shadow-glass data-[theme=light]:bg-[#ffffff] data-[theme=light]:border-[#e2e8f0]">
+            <h2 className="text-[1.5rem] text-primary mb-lg font-semibold">Frequently Asked Questions</h2>
+            <div className="mb-lg pb-lg border-b border-white/10 last:border-b-0 last:mb-0 last:pb-0 data-[theme=light]:border-black/10">
+              <h3 className="text-[1rem] text-primary mb-sm font-semibold">How do I find restaurants near me?</h3>
+              <p className="text-secondary leading-[1.6] text-[0.95rem]">Use the "Near Me" button in the top navigation to discover restaurants based on your location.</p>
             </div>
-            <div className="faq-item">
-              <h3>Can I suggest a restaurant?</h3>
-              <p>Yes! Send us an email with restaurant details and we'll review it for inclusion in our guide.</p>
+            <div className="mb-lg pb-lg border-b border-white/10 last:border-b-0 last:mb-0 last:pb-0 data-[theme=light]:border-black/10">
+              <h3 className="text-[1rem] text-primary mb-sm font-semibold">Can I suggest a restaurant?</h3>
+              <p className="text-secondary leading-[1.6] text-[0.95rem]">Yes! Send us an email with restaurant details and we'll review it for inclusion in our guide.</p>
             </div>
-            <div className="faq-item">
-              <h3>Are the restaurant timings accurate?</h3>
-              <p>We strive to keep all information updated, but we recommend calling ahead to confirm timings.</p>
+            <div className="mb-lg pb-lg border-b border-white/10 last:border-b-0 last:mb-0 last:pb-0 data-[theme=light]:border-black/10">
+              <h3 className="text-[1rem] text-primary mb-sm font-semibold">Are the restaurant timings accurate?</h3>
+              <p className="text-secondary leading-[1.6] text-[0.95rem]">We strive to keep all information updated, but we recommend calling ahead to confirm timings.</p>
             </div>
           </div>
         </div>

@@ -15,7 +15,6 @@ import {
 import { articlesApi } from '../../services/adminApi'
 import { showToast } from '../../components/admin/Toast'
 import ConfirmModal from '../../components/admin/ConfirmModal'
-import './ArticlesManagement.css'
 
 const ArticlesManagement = () => {
   const [searchTerm, setSearchTerm] = useState('')
@@ -125,23 +124,17 @@ const ArticlesManagement = () => {
 
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'news':
-        return 'blue'
-      case 'features':
-        return 'purple'
-      case 'interviews':
-        return 'green'
-      case 'guides':
-        return 'orange'
-      case 'awards':
-        return 'red'
-      default:
-        return 'gray'
+      case 'news': return 'bg-gradient-to-br from-blue-500 to-blue-700'
+      case 'features': return 'bg-gradient-to-br from-purple-500 to-purple-700'
+      case 'interviews': return 'bg-gradient-to-br from-emerald-500 to-emerald-700'
+      case 'guides': return 'bg-gradient-to-br from-amber-500 to-amber-700'
+      case 'awards': return 'bg-gradient-to-br from-red-500 to-red-600'
+      default: return 'bg-gradient-to-br from-gray-500 to-gray-600'
     }
   }
 
   const getStatusColor = (status) => {
-    return status === 'published' ? 'green' : 'orange'
+    return status === 'published' ? 'bg-gradient-to-br from-emerald-500 to-emerald-700' : 'bg-gradient-to-br from-amber-500 to-amber-700'
   }
 
   const getAuthorName = (author) => {
@@ -151,35 +144,36 @@ const ArticlesManagement = () => {
   }
 
   return (
-    <div className="articles-management">
-      <div className="page-header">
-        <div className="header-content">
-          <h1>Articles Management</h1>
-          <p>Manage your articles and blog posts</p>
+    <div className="max-w-[1200px] mx-auto font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+        <div>
+          <h1 className="text-[1.75rem] font-bold text-gray-100 m-0 mb-1 max-[480px]:text-[1.5rem] data-[theme=light]:text-gray-900">Articles Management</h1>
+          <p className="text-gray-500 m-0 data-[theme=light]:text-gray-600">Manage your articles and blog posts</p>
         </div>
-        <Link to="/admin/articles/add" className="btn-primary">
+        <Link to="/admin/articles/add" className="inline-flex items-center gap-1.5 py-2 px-6 bg-gradient-to-br from-purple-500 to-[#9b59b6] border-none rounded-lg text-white no-underline font-semibold transition-all duration-300 hover:-translate-y-[2px] shadow-[0_4px_10px_rgba(138,43,226,0.2)] hover:shadow-[0_8px_25px_rgba(138,43,226,0.3)]">
           <Plus size={20} />
           Add New Article
         </Link>
       </div>
 
       {/* Filters and Search */}
-      <div className="filters-section">
-        <div className="search-box">
-          <Search size={20} />
+      <div className="flex gap-4 mb-8 flex-wrap max-md:flex-col">
+        <div className="relative flex-1 min-w-[300px] max-md:min-w-0">
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
             placeholder="Search articles..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full py-2 px-4 pl-11 bg-white/5 border border-white/10 rounded-lg text-gray-100 text-[0.95rem] outline-none transition-all duration-300 focus:border-purple-500 focus:shadow-[0_0_0_3px_rgba(138,43,226,0.1)] placeholder-gray-500 data-[theme=light]:bg-white/90 data-[theme=light]:border-black/10 data-[theme=light]:text-gray-900"
           />
         </div>
 
-        <div className="filter-controls">
+        <div className="flex gap-2 max-md:flex-wrap">
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="filter-select"
+            className="py-2 px-4 bg-white/5 border border-white/10 rounded-lg text-gray-100 text-[0.9rem] outline-none cursor-pointer transition-all duration-300 focus:border-purple-500 data-[theme=light]:bg-white/90 data-[theme=light]:border-black/10 data-[theme=light]:text-gray-900"
           >
             <option value="all">All Categories</option>
             <option value="news">News</option>
@@ -192,7 +186,7 @@ const ArticlesManagement = () => {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
+            className="py-2 px-4 bg-white/5 border border-white/10 rounded-lg text-gray-100 text-[0.9rem] outline-none cursor-pointer transition-all duration-300 focus:border-purple-500 data-[theme=light]:bg-white/90 data-[theme=light]:border-black/10 data-[theme=light]:text-gray-900"
           >
             <option value="all">All Status</option>
             <option value="published">Published</option>
@@ -202,7 +196,7 @@ const ArticlesManagement = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="sort-select"
+            className="py-2 px-4 bg-white/5 border border-white/10 rounded-lg text-gray-100 text-[0.9rem] outline-none cursor-pointer transition-all duration-300 focus:border-purple-500 data-[theme=light]:bg-white/90 data-[theme=light]:border-black/10 data-[theme=light]:text-gray-900"
           >
             <option value="date">Sort by Date</option>
             <option value="title">Sort by Title</option>
@@ -213,82 +207,82 @@ const ArticlesManagement = () => {
 
       {/* Articles Grid */}
       {loading ? (
-        <div className="loading-state">
-          <Loader size={48} className="spinner" />
-          <p>Loading articles...</p>
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center text-gray-500 data-[theme=light]:text-gray-500">
+          <Loader size={48} className="animate-spin mb-4 text-purple-500" />
+          <p className="m-0 text-[1rem]">Loading articles...</p>
         </div>
       ) : (
-        <div className="articles-grid">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(380px,1fr))] gap-6 mb-8 max-md:grid-cols-1">
           {filteredArticles.map((article, index) => {
             const articleId = article._id || article.id
             return (
               <motion.div
                 key={articleId}
-              className="article-card"
+              className="bg-white/5 border border-white/10 rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(0,0,0,0.15)] data-[theme=light]:bg-white/90 data-[theme=light]:border-black/10 data-[theme=light]:hover:shadow-[0_12px_30px_rgba(0,0,0,0.1)] group"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <div className="article-image">
-                <img src={article.image} alt={article.title} />
-                <div className="article-badges">
-                  <span className={`badge category ${getCategoryColor(article.category)}`}>
+              <div className="relative h-[200px] overflow-hidden">
+                <img src={article.image} alt={article.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <div className="absolute top-3 left-3 flex gap-1.5">
+                  <span className={`py-1 px-2 rounded font-semibold text-[0.75rem] text-white capitalize ${getCategoryColor(article.category)}`}>
                     {article.category}
                   </span>
-                  <span className={`badge status ${getStatusColor(article.status)}`}>
+                  <span className={`py-1 px-2 rounded font-semibold text-[0.75rem] text-white capitalize ${getStatusColor(article.status)}`}>
                     {article.status}
                   </span>
                 </div>
               </div>
 
-              <div className="article-content">
-                <div className="article-header">
-                  <h3>{article.title}</h3>
-                  <div className="article-meta">
-                    <div className="article-date">
+              <div className="p-6 max-[480px]:p-4">
+                <div className="mb-4">
+                  <h3 className="text-[1.1rem] font-semibold text-gray-100 data-[theme=light]:text-gray-900 m-0 mb-2 leading-[1.3] line-clamp-2">{article.title}</h3>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[0.8rem] text-gray-500 max-md:flex-col max-md:items-start max-md:gap-1">
+                    <div className="flex items-center gap-1.5">
                       <Calendar size={14} />
                       <span>{formatDate(article.publishedDate)}</span>
                     </div>
-                    <div className="article-author">
+                    <div className="italic">
                       By {getAuthorName(article.author)}
                     </div>
                   </div>
                 </div>
 
-                <div className="article-details">
-                  <p className="excerpt">{article.excerpt}</p>
-                  <div className="article-stats">
-                    <span className="read-time">{article.readTime} min read</span>
-                    <div className="article-tags">
+                <div className="mb-4">
+                  <p className="text-gray-500 text-[0.9rem] m-0 mb-2 leading-[1.4] line-clamp-3">{article.excerpt}</p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[0.8rem] text-gray-500 max-md:flex-col max-md:items-start max-md:gap-1">
+                    <span className="font-medium">{article.readTime}</span>
+                    <div className="flex items-center gap-1.5">
                       <Tag size={12} />
                       <span>{article.tags?.slice(0, 2).join(', ')}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="article-actions">
+                <div className="flex gap-1.5 justify-end max-md:justify-center">
                   <Link 
                     to={`/admin/articles/edit/${articleId}`}
-                    className="action-btn edit"
+                    className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-white/5 text-gray-500 cursor-pointer transition-all duration-200 no-underline hover:text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/30 data-[theme=light]:border-black/10 data-[theme=light]:bg-white/80"
                     title="Edit Article"
                   >
                     <Edit size={16} />
                   </Link>
                   <button
-                    className="action-btn view"
+                    className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-transparent text-gray-500 cursor-pointer transition-all duration-200 hover:text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 data-[theme=light]:border-black/10"
                     title="View Article"
                   >
                     <Eye size={16} />
                   </button>
                   <button
-                    className={`action-btn status ${article.status === 'published' ? 'published' : 'draft'}`}
+                    className={`w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-transparent cursor-pointer transition-all duration-200 data-[theme=light]:border-black/10 ${article.status === 'published' ? 'hover:text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 text-gray-500' : 'text-amber-500 border-amber-500/30 bg-amber-500/10 hover:text-amber-400 hover:bg-amber-500/20'}`}
                     onClick={() => toggleStatus(articleId)}
                     title={`${article.status === 'published' ? 'Unpublish' : 'Publish'} Article`}
                   >
-                    <FileText size={16} />
+                    <FileText size={16} className={article.status === 'published' ? '' : 'text-amber-500'} />
                   </button>
                   <button
-                    className="action-btn delete"
+                    className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-transparent text-gray-500 cursor-pointer transition-all duration-200 hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/30 data-[theme=light]:border-black/10"
                     onClick={() => openDeleteModal(article)}
                     title="Delete Article"
                   >
@@ -302,19 +296,19 @@ const ArticlesManagement = () => {
       )}
 
       {!loading && filteredArticles.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-content">
-            <FileText size={48} />
-            <h3>No articles found</h3>
-            <p>Try adjusting your search or filter criteria</p>
+        <div className="flex items-center justify-center min-h-[300px] text-center text-gray-500">
+          <div>
+            <FileText size={48} className="mx-auto mb-4" />
+            <h3 className="text-gray-100 data-[theme=light]:text-gray-900 m-0 mb-2 font-semibold">No articles found</h3>
+            <p className="m-0">Try adjusting your search or filter criteria</p>
           </div>
         </div>
       )}
 
       {/* Pagination */}
       {!loading && (
-        <div className="pagination">
-          <p>Showing {filteredArticles.length} of {articles.length} articles</p>
+        <div className="flex items-center justify-center py-6 border-t border-white/10 data-[theme=light]:border-black/10 mt-4">
+          <p className="text-gray-500 text-[0.9rem] m-0">Showing {filteredArticles.length} of {articles.length} articles</p>
         </div>
       )}
 

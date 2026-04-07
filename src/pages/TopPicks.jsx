@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Award, Star, TrendingUp } from 'lucide-react'
+import { Award, Star } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import { hotelsApi } from '../services/adminApi'
-import './TopPicks.css'
 
 const TopPicks = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
@@ -44,20 +43,20 @@ const TopPicks = () => {
   }
 
   return (
-    <div className="top-picks-page">
-      <div className="top-picks-header">
-        <h1>Top Picks</h1>
-        <p>Curated selection of the best restaurants in Aurangabad</p>
+    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+      <div className="text-center mb-xl">
+        <h1 className="text-[3rem] mb-sm text-primary font-bold">Top Picks</h1>
+        <p className="text-[1.1rem] text-secondary">Curated selection of the best restaurants in Aurangabad</p>
       </div>
 
-      <section className="top-picks-section">
-        <div className="section-header">
-          <Award size={28} />
-          <h2>IHM Recommended</h2>
+      <section className="mb-xl">
+        <div className="flex items-center gap-md mb-lg pb-md border-b border-glass-border">
+          <Award size={28} className="text-primary" />
+          <h2 className="text-[2rem] text-primary m-0 font-semibold">IHM Recommended</h2>
         </div>
-        <div className="restaurants-grid">
+        <div className="flex flex-col gap-md">
           {loading ? (
-            <div className="loading-spinner">Loading recommendations...</div>
+            <div className="text-secondary py-xl text-center">Loading recommendations...</div>
           ) : (
             ihmRecommended.length > 0 ? (
               ihmRecommended.map((restaurant, index) => (
@@ -74,20 +73,20 @@ const TopPicks = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="no-data">No recommended restaurants yet.</div>
+              <div className="text-secondary py-xl text-center">No recommended restaurants yet.</div>
             )
           )}
         </div>
       </section>
 
-      <section className="top-picks-section">
-        <div className="section-header">
+      <section className="mb-xl">
+        <div className="flex items-center gap-md mb-lg pb-md border-b border-glass-border">
           <Star size={28} fill="#FFD700" color="#FFD700" />
-          <h2>Highest Rated</h2>
+          <h2 className="text-[2rem] text-primary m-0 font-semibold">Highest Rated</h2>
         </div>
-        <div className="restaurants-grid">
+        <div className="flex flex-col gap-md">
           {loading ? (
-            <div className="loading-spinner">Loading top rated...</div>
+            <div className="text-secondary py-xl text-center">Loading top rated...</div>
           ) : (
             topRated.length > 0 ? (
               topRated.map((restaurant, index) => (
@@ -104,7 +103,7 @@ const TopPicks = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="no-data">No rated restaurants yet.</div>
+              <div className="text-secondary py-xl text-center">No rated restaurants yet.</div>
             )
           )}
         </div>
@@ -120,5 +119,3 @@ const TopPicks = () => {
 }
 
 export default TopPicks
-
-
