@@ -7,7 +7,6 @@ import {
 import { Link } from 'react-router-dom'
 import { dashboardApi } from '../../services/adminApi'
 import { useAdminAuth } from '../../context/AdminAuthContext'
-import './AdminDashboard.css'
 
 const cardVariants = {
   initial: { opacity: 0, y: 24 },
@@ -110,53 +109,64 @@ const AdminDashboard = () => {
     return 'Good evening'
   }
 
+  const getIconClasses = (type) => {
+    if (type === 'event') return 'bg-[rgba(34,211,238,0.1)] text-[#22d3ee]'
+    if (type === 'article') return 'bg-[rgba(245,158,11,0.1)] text-[#f59e0b]'
+    return 'bg-[rgba(168,85,247,0.1)] text-[#a855f7]'
+  }
+
   return (
-    <div className="adb-root">
+    <div className="p-0 font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
       {/* Header */}
-      <div className="adb-header">
+      <div className="flex items-start justify-between mb-8">
         <div>
-          <p className="adb-greeting">{getGreeting()}, {adminUser?.name || 'Admin'} 👋</p>
-          <h1 className="adb-title">Dashboard Overview</h1>
+          <p className="text-[0.9rem] text-gray-500 m-0 mb-1">{getGreeting()}, {adminUser?.name || 'Admin'} 👋</p>
+          <h1 className="text-[1.75rem] font-bold text-gray-100 m-0 tracking-[-0.02em]">Dashboard Overview</h1>
         </div>
-        <div className="adb-header-badge">
-          <Sparkles size={14} />
+        <div className="flex items-center gap-1.5 py-[0.35rem] px-[0.9rem] bg-green-500/10 border border-green-500/25 rounded-full text-[0.8rem] text-green-400 font-semibold">
+          <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-[pulse_2s_infinite_ease-in-out]" />
           <span>Live</span>
         </div>
       </div>
 
       {loading ? (
-        <div className="adb-loading">
-          <Loader size={40} className="adb-spinner" />
-          <p>Loading dashboard data...</p>
+        <div className="flex flex-col items-center justify-center h-[300px] gap-4 text-gray-500">
+          <Loader size={40} className="animate-spin text-purple-500" />
+          <p className="m-0">Loading dashboard data...</p>
         </div>
       ) : (
         <>
           {/* Stat Cards */}
-          <div className="adb-stats-grid">
+          <div className="grid grid-cols-4 gap-5 mb-8 max-xl:grid-cols-2 max-[600px]:grid-cols-1">
             {statCards.map((card, i) => {
               const Icon = card.icon
               return (
                 <motion.div
                   key={card.label}
-                  className="adb-stat-card"
+                  className="bg-[#111118] border border-white/5 rounded-[1.25rem] p-6 flex flex-col gap-3 relative overflow-hidden transition-all duration-200 hover:-translate-y-[3px] group"
                   style={{ '--card-color': card.color, '--card-glow': card.glow }}
                   variants={cardVariants}
                   initial="initial"
                   animate="animate"
                   custom={i}
                 >
-                  <div className="adb-stat-icon">
+                  <div className="absolute inset-0 bg-[var(--card-glow)] opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none" />
+                  <div 
+                    className="absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 pointer-events-none" 
+                    style={{ boxShadow: '0 8px 30px var(--card-glow)' }}
+                  />
+                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 border relative z-10" style={{ background: card.glow, borderColor: card.color, color: card.color }}>
                     <Icon size={20} />
                   </div>
-                  <div className="adb-stat-body">
-                    <span className="adb-stat-value">{card.value}</span>
-                    <span className="adb-stat-label">{card.label}</span>
+                  <div className="flex flex-col gap-[0.2rem] relative z-10">
+                    <span className="text-[2rem] font-extrabold text-gray-100 leading-none tracking-[-0.02em]">{card.value}</span>
+                    <span className="text-[0.82rem] text-gray-500 font-medium">{card.label}</span>
                   </div>
-                  <div className="adb-stat-footer">
+                  <div className="flex items-center gap-[0.35rem] text-[0.78rem] text-green-400 mt-auto relative z-10">
                     <TrendingUp size={12} />
                     <span>{card.change}</span>
                     {card.link && (
-                      <Link to={card.link} className="adb-stat-link">
+                      <Link to={card.link} className="ml-auto flex flex-shrink-0 items-center no-underline transition-opacity duration-200 opacity-70 hover:opacity-100" style={{ color: card.color }}>
                         <ArrowUpRight size={14} />
                       </Link>
                     )}
@@ -167,33 +177,45 @@ const AdminDashboard = () => {
           </div>
 
           {/* Body Grid */}
-          <div className="adb-body-grid">
+          <div className="grid grid-cols-2 gap-5 mb-8 max-[900px]:grid-cols-1">
             {/* Quick Actions */}
             <motion.div
-              className="adb-panel"
+              className="bg-[#111118] border border-white/5 rounded-[1.25rem] p-6 flex flex-col gap-5"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.35 }}
             >
-              <div className="adb-panel-header">
-                <h2>Quick Actions</h2>
-                <p>Jump to common tasks</p>
+              <div>
+                <h2 className="text-[1rem] font-bold text-gray-100 m-0 mb-[0.2rem]">Quick Actions</h2>
+                <p className="text-[0.8rem] text-gray-500 m-0">Jump to common tasks</p>
               </div>
-              <div className="adb-actions-grid">
+              <div className="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
                 {quickActions.map((action) => {
                   const Icon = action.icon
                   return (
                     <Link
                       key={action.label}
                       to={action.to}
-                      className="adb-action-card"
+                      className="group flex items-center gap-3 py-[0.9rem] px-4 bg-white/5 border border-white/10 rounded-[0.875rem] no-underline text-gray-300 text-[0.875rem] font-medium transition-all duration-[0.18s] relative overflow-hidden focus:outline-none"
                       style={{ '--action-color': action.color }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = action.color
+                        e.currentTarget.style.backgroundColor = 'rgba(168,85,247,0.04)'
+                        e.currentTarget.style.color = '#f3f4f6'
+                        e.currentTarget.style.transform = 'translateY(-2px)'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+                        e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'
+                        e.currentTarget.style.color = '#d1d5db'
+                        e.currentTarget.style.transform = 'none'
+                      }}
                     >
-                      <div className="adb-action-icon">
+                      <div className="w-[34px] h-[34px] rounded-lg bg-white/5 flex items-center justify-center shrink-0 transition-colors" style={{ color: action.color }}>
                         <Icon size={20} />
                       </div>
                       <span>{action.label}</span>
-                      <ArrowUpRight size={14} className="adb-action-arrow" />
+                      <ArrowUpRight size={14} className="ml-auto opacity-0 transition-opacity duration-[0.18s] group-hover:opacity-100" style={{ color: action.color }} />
                     </Link>
                   )
                 })}
@@ -202,32 +224,32 @@ const AdminDashboard = () => {
 
             {/* Recent Activity */}
             <motion.div
-              className="adb-panel"
+              className="bg-[#111118] border border-white/5 rounded-[1.25rem] p-6 flex flex-col gap-5"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, delay: 0.4 }}
             >
-              <div className="adb-panel-header">
-                <h2>Recent Activity</h2>
-                <p>Latest updates across the platform</p>
+              <div>
+                <h2 className="text-[1rem] font-bold text-gray-100 m-0 mb-[0.2rem]">Recent Activity</h2>
+                <p className="text-[0.8rem] text-gray-500 m-0">Latest updates across the platform</p>
               </div>
-              <div className="adb-activity-list">
+              <div className="flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-2 custom-scrollbar">
                 {recentActivities.length === 0 ? (
-                  <div className="adb-activity-empty">
+                  <div className="flex flex-col items-center gap-3 p-8 text-gray-700 text-[0.875rem]">
                     <Clock size={32} />
-                    <p>No recent activity yet.</p>
+                    <p className="m-0">No recent activity yet.</p>
                   </div>
                 ) : (
                   recentActivities.slice(0, 8).map((item, i) => (
-                    <div key={item._id || item.id || i} className="adb-activity-item">
-                      <div className="adb-activity-icon" data-type={item.type}>
+                    <div key={item._id || item.id || i} className="flex items-center gap-[0.875rem] py-[0.625rem] px-3 rounded-xl transition-colors duration-150 hover:bg-white/5">
+                      <div className={`w-[28px] h-[28px] rounded-[7px] flex items-center justify-center shrink-0 ${getIconClasses(item.type)}`}>
                         {activityIcon(item.type)}
                       </div>
-                      <div className="adb-activity-content">
-                        <span className="adb-activity-title">{item.title || item.name}</span>
-                        <span className="adb-activity-action">{item.action}</span>
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="text-[0.85rem] text-gray-200 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{item.title || item.name}</span>
+                        <span className="text-[0.75rem] text-gray-500">{item.action}</span>
                       </div>
-                      <span className="adb-activity-time">{item.time}</span>
+                      <span className="text-[0.72rem] text-gray-600 shrink-0">{item.time}</span>
                     </div>
                   ))
                 )}
@@ -237,30 +259,30 @@ const AdminDashboard = () => {
 
           {/* Bottom Info row */}
           <motion.div
-            className="adb-info-row"
+            className="grid grid-cols-3 gap-5 max-[900px]:grid-cols-1"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
-            <div className="adb-info-card">
-              <Star size={18} style={{ color: '#f59e0b' }} />
+            <div className="flex items-start gap-[0.875rem] p-5 bg-[#111118] border border-white/5 rounded-2xl">
+              <Star size={18} style={{ color: '#f59e0b', marginTop: '2px', flexShrink: 0 }} />
               <div>
-                <h4>IHM Recommended</h4>
-                <p>Featured restaurants are shown on the homepage top picks section.</p>
+                <h4 className="text-[0.875rem] font-semibold text-gray-200 m-0 mb-[0.3rem]">IHM Recommended</h4>
+                <p className="text-[0.8rem] text-gray-500 m-0 leading-relaxed">Featured restaurants are shown on the homepage top picks section.</p>
               </div>
             </div>
-            <div className="adb-info-card">
-              <Activity size={18} style={{ color: '#a855f7' }} />
+            <div className="flex items-start gap-[0.875rem] p-5 bg-[#111118] border border-white/5 rounded-2xl">
+              <Activity size={18} style={{ color: '#a855f7', marginTop: '2px', flexShrink: 0 }} />
               <div>
-                <h4>Content is Live</h4>
-                <p>Changes to restaurants, events, and articles are reflected publicly immediately.</p>
+                <h4 className="text-[0.875rem] font-semibold text-gray-200 m-0 mb-[0.3rem]">Content is Live</h4>
+                <p className="text-[0.8rem] text-gray-500 m-0 leading-relaxed">Changes to restaurants, events, and articles are reflected publicly immediately.</p>
               </div>
             </div>
-            <div className="adb-info-card">
-              <FileText size={18} style={{ color: '#22d3ee' }} />
+            <div className="flex items-start gap-[0.875rem] p-5 bg-[#111118] border border-white/5 rounded-2xl">
+              <FileText size={18} style={{ color: '#22d3ee', marginTop: '2px', flexShrink: 0 }} />
               <div>
-                <h4>Draft Articles</h4>
-                <p>Set article status to "published" to make them visible to visitors.</p>
+                <h4 className="text-[0.875rem] font-semibold text-gray-200 m-0 mb-[0.3rem]">Draft Articles</h4>
+                <p className="text-[0.8rem] text-gray-500 m-0 leading-relaxed">Set article status to "published" to make them visible to visitors.</p>
               </div>
             </div>
           </motion.div>

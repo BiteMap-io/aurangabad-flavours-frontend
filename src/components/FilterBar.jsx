@@ -6,7 +6,6 @@ import {
   ratingCategories,
   facilities as allFacilities,
 } from '../constants/filters'
-import './FilterBar.css'
 
 const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -54,59 +53,57 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
   ].filter(Boolean).length
 
   return (
-    <div className="filter-bar">
-      <div className="filter-bar-header">
+    <div className="mb-lg">
+      <div className="flex flex-col md:flex-row md:items-center gap-md mb-md">
         <button
-          className="filter-toggle"
+          className="flex items-center justify-center md:justify-start gap-xs py-sm px-md bg-glass-surface border border-glass-border rounded-pill text-primary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple/20"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <Filter size={20} />
           <span>Filters</span>
           {activeFiltersCount > 0 && (
-            <span className="filter-count">{activeFiltersCount}</span>
+            <span className="bg-accent-purple text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.75rem] font-semibold shadow-glow/40">{activeFiltersCount}</span>
           )}
         </button>
-
-
       </div>
 
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="filter-panel"
+            className="overflow-hidden bg-glass-surface border border-glass-border rounded-lg p-lg mt-md shadow-glass"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="filter-sections">
-              <div className="filter-section">
-                <h3>Establishment Type</h3>
-                <div className="filter-options">
+            <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-lg mb-lg">
+              <div className="flex flex-col">
+                <h3 className="text-[1rem] font-semibold text-primary mb-sm">Establishment Type</h3>
+                <div className="flex flex-wrap gap-xs">
                   {establishmentTypes.length > 0 ? establishmentTypes.map((type) => (
                     <button
                       key={type}
-                      className={`filter-option ${
-                        filters.establishmentType === type ? 'active' : ''
+                      className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                        filters.establishmentType === type ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('establishmentType', type)}
                     >
                       {type}
                     </button>
-                  )) : <p className="no-filter-data">No types found</p>}
+                  )) : <p className="text-tertiary text-sm">No types found</p>}
                 </div>
               </div>
 
-              <div className="filter-section">
-                <h3>Cuisine</h3>
-                <div className="filter-options">
+              <div className="flex flex-col">
+                <h3 className="text-[1rem] font-semibold text-primary mb-sm">Cuisine</h3>
+                <div className="flex flex-wrap gap-xs">
                   {cuisines.length > 0 ? (
                     <>
                       {cuisines.slice(0, 10).map((cuisine) => (
                         <button
                           key={cuisine}
-                          className={`filter-option ${
-                            filters.cuisine === cuisine ? 'active' : ''
+                          className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                            filters.cuisine === cuisine ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                           }`}
                           onClick={() => handleFilterChange('cuisine', cuisine)}
                         >
@@ -114,12 +111,12 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                         </button>
                       ))}
                       {activeFilter === 'cuisine' && (
-                        <div className="filter-dropdown">
+                        <div className="flex flex-wrap gap-xs w-full mt-1">
                           {cuisines.slice(10).map((cuisine) => (
                             <button
                               key={cuisine}
-                              className={`filter-option ${
-                                filters.cuisine === cuisine ? 'active' : ''
+                              className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                                filters.cuisine === cuisine ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                               }`}
                               onClick={() => handleFilterChange('cuisine', cuisine)}
                             >
@@ -130,7 +127,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                       )}
                       {cuisines.length > 10 && (
                         <button
-                          className="filter-more"
+                          className="py-xs px-sm bg-transparent border border-dashed border-glass-border rounded-md text-tertiary text-[0.875rem] cursor-pointer transition-all duration-300 hover:border-accent-purple hover:text-primary"
                           onClick={() =>
                             setActiveFilter(activeFilter === 'cuisine' ? null : 'cuisine')
                           }
@@ -139,18 +136,18 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                         </button>
                       )}
                     </>
-                  ) : <p className="no-filter-data">No cuisines found</p>}
+                  ) : <p className="text-tertiary text-sm">No cuisines found</p>}
                 </div>
               </div>
 
-              <div className="filter-section">
-                <h3>Price Range</h3>
-                <div className="filter-options">
+              <div className="flex flex-col">
+                <h3 className="text-[1rem] font-semibold text-primary mb-sm">Price Range</h3>
+                <div className="flex flex-wrap gap-xs">
                   {priceRanges.map((range) => (
                     <button
                       key={range}
-                      className={`filter-option ${
-                        filters.priceRange === range ? 'active' : ''
+                      className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                        filters.priceRange === range ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('priceRange', range)}
                     >
@@ -160,14 +157,14 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                 </div>
               </div>
 
-              <div className="filter-section">
-                <h3>Rating</h3>
-                <div className="filter-options">
+              <div className="flex flex-col">
+                <h3 className="text-[1rem] font-semibold text-primary mb-sm">Rating</h3>
+                <div className="flex flex-wrap gap-xs">
                   {ratingCategories.map((rating) => (
                     <button
                       key={rating}
-                      className={`filter-option ${
-                        filters.rating === rating ? 'active' : ''
+                      className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                        filters.rating === rating ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('rating', rating)}
                     >
@@ -177,31 +174,31 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                 </div>
               </div>
 
-              <div className="filter-section">
-                <h3>Area</h3>
-                <div className="filter-options">
+              <div className="flex flex-col">
+                <h3 className="text-[1rem] font-semibold text-primary mb-sm">Area</h3>
+                <div className="flex flex-wrap gap-xs">
                   {areas.length > 0 ? areas.map((area) => (
                     <button
                       key={area}
-                      className={`filter-option ${
-                        filters.area === area ? 'active' : ''
+                      className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                        filters.area === area ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('area', area)}
                     >
                       {area}
                     </button>
-                  )) : <p className="no-filter-data">No areas found</p>}
+                  )) : <p className="text-tertiary text-sm">No areas found</p>}
                 </div>
               </div>
 
-              <div className="filter-section">
-                <h3>Facilities</h3>
-                <div className="filter-options">
+              <div className="flex flex-col">
+                <h3 className="text-[1rem] font-semibold text-primary mb-sm">Facilities</h3>
+                <div className="flex flex-wrap gap-xs">
                   {allFacilities.map((facility) => (
                     <button
                       key={facility}
-                      className={`filter-option ${
-                        filters.facilities?.includes(facility) ? 'active' : ''
+                      className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
+                        filters.facilities?.includes(facility) ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('facilities', facility)}
                     >
@@ -212,9 +209,9 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
               </div>
             </div>
 
-            <div className="filter-actions">
+            <div className="flex justify-end pt-md border-t border-glass-border">
               <button
-                className="clear-all-btn"
+                className="flex items-center gap-xs py-sm px-md bg-transparent border border-glass-border rounded-md text-tertiary text-[0.9rem] cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple hover:text-primary"
                 onClick={() => {
                   onFilterChange({
                     establishmentType: '',
@@ -238,5 +235,3 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
 }
 
 export default FilterBar
-
-

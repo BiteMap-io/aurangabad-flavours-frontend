@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Eye, EyeOff } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import './AuthModal.css'
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const { t } = useTranslation()
@@ -79,7 +78,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   return (
     <AnimatePresence>
       <motion.div
-        className="auth-modal-overlay"
+        className="fixed inset-0 bg-black/60 backdrop-blur-[8px] z-[9999] flex flex-col md:flex-row items-center justify-center p-sm md:p-md lg:p-lg"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -87,30 +86,34 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
         onClick={handleBackdropClick}
       >
         <motion.div
-          className="auth-modal-container"
+          className="relative w-full max-w-[420px] max-h-[98vh] md:max-h-[95vh] bg-background-primary/95 backdrop-blur-[24px] border border-glass-border rounded-xl shadow-glass overflow-y-auto overflow-x-hidden"
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
         >
           <button
-            className="auth-modal-close"
+            className="absolute top-md right-md lg:top-lg lg:right-lg bg-glass-surface border border-glass-border rounded-md text-primary w-9 h-9 md:w-10 md:h-10 flex items-center justify-center cursor-pointer transition-all duration-200 z-10 hover:bg-glass-hover hover:scale-105"
             onClick={onClose}
             aria-label={t('accessibility.closeModal')}
           >
             <X size={20} />
           </button>
 
-          <div className="auth-modal-content">
-            <div className="auth-modal-header">
-              <h2>{mode === 'login' ? t('auth.login') : t('auth.join')}</h2>
-              <p>{mode === 'login' ? 'Sign in to your account' : 'Create your account to get started'}</p>
+          <div className="p-sm pt-[calc(1rem+20px)] md:p-md md:pt-[calc(1.5rem+20px)] lg:p-xl lg:pt-[calc(2rem+20px)] min-h-fit">
+            <div className="text-center mb-md lg:mb-lg">
+              <h2 className="text-[1.25rem] md:text-[1.5rem] lg:text-[1.75rem] font-bold text-primary mb-sm font-['Playfair_Display',serif]">
+                {mode === 'login' ? t('auth.login') : t('auth.join')}
+              </h2>
+              <p className="text-secondary text-[0.95rem] m-0">
+                {mode === 'login' ? 'Sign in to your account' : 'Create your account to get started'}
+              </p>
             </div>
 
-            <form className="auth-form" onSubmit={handleSubmit}>
+            <form className="flex flex-col gap-sm lg:gap-md" onSubmit={handleSubmit}>
               {mode === 'join' && (
-                <div className="form-group">
-                  <label htmlFor="name">{t('auth.name')}</label>
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="name" className="text-[0.9rem] font-medium text-primary">{t('auth.name')}</label>
                   <input
                     type="text"
                     id="name"
@@ -118,13 +121,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder={t('auth.name')}
+                    className="p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
                     required
                   />
                 </div>
               )}
 
-              <div className="form-group">
-                <label htmlFor="email">{t('auth.email')}</label>
+              <div className="flex flex-col gap-xs">
+                <label htmlFor="email" className="text-[0.9rem] font-medium text-primary">{t('auth.email')}</label>
                 <input
                   type="email"
                   id="email"
@@ -132,13 +136,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder={t('auth.email')}
+                  className="p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
                   required
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="password">{t('auth.password')}</label>
-                <div className="password-input">
+              <div className="flex flex-col gap-xs">
+                <label htmlFor="password" className="text-[0.9rem] font-medium text-primary">{t('auth.password')}</label>
+                <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -146,11 +151,12 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder={t('auth.password')}
+                    className="w-full p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
                     required
                   />
                   <button
                     type="button"
-                    className="password-toggle"
+                    className="absolute right-md top-1/2 -translate-y-1/2 bg-transparent border-none text-secondary cursor-pointer p-0 flex items-center justify-center transition-colors duration-200 hover:text-primary"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -159,9 +165,9 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               </div>
 
               {mode === 'join' && (
-                <div className="form-group">
-                  <label htmlFor="confirmPassword">{t('auth.confirmPassword')}</label>
-                  <div className="password-input">
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="confirmPassword" className="text-[0.9rem] font-medium text-primary">{t('auth.confirmPassword')}</label>
+                  <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       id="confirmPassword"
@@ -169,11 +175,12 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder={t('auth.confirmPassword')}
+                      className="w-full p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
                       required
                     />
                     <button
                       type="button"
-                      className="password-toggle"
+                      className="absolute right-md top-1/2 -translate-y-1/2 bg-transparent border-none text-secondary cursor-pointer p-0 flex items-center justify-center transition-colors duration-200 hover:text-primary"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -183,62 +190,64 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               )}
 
               {mode === 'login' && (
-                <div className="form-options">
-                  <label className="checkbox-label">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-sm">
+                  <label className="flex items-center gap-xs cursor-pointer text-[0.9rem]">
                     <input
                       type="checkbox"
                       name="rememberMe"
                       checked={formData.rememberMe}
                       onChange={handleInputChange}
+                      className="w-4 h-4 m-0 bg-transparent border border-glass-border rounded focus:ring-accent-purple"
                     />
-                    <span className="checkbox-text">{t('auth.rememberMe')}</span>
+                    <span className="text-secondary select-none">{t('auth.rememberMe')}</span>
                   </label>
-                  <button type="button" className="forgot-password">
+                  <button type="button" className="bg-transparent border-none text-accent-purple text-[0.9rem] cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80">
                     {t('auth.forgotPassword')}
                   </button>
                 </div>
               )}
 
               {mode === 'join' && (
-                <div className="form-group">
-                  <label className="checkbox-label">
+                <div className="flex flex-col gap-xs mt-1">
+                  <label className="flex items-start gap-xs cursor-pointer text-[0.9rem]">
                     <input
                       type="checkbox"
                       name="acceptTerms"
                       checked={formData.acceptTerms}
                       onChange={handleInputChange}
+                      className="w-4 h-4 mt-[0.15rem] m-0 bg-transparent border border-glass-border rounded focus:ring-accent-purple"
                       required
                     />
-                    <span className="checkbox-text">
+                    <span className="text-secondary select-none leading-tight">
                       {t('auth.terms')}
                     </span>
                   </label>
                 </div>
               )}
 
-              <button type="submit" className="auth-submit-btn">
+              <button type="submit" className="w-full p-md lg:px-lg lg:py-md bg-accent-purple border-none rounded-pill text-white text-[1rem] font-semibold cursor-pointer transition-all duration-300 mt-xs hover:bg-accent-purple/90 hover:shadow-glow hover:-translate-y-[1px] active:translate-y-0">
                 {mode === 'login' ? t('auth.login') : t('auth.createAccount')}
               </button>
             </form>
 
-            <div className="auth-switch">
+            <div className="text-center mt-md pt-md border-t border-glass-border">
               {mode === 'login' ? (
-                <p>
+                <p className="text-secondary text-[0.9rem] m-0">
                   {t('auth.newHere')}{' '}
                   <button
                     type="button"
-                    className="auth-switch-btn"
+                    className="bg-transparent border-none text-accent-purple text-[0.9rem] font-semibold cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80"
                     onClick={() => switchMode('join')}
                   >
                     {t('auth.join')}
                   </button>
                 </p>
               ) : (
-                <p>
+                <p className="text-secondary text-[0.9rem] m-0">
                   {t('auth.alreadyAccount')}{' '}
                   <button
                     type="button"
-                    className="auth-switch-btn"
+                    className="bg-transparent border-none text-accent-purple text-[0.9rem] font-semibold cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80"
                     onClick={() => switchMode('login')}
                   >
                     {t('auth.login')}

@@ -8,7 +8,6 @@ import FilterBar from '../components/FilterBar'
 import { hotelsApi } from '../services/adminApi'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
-import './Explore.css'
 
 const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -54,7 +53,6 @@ const Explore = () => {
 
   const filteredRestaurants = useMemo(() => {
     let filtered = [...restaurants]
-
 
     // Apply tourist mode filter
     if (isTouristMode) {
@@ -105,7 +103,7 @@ const Explore = () => {
     }
 
     return filtered
-  }, [filters, isTouristMode])
+  }, [filters, isTouristMode, restaurants])
 
   const handleRestaurantClick = (restaurant) => {
     setSelectedRestaurant(restaurant)
@@ -122,34 +120,28 @@ const Explore = () => {
   }
 
   return (
-    <div className="explore-page">
-      <div className="explore-header">
-        {/* Background Video */}
-        <video
-          className="explore-header-video"
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&h=600&fit=crop&q=80"
-        >
-          <source
-            src="https://cdn.coverr.co/videos/coverr-restaurant-interior-with-people-dining-9483/1080p.mp4"
-            type="video/mp4"
-          />
-        </video>
+    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+      <div className="relative text-center mb-xl py-xl px-lg min-h-[200px] flex items-center justify-center overflow-hidden rounded-[2rem] bg-background-secondary border border-glass-border">
+        {/* Background Image */}
+        <img
+          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&h=600&fit=crop&q=80"
+          alt="Restaurant interior"
+          className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.5] saturate-[0.8] light:brightness-[0.6]"
+        />
         
         {/* Dark Overlay */}
-        <div className="explore-header-overlay" />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/50 z-10 light:bg-black/40" />
         
         {/* Content */}
-        <div className="explore-header-content">
-          <h1>Explore Restaurants</h1>
-          <p>Discover the best dining experiences in Aurangabad</p>
+        <div className="relative z-20 text-center">
+          <h1 className="text-[3rem] mb-sm text-white drop-shadow-lg">
+            Explore Restaurants
+          </h1>
+          <p className="text-[1.1rem] text-white/95 drop-shadow-md opacity-95">
+            Discover the best dining experiences in Aurangabad
+          </p>
         </div>
       </div>
-
-
 
       <FilterBar 
         filters={filters} 
@@ -157,21 +149,21 @@ const Explore = () => {
         restaurants={restaurants}
       />
 
-      <div className="explore-content">
-        <div className="results-header">
-          <span className="results-count">
+      <div className="mt-xl">
+        <div className="mb-lg pb-md border-b border-glass-border">
+          <span className="text-secondary text-[0.95rem]">
             {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} found
           </span>
         </div>
 
         <motion.div
-          className="restaurants-list"
+          className="flex flex-col gap-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
           {loading ? (
-            <div className="loading-spinner">Searching for flavours...</div>
+            <div className="text-center text-secondary py-xl">Searching for flavours...</div>
           ) : (
             filteredRestaurants.length > 0 ? (
               filteredRestaurants.map((restaurant, index) => (
@@ -188,10 +180,10 @@ const Explore = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="no-results">
-                <p>No restaurants found matching your criteria.</p>
+              <div className="text-center p-xl bg-glass-surface border border-glass-border rounded-[1.5rem]">
+                <p className="text-secondary text-[1.1rem] mb-md">No restaurants found matching your criteria.</p>
                 <button
-                  className="clear-filters-btn"
+                  className="py-sm px-lg bg-glass-surface border border-glass-border rounded-[0.5rem] text-primary text-[1rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-[#8A2BE2] hover:shadow-[0_0_15px_#8A2BE2]"
                   onClick={() => setFilters({
                     establishmentType: '',
                     cuisine: '',
@@ -220,5 +212,3 @@ const Explore = () => {
 }
 
 export default Explore
-
-

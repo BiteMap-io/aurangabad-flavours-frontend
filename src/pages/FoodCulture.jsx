@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { BookOpen, Utensils, Users } from 'lucide-react'
-import './FoodCulture.css'
 
 const FoodCulture = () => {
   const cultureSections = [
@@ -25,12 +24,13 @@ const FoodCulture = () => {
   ]
 
   return (
-    <div className="food-culture-page">
+    <div className="min-h-screen">
       {/* Hero Section with Background */}
-      <section className="food-culture-hero-section">
-        <div className="food-culture-hero-overlay" />
-        <div className="food-culture-header">
+      <section className="relative min-h-[50vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-[url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center bg-no-repeat light:brightness-[0.9] max-md:py-lg max-md:px-md max-md:bg-top max-md:min-h-[40vh]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60 z-[1] light:from-black/30 light:via-black/40 light:to-black/50" />
+        <div className="relative z-[2] text-center max-w-[800px]">
           <motion.h1
+            className="text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2] max-md:text-[2.5rem]"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -38,6 +38,7 @@ const FoodCulture = () => {
             Aurangabad Food Culture
           </motion.h1>
           <motion.p
+            className="text-[1.25rem] text-white/95 drop-shadow-md opacity-95 max-md:text-[1.1rem]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -47,38 +48,38 @@ const FoodCulture = () => {
         </div>
       </section>
 
-      <div className="food-culture-content">
-        <div className="culture-sections">
+      <div className="max-w-[1400px] mx-auto px-lg max-md:px-md">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] max-md:grid-cols-1 gap-xl mb-xl">
           {cultureSections.map((section, index) => (
             <motion.div
               key={section.id}
-              className="culture-card"
+              className="p-xl bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-[1.5rem] text-center transition-all duration-300 hover:bg-glass-hover hover:border-white/20 hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ scale: 1.02, y: -4 }}
             >
-              <div className="culture-icon">{section.icon}</div>
-              <h2>{section.title}</h2>
-              <p>{section.content}</p>
+              <div className="flex justify-center mb-md text-accent-purple">{section.icon}</div>
+              <h2 className="text-[1.5rem] mb-md text-primary font-semibold">{section.title}</h2>
+              <p className="text-secondary leading-[1.8] m-0">{section.content}</p>
             </motion.div>
           ))}
         </div>
 
-        <div className="culture-highlights">
-          <h2>Cultural Highlights</h2>
-          <div className="highlights-grid">
-            <div className="highlight-item">
-              <h3>Festival Foods</h3>
-              <p>Special dishes prepared during festivals like Ganesh Chaturthi, Diwali, and Eid showcase the city\'s diverse cultural celebrations.</p>
+        <div className="mt-xl p-xl bg-glass-surface border border-glass-border rounded-[1.5rem] mb-xl">
+          <h2 className="text-[2rem] mb-lg text-primary text-center font-semibold">Cultural Highlights</h2>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-lg">
+            <div className="p-md bg-glass-surface border border-glass-border rounded-md">
+              <h3 className="text-[1.25rem] mb-sm text-primary font-medium">Festival Foods</h3>
+              <p className="text-secondary leading-[1.6] m-0">Special dishes prepared during festivals like Ganesh Chaturthi, Diwali, and Eid showcase the city's diverse cultural celebrations.</p>
             </div>
-            <div className="highlight-item">
-              <h3>Street Food Culture</h3>
-              <p>Aurangabad\'s streets come alive with vendors offering everything from Vada Pav to Bhel Puri, creating a vibrant food culture.</p>
+            <div className="p-md bg-glass-surface border border-glass-border rounded-md">
+              <h3 className="text-[1.25rem] mb-sm text-primary font-medium">Street Food Culture</h3>
+              <p className="text-secondary leading-[1.6] m-0">Aurangabad's streets come alive with vendors offering everything from Vada Pav to Bhel Puri, creating a vibrant food culture.</p>
             </div>
-            <div className="highlight-item">
-              <h3>Restaurant Evolution</h3>
-              <p>The city has seen a transformation in its dining scene, with new restaurants bringing global cuisines while preserving local traditions.</p>
+            <div className="p-md bg-glass-surface border border-glass-border rounded-md">
+              <h3 className="text-[1.25rem] mb-sm text-primary font-medium">Restaurant Evolution</h3>
+              <p className="text-secondary leading-[1.6] m-0">The city has seen a transformation in its dining scene, with new restaurants bringing global cuisines while preserving local traditions.</p>
             </div>
           </div>
         </div>
@@ -88,5 +89,3 @@ const FoodCulture = () => {
 }
 
 export default FoodCulture
-
-
