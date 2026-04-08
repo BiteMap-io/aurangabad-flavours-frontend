@@ -4,14 +4,14 @@ import { Mail, Phone, MapPin, Clock } from 'lucide-react'
 const Contact = () => {
   return (
     <motion.div
-      className="min-h-screen py-xl px-lg bg-background-primary data-[theme=light]:bg-background-primary"
+      className="min-h-screen py-xl px-lg bg-background-primary"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-xl">
-          <h1 className="text-[2.5rem] md:text-[3rem] font-bold text-primary mb-md bg-[linear-gradient(135deg,#F8FAFC_0%,#E2E8F0_50%,#CBD5E1_100%)] bg-clip-text text-transparent data-[theme=light]:text-primary data-[theme=light]:![webkit-text-fill-color:initial] data-[theme=light]:!bg-none">
+          <h1 className="text-[2.5rem] md:text-[3rem] font-bold text-primary mb-md bg-gradient-to-br from-primary via-secondary to-tertiary bg-clip-text text-transparent light:![webkit-text-fill-color:initial] light:!bg-none">
             Contact & Help
           </h1>
           <p className="text-[1.2rem] text-secondary max-w-[600px] mx-auto">
@@ -20,7 +20,7 @@ const Contact = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-lg md:gap-xl mt-xl">
-          <div className="bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg p-lg md:p-xl shadow-glass flex flex-col gap-lg data-[theme=light]:bg-[#ffffff] data-[theme=light]:border-[#e2e8f0]">
+          <div className="bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg p-lg md:p-xl shadow-glass flex flex-col gap-lg">
             <div className="flex items-start gap-md">
               <Mail size={24} className="text-accent-purple shrink-0 mt-[2px]" />
               <div>
@@ -54,17 +54,17 @@ const Contact = () => {
             </div>
           </div>
           
-          <div className="bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg p-lg md:p-xl shadow-glass data-[theme=light]:bg-[#ffffff] data-[theme=light]:border-[#e2e8f0]">
+          <div className="bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg p-lg md:p-xl shadow-glass">
             <h2 className="text-[1.5rem] text-primary mb-lg font-semibold">Frequently Asked Questions</h2>
-            <div className="mb-lg pb-lg border-b border-white/10 last:border-b-0 last:mb-0 last:pb-0 data-[theme=light]:border-black/10">
+            <div className="mb-lg pb-lg border-b border-glass-border last:border-b-0 last:mb-0 last:pb-0">
               <h3 className="text-[1rem] text-primary mb-sm font-semibold">How do I find restaurants near me?</h3>
               <p className="text-secondary leading-[1.6] text-[0.95rem]">Use the "Near Me" button in the top navigation to discover restaurants based on your location.</p>
             </div>
-            <div className="mb-lg pb-lg border-b border-white/10 last:border-b-0 last:mb-0 last:pb-0 data-[theme=light]:border-black/10">
+            <div className="mb-lg pb-lg border-b border-glass-border last:border-b-0 last:mb-0 last:pb-0">
               <h3 className="text-[1rem] text-primary mb-sm font-semibold">Can I suggest a restaurant?</h3>
               <p className="text-secondary leading-[1.6] text-[0.95rem]">Yes! Send us an email with restaurant details and we'll review it for inclusion in our guide.</p>
             </div>
-            <div className="mb-lg pb-lg border-b border-white/10 last:border-b-0 last:mb-0 last:pb-0 data-[theme=light]:border-black/10">
+            <div className="mb-lg pb-lg border-b border-glass-border last:border-b-0 last:mb-0 last:pb-0">
               <h3 className="text-[1rem] text-primary mb-sm font-semibold">Are the restaurant timings accurate?</h3>
               <p className="text-secondary leading-[1.6] text-[0.95rem]">We strive to keep all information updated, but we recommend calling ahead to confirm timings.</p>
             </div>

@@ -3,18 +3,15 @@ import { motion } from 'framer-motion'
 
 const WelcomeIntro = () => {
   const [showIntro, setShowIntro] = useState(() => {
-    // Show intro for 7 days after the first visit
+    // Show intro only once every 7 days
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
-    const firstVisit = localStorage.getItem('welcomeIntro_firstVisit')
+    const lastShown = localStorage.getItem('welcomeIntro_lastShown')
     const now = Date.now()
 
-    if (!firstVisit) {
-      localStorage.setItem('welcomeIntro_firstVisit', now.toString())
-      return true
-    }
+    if (!lastShown) return true
 
-    const timePassed = now - parseInt(firstVisit, 10)
-    return timePassed < SEVEN_DAYS_MS
+    const timePassed = now - parseInt(lastShown, 10)
+    return timePassed > SEVEN_DAYS_MS
   })
 
   const [displayedText, setDisplayedText] = useState('')
@@ -22,10 +19,15 @@ const WelcomeIntro = () => {
   const [showSubtitle, setShowSubtitle] = useState(false)
   
   const fullText = "Welcome to Aurangabad Flavors"
-  const typingSpeed = 100 // milliseconds per character
+  const typingSpeed = 60 // faster typing speed
 
   useEffect(() => {
     if (!showIntro) return
+
+    // Mark as shown immediately to prevent repeat on refresh during animation
+    try {
+      localStorage.setItem('welcomeIntro_lastShown', Date.now().toString())
+    } catch (e) {}
 
     // Typing animation effect
     if (currentIndex < fullText.length) {
@@ -40,15 +42,10 @@ const WelcomeIntro = () => {
         setShowSubtitle(true)
       }, 300)
       
-      // Auto-hide after typing completes + 2 seconds
+      // Auto-hide after typing completes
       const hideTimer = setTimeout(() => {
-        try {
-          sessionStorage.setItem('introShown', 'true')
-        } catch {
-          // Ignore storage errors
-        }
         setShowIntro(false)
-      }, 2500)
+      }, 1500)
 
       return () => {
         clearTimeout(subtitleTimer)
