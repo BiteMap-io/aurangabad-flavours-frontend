@@ -26,11 +26,11 @@ const FoodCulture = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section with Background */}
-      <section className="relative min-h-[50vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-[#2c1810] bg-[url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center bg-no-repeat filter brightness-[1.15] contrast-[1.1] saturate-[1.08] max-md:py-lg max-md:px-md max-md:bg-top max-md:min-h-[40vh] max-md:brightness-[1.08] max-md:contrast-[1.05] max-md:saturate-[1.03] data-[theme=light]:brightness-[1.15] data-[theme=light]:contrast-[1.1] data-[theme=light]:saturate-[1.08]">
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0.45)_50%,rgba(0,0,0,0.6)_100%)] z-[1] max-md:bg-[linear-gradient(to_bottom,rgba(0,0,0,0.38)_0%,rgba(0,0,0,0.45)_50%,rgba(0,0,0,0.5)_100%)] data-[theme=light]:bg-[linear-gradient(to_bottom,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0.45)_50%,rgba(0,0,0,0.6)_100%)]" />
+      <section className="relative min-h-[50vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-[url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center bg-no-repeat light:brightness-[0.9] max-md:py-lg max-md:px-md max-md:bg-top max-md:min-h-[40vh]">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60 z-[1] light:from-black/30 light:via-black/40 light:to-black/50" />
         <div className="relative z-[2] text-center max-w-[800px]">
           <motion.h1
-            className="text-[3.5rem] font-bold mb-md text-primary [text-shadow:0_3px_12px_rgba(0,0,0,0.8),_0_1px_4px_rgba(0,0,0,0.6)] leading-[1.2] max-md:text-[2.5rem] data-[theme=light]:text-[#F8FAFC]"
+            className="text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2] max-md:text-[2.5rem]"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -38,7 +38,7 @@ const FoodCulture = () => {
             Aurangabad Food Culture
           </motion.h1>
           <motion.p
-            className="text-[1.25rem] text-primary [text-shadow:0_2px_8px_rgba(0,0,0,0.8),_0_1px_3px_rgba(0,0,0,0.6)] opacity-95 max-md:text-[1.1rem] data-[theme=light]:text-[#F8FAFC]"
+            className="text-[1.25rem] text-white/95 drop-shadow-md opacity-95 max-md:text-[1.1rem]"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}

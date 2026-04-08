@@ -121,23 +121,23 @@ const Explore = () => {
 
   return (
     <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
-      <div className="relative text-center mb-xl py-xl px-lg min-h-[200px] flex items-center justify-center overflow-hidden rounded-[2rem] bg-background-secondary">
+      <div className="relative text-center mb-xl py-xl px-lg min-h-[200px] flex items-center justify-center overflow-hidden rounded-[2rem] bg-background-secondary border border-glass-border">
         {/* Background Image */}
         <img
           src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&h=600&fit=crop&q=80"
           alt="Restaurant interior"
-          className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.45] saturate-[0.75] md:brightness-[0.5] md:saturate-[0.8] data-[theme=light]:brightness-[0.45] data-[theme=light]:saturate-[0.75] md:data-[theme=light]:brightness-[0.5] md:data-[theme=light]:saturate-[0.8]"
+          className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.5] saturate-[0.8] light:brightness-[0.6]"
         />
         
         {/* Dark Overlay */}
-        <div className="absolute top-0 left-0 w-full h-full bg-black/65 md:bg-black/60 z-10 data-[theme=light]:bg-black/65 md:data-[theme=light]:bg-black/60" />
+        <div className="absolute top-0 left-0 w-full h-full bg-black/50 z-10 light:bg-black/40" />
         
         {/* Content */}
         <div className="relative z-20 text-center">
-          <h1 className="text-[3rem] mb-sm text-primary drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] md:drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] data-[theme=light]:text-[#F8FAFC]">
+          <h1 className="text-[3rem] mb-sm text-white drop-shadow-lg">
             Explore Restaurants
           </h1>
-          <p className="text-[1.1rem] text-primary drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)] md:drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)] opacity-95 data-[theme=light]:text-[#F8FAFC]">
+          <p className="text-[1.1rem] text-white/95 drop-shadow-md opacity-95">
             Discover the best dining experiences in Aurangabad
           </p>
         </div>

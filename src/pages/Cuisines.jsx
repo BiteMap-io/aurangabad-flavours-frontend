@@ -76,21 +76,21 @@ const Cuisines = () => {
       </style>
       <div className="min-h-screen relative p-0 overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-[#1a1a1a] bg-cover bg-center bg-no-repeat bg-fixed animate-cuisine-slideshow filter brightness-[1.1] contrast-[1.2] saturate-[1.1] data-[theme=light]:brightness-[0.9] data-[theme=light]:contrast-[1.1] data-[theme=light]:saturate-[1.2] data-[theme=light]:bg-[#f8fafc] z-[0]" />
+        <div className="absolute inset-0 bg-background-primary bg-cover bg-center bg-no-repeat bg-fixed animate-cuisine-slideshow filter brightness-[1.1] contrast-[1.2] saturate-[1.1] light:brightness-[0.9] light:contrast-[1.1] light:saturate-[1.2] z-[0]" />
         
         {/* Overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(0,0,0,0.4)_0%,rgba(0,0,0,0.2)_50%,rgba(0,0,0,0.4)_100%)] pointer-events-none data-[theme=light]:bg-[linear-gradient(135deg,rgba(255,255,255,0.7)_0%,rgba(255,255,255,0.4)_50%,rgba(255,255,255,0.7)_100%)] z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/50 via-black/30 to-black/50 pointer-events-none light:from-black/40 light:via-black/20 light:to-black/40 z-[1]" />
         
         {/* Main wrapper properly positioned on top of the background */}
         <div className="relative z-[2] max-w-[1400px] mx-auto py-xl px-lg">
           <div className="text-center mb-xl">
-            <h1 className="text-[3rem] mb-sm text-primary [text-shadow:0_2px_8px_rgba(0,0,0,0.8)] data-[theme=light]:[text-shadow:0_2px_8px_rgba(0,0,0,0.3)]">Explore by Cuisine</h1>
-            <p className="text-[1.1rem] text-secondary [text-shadow:0_1px_4px_rgba(0,0,0,0.6)] data-[theme=light]:[text-shadow:0_1px_4px_rgba(0,0,0,0.2)]">Discover restaurants by their culinary style</p>
+            <h1 className="text-[3rem] mb-sm text-white drop-shadow-lg">Explore by Cuisine</h1>
+            <p className="text-[1.1rem] text-white/95 drop-shadow-md">Discover restaurants by their culinary style</p>
           </div>
 
           <div className="flex flex-wrap gap-sm mb-xl p-lg bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-lg shadow-glass">
             <button
-              className={`py-sm px-md bg-glass-surface border border-glass-border rounded-md text-secondary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-white/20 hover:text-primary ${selectedCuisine === '' ? '!bg-accent-purple !border-accent-purple text-white' : ''}`}
+              className={`py-sm px-md bg-glass-surface border border-glass-border rounded-md text-secondary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary ${selectedCuisine === '' ? '!bg-accent-purple !border-accent-purple text-white' : ''}`}
               onClick={() => setSelectedCuisine('')}
             >
               All Cuisines
@@ -98,7 +98,7 @@ const Cuisines = () => {
             {cuisines.map((cuisine) => (
               <button
                 key={cuisine}
-                className={`py-sm px-md bg-glass-surface border border-glass-border rounded-md text-secondary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-white/20 hover:text-primary ${selectedCuisine === cuisine ? '!bg-accent-purple !border-accent-purple text-white' : ''}`}
+                className={`py-sm px-md bg-glass-surface border border-glass-border rounded-md text-secondary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary ${selectedCuisine === cuisine ? '!bg-accent-purple !border-accent-purple text-white' : ''}`}
                 onClick={() => setSelectedCuisine(cuisine)}
               >
                 {cuisine}
