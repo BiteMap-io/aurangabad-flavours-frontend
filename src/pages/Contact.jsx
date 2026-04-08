@@ -11,7 +11,7 @@ const Contact = () => {
     >
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-xl">
-          <h1 className="text-[2.5rem] md:text-[3rem] font-bold text-primary mb-md bg-gradient-to-br from-primary via-secondary to-tertiary bg-clip-text text-transparent light:![webkit-text-fill-color:initial] light:!bg-none">
+          <h1 className="text-[2.5rem] md:text-[3rem] font-bold text-primary mb-md bg-gradient-to-br from-primary via-accent-purple to-secondary bg-clip-text text-transparent">
             Contact & Help
           </h1>
           <p className="text-[1.2rem] text-secondary max-w-[600px] mx-auto">

@@ -81,7 +81,7 @@ const MasonryGallery = () => {
       {foodImages.map((image, index) => (
         <motion.div
           key={image.id}
-          className={`relative rounded-md overflow-hidden cursor-default transition-all duration-300 group hover:shadow-[0_0_24px_rgba(138,43,226,0.4)] ${image.span}`}
+          className={`relative rounded-md overflow-hidden cursor-default transition-all duration-300 group hover:shadow-[0_0_24px_rgba(139,92,246,0.4)] ${image.span}`}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ 

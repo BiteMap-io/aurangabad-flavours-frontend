@@ -87,8 +87,8 @@ const Home = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="flex items-center gap-sm mb-lg pb-md border-b border-glass-border">
-              <Star size={24} fill="#FFD700" color="#FFD700" />
-              <h2 className="font-sans text-[1.1rem] md:text-[1.25rem] xl:text-[1.4rem] font-semibold text-primary m-0 tracking-[-0.01em]">Top 5 Highest Rated</h2>
+              <Star size={24} fill="var(--accent-purple)" color="var(--accent-purple)" className="drop-shadow-glow" />
+              <h2 className="font-sans text-[1.1rem] md:text-[1.25rem] xl:text-[1.4rem] font-semibold text-primary m-0 tracking-[-0.01em] bg-gradient-to-r from-primary to-accent-purple bg-clip-text text-transparent">Top 5 Highest Rated</h2>
             </div>
             <div className="flex flex-col gap-md">
               {loading ? (
@@ -105,7 +105,7 @@ const Home = () => {
                       <div className="flex-1 flex flex-col justify-center gap-1">
                         <h4 className="font-sans text-[1rem] font-semibold text-primary m-0 tracking-[-0.01em] leading-[1.3]">{restaurant.name}</h4>
                         <div className="flex items-center gap-1 mt-1">
-                          <Star size={14} fill="#FFD700" color="#FFD700" />
+                          <Star size={14} fill="var(--accent-purple)" color="var(--accent-purple)" />
                           <span className="font-sans text-[0.9rem] font-semibold text-primary tracking-[0.01em]">{restaurant.rating}</span>
                         </div>
                       </div>

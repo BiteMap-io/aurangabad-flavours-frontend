@@ -42,23 +42,23 @@
 /* Custom Base Styles */
 @layer base {
   :root {
-    /* Dark Theme (Default) - Premium Slate/Black Palette */
-    --bg-primary: #020617;
-    --bg-secondary: #0f172a;
+    /* Pure Black Polish Theme (Default) */
+    --bg-primary: #000000; /* Absolute Black */
+    --bg-secondary: #050505; /* Deep Obsidian */
     
-    --glass-surface: rgba(30, 41, 59, 0.7);
+    --glass-surface: rgba(18, 18, 18, 0.75);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-hover: rgba(30, 41, 59, 0.9);
+    --glass-hover: rgba(25, 25, 25, 0.95);
     
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-tertiary: #64748b;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #52525b;
     
-    --accent-purple: #a855f7;
+    --accent-purple: #8b5cf6; /* Vibrant Premium Purple */
     --accent-gold: #fbbf24;
     
-    --shadow-glass: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 20px rgba(168, 85, 247, 0.4);
+    --shadow-glass: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    --shadow-glow: 0 0 25px rgba(139, 92, 246, 0.3);
     
     --radius-sm: 0.5rem;
     --radius-md: 1rem;
@@ -66,38 +66,34 @@
     --radius-xl: 2rem;
     --radius-pill: 9999px;
     
-    /* Variables used by some components */
+    /* System Aliases */
     --background-primary: var(--bg-primary);
     --background-secondary: var(--bg-secondary);
     --glass-bg: var(--glass-surface);
     --glass-bg-hover: var(--glass-hover);
-    --accent-primary: #8A2BE2;
+    --accent-primary: #8B5CF6;
     
     --text-direction: ltr;
   }
 
   [data-theme="light"] {
-    /* Premium Light Palette - Clean, Professional, High Contrast */
+    /* Pure Light Polish Theme */
     --bg-primary: #ffffff;
-    --bg-secondary: #f1f5f9;
+    --bg-secondary: #f8fafc;
     
-    --glass-surface: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-surface: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(139, 92, 246, 0.1);
     --glass-hover: rgba(255, 255, 255, 0.95);
     
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-tertiary: #94a3b8;
     
-    --accent-purple: #9333ea;
+    --accent-purple: #7c3aed; /* Punchy Deep Purple for Light Mode */
     --accent-gold: #d97706;
     
-    --shadow-glass: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
-    --shadow-glow: 0 0 20px rgba(147, 51, 234, 0.15);
-    
-    /* Specific overrides */
-    --light-card-bg: rgba(255, 255, 255, 0.95);
-    --light-border: rgba(0, 0, 0, 0.06);
+    --shadow-glass: 0 10px 40px -10px rgba(139, 92, 246, 0.08);
+    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.1);
     
     --background-primary: var(--bg-primary);
     --background-secondary: var(--bg-secondary);

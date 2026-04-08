@@ -38,7 +38,7 @@ const RestaurantCard = ({ restaurant, onClick }) => {
         <div className="flex justify-between items-start gap-sm">
           <h3 className="text-xl font-semibold text-primary m-0">{restaurant.name}</h3>
           <div className="flex items-center gap-1 px-2 py-1 bg-glass-surface border border-glass-border rounded-[0.5rem] text-sm font-semibold whitespace-nowrap">
-            <Star size={14} fill="#FFD700" color="#FFD700" />
+            <Star size={14} fill="var(--accent-purple)" color="var(--accent-purple)" className="drop-shadow-glow" />
             <span className="text-primary">{restaurant.rating}</span>
           </div>
         </div>

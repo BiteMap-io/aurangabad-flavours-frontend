@@ -165,7 +165,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                 <p className="text-[0.85rem] md:text-[0.95rem] lg:text-[1rem] text-secondary m-0 font-medium">{restaurant.cuisine}</p>
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-xs md:gap-sm lg:gap-md mt-xs flex-wrap">
                   <div className="flex items-center gap-1 lg:gap-2">
-                    <Star size={18} fill="#FFD700" color="#FFD700" />
+                    <Star size={18} fill="var(--accent-purple)" color="var(--accent-purple)" />
                     <span className="text-[1rem] md:text-[1.1rem] lg:text-[1.2rem] font-bold text-primary">{averageRating}</span>
                     <span className="text-[0.8rem] lg:text-[0.9rem] text-tertiary">
                       ({restaurant.reviews?.length || 0} reviews)
@@ -259,8 +259,8 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                             >
                               <Star
                                 size={28}
-                                fill={isFilled ? '#FFD700' : 'transparent'}
-                                color={isFilled ? '#FFD700' : 'var(--text-tertiary)'}
+                                fill={isFilled ? 'var(--accent-purple)' : 'transparent'}
+                                color={isFilled ? 'var(--accent-purple)' : 'var(--text-tertiary)'}
                                 strokeWidth={isFilled ? 0 : 1.5}
                               />
                             </button>
@@ -313,8 +313,8 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                               <Star
                                 key={i}
                                 size={14}
-                                fill={i < review.rating ? '#FFD700' : 'transparent'}
-                                color={i < review.rating ? '#FFD700' : 'var(--text-tertiary)'}
+                                fill={i < review.rating ? 'var(--accent-purple)' : 'transparent'}
+                                color={i < review.rating ? 'var(--accent-purple)' : 'var(--text-tertiary)'}
                               />
                             ))}
                           </div>
