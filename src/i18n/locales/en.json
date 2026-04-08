@@ -12,12 +12,14 @@
     "contact": "Contact",
     "login": "Login",
     "nearMe": "Near Me",
-    "touristMode": "Tourist Mode"
+    "touristMode": "Tourist Mode",
+    "language": "Language"
   },
   "cardNav": {
     "exploreGroup": "Explore",
     "discoverGroup": "Discover",
-    "infoGroup": "Info"
+    "infoGroup": "Info",
+    "preferences": "Preferences"
   },
   "common": {
     "search": "Search",

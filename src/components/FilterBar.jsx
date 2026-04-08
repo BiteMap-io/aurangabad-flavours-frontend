@@ -56,13 +56,13 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
     <div className="mb-lg">
       <div className="flex flex-col md:flex-row md:items-center gap-md mb-md">
         <button
-          className="flex items-center justify-center md:justify-start gap-xs py-sm px-md bg-glass-surface border border-glass-border rounded-pill text-primary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-white/20"
+          className="flex items-center justify-center md:justify-start gap-xs py-sm px-md bg-glass-surface border border-glass-border rounded-pill text-primary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple/20"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <Filter size={20} />
           <span>Filters</span>
           {activeFiltersCount > 0 && (
-            <span className="bg-accent-purple text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.75rem] font-semibold">{activeFiltersCount}</span>
+            <span className="bg-accent-purple text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.75rem] font-semibold shadow-glow/40">{activeFiltersCount}</span>
           )}
         </button>
       </div>
@@ -70,7 +70,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="overflow-hidden bg-glass-surface border border-glass-border rounded-lg p-lg mt-md"
+            className="overflow-hidden bg-glass-surface border border-glass-border rounded-lg p-lg mt-md shadow-glass"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -84,13 +84,13 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                     <button
                       key={type}
                       className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                        filters.establishmentType === type ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                        filters.establishmentType === type ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('establishmentType', type)}
                     >
                       {type}
                     </button>
-                  )) : <p className="text-secondary text-sm">No types found</p>}
+                  )) : <p className="text-tertiary text-sm">No types found</p>}
                 </div>
               </div>
 
@@ -103,7 +103,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                         <button
                           key={cuisine}
                           className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                            filters.cuisine === cuisine ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                            filters.cuisine === cuisine ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                           }`}
                           onClick={() => handleFilterChange('cuisine', cuisine)}
                         >
@@ -116,7 +116,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                             <button
                               key={cuisine}
                               className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                                filters.cuisine === cuisine ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                                filters.cuisine === cuisine ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                               }`}
                               onClick={() => handleFilterChange('cuisine', cuisine)}
                             >
@@ -127,7 +127,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                       )}
                       {cuisines.length > 10 && (
                         <button
-                          className="py-xs px-sm bg-transparent border border-dashed border-glass-border rounded-md text-secondary text-[0.875rem] cursor-pointer transition-all duration-300 hover:border-accent-purple hover:text-primary"
+                          className="py-xs px-sm bg-transparent border border-dashed border-glass-border rounded-md text-tertiary text-[0.875rem] cursor-pointer transition-all duration-300 hover:border-accent-purple hover:text-primary"
                           onClick={() =>
                             setActiveFilter(activeFilter === 'cuisine' ? null : 'cuisine')
                           }
@@ -136,7 +136,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                         </button>
                       )}
                     </>
-                  ) : <p className="text-secondary text-sm">No cuisines found</p>}
+                  ) : <p className="text-tertiary text-sm">No cuisines found</p>}
                 </div>
               </div>
 
@@ -147,7 +147,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                     <button
                       key={range}
                       className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                        filters.priceRange === range ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                        filters.priceRange === range ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('priceRange', range)}
                     >
@@ -164,7 +164,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                     <button
                       key={rating}
                       className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                        filters.rating === rating ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                        filters.rating === rating ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('rating', rating)}
                     >
@@ -181,13 +181,13 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                     <button
                       key={area}
                       className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                        filters.area === area ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                        filters.area === area ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('area', area)}
                     >
                       {area}
                     </button>
-                  )) : <p className="text-secondary text-sm">No areas found</p>}
+                  )) : <p className="text-tertiary text-sm">No areas found</p>}
                 </div>
               </div>
 
@@ -198,7 +198,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
                     <button
                       key={facility}
                       className={`py-xs px-sm border rounded-md text-[0.875rem] cursor-pointer transition-all duration-300 ${
-                        filters.facilities?.includes(facility) ? 'bg-accent-purple border-accent-purple text-white' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-white/20 hover:text-primary'
+                        filters.facilities?.includes(facility) ? 'bg-accent-purple border-accent-purple text-white shadow-glow/30' : 'bg-glass-surface border-glass-border text-secondary hover:bg-glass-hover hover:border-accent-purple/40 hover:text-primary'
                       }`}
                       onClick={() => handleFilterChange('facilities', facility)}
                     >
@@ -211,7 +211,7 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
 
             <div className="flex justify-end pt-md border-t border-glass-border">
               <button
-                className="flex items-center gap-xs py-sm px-md bg-transparent border border-glass-border rounded-md text-secondary text-[0.9rem] cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple hover:text-primary"
+                className="flex items-center gap-xs py-sm px-md bg-transparent border border-glass-border rounded-md text-tertiary text-[0.9rem] cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple hover:text-primary"
                 onClick={() => {
                   onFilterChange({
                     establishmentType: '',
