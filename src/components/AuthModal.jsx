@@ -1,76 +1,77 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Eye, EyeOff } from 'lucide-react'
+import { X, Eye, EyeOff, Loader } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useUserAuth } from '../context/UserAuthContext'
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const { t } = useTranslation()
+  const { login, signup } = useUserAuth()
   const [mode, setMode] = useState(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    rememberMe: false,
-    acceptTerms: false
+    name: '', email: '', password: '', confirmPassword: '',
+    rememberMe: false, acceptTerms: false
   })
 
-  // Update mode when initialMode changes
-  useEffect(() => {
-    setMode(initialMode)
-  }, [initialMode])
+  useEffect(() => { setMode(initialMode) }, [initialMode])
 
-  // Reset form when modal opens or mode changes
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        rememberMe: false,
-        acceptTerms: false
-      })
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', rememberMe: false, acceptTerms: false })
       setShowPassword(false)
       setShowConfirmPassword(false)
+      setError('')
     }
   }, [isOpen, mode])
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: Implement actual auth logic
-    console.log('Auth submission:', { mode, formData })
-    onClose()
+    setError('')
+
+    if (mode === 'join') {
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match')
+        return
+      }
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters')
+        return
+      }
+    }
+
+    setLoading(true)
+    try {
+      const result = mode === 'login'
+        ? await login(formData.email, formData.password)
+        : await signup(formData.name, formData.email, formData.password)
+
+      if (result.success) {
+        onClose()
+      } else {
+        setError(result.error || 'Something went wrong')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const switchMode = (newMode) => {
     setMode(newMode)
-    setFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      rememberMe: false,
-      acceptTerms: false
-    })
+    setError('')
+    setFormData({ name: '', email: '', password: '', confirmPassword: '', rememberMe: false, acceptTerms: false })
     setShowPassword(false)
     setShowConfirmPassword(false)
-  }
-
-  const handleBackdropClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose()
-    }
   }
 
   if (!isOpen) return null
@@ -83,7 +84,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        onClick={handleBackdropClick}
+        onClick={e => { if (e.target === e.currentTarget) onClose() }}
       >
         <motion.div
           className="relative w-full max-w-[420px] max-h-[98vh] md:max-h-[95vh] bg-background-primary/95 backdrop-blur-[24px] border border-glass-border rounded-xl shadow-glass overflow-y-auto overflow-x-hidden"
@@ -225,9 +226,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                 </div>
               )}
 
-              <button type="submit" className="w-full p-md lg:px-lg lg:py-md bg-accent-purple border-none rounded-pill text-white text-[1rem] font-semibold cursor-pointer transition-all duration-300 mt-xs hover:bg-accent-purple/90 hover:shadow-glow hover:-translate-y-[1px] active:translate-y-0">
+              <button type="submit" disabled={loading} className="w-full p-md lg:px-lg lg:py-md bg-accent-purple border-none rounded-pill text-white text-[1rem] font-semibold cursor-pointer transition-all duration-300 mt-xs hover:bg-accent-purple/90 hover:shadow-glow hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-sm">
+                {loading && <Loader size={16} className="animate-spin" />}
                 {mode === 'login' ? t('auth.login') : t('auth.createAccount')}
               </button>
+
+              {error && (
+                <p className="text-red-400 text-[0.85rem] text-center mt-xs">{error}</p>
+              )}
             </form>
 
             <div className="text-center mt-md pt-md border-t border-glass-border">

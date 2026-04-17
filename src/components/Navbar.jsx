@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapPin, Menu } from 'lucide-react'
+import { MapPin, Menu, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import TouristModeToggle from './TouristModeToggle'
@@ -8,9 +8,11 @@ import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
 import CardNav from './CardNav'
 import AuthModal from './AuthModal'
+import { useUserAuth } from '../context/UserAuthContext'
 
 const Navbar = () => {
   const { t } = useTranslation()
+  const { user, isLoggedIn, logout } = useUserAuth()
   const [cardNavOpen, setCardNavOpen] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
@@ -83,15 +85,41 @@ const Navbar = () => {
               </Link>
             </motion.div>
 
-            <motion.button
-              className="flex items-center justify-center p-sm px-md lg:px-lg sm:text-[0.8rem] md:text-[0.85rem] lg:text-[0.9rem] font-sans font-medium bg-glass-surface border border-glass-border text-primary rounded-full cursor-pointer transition-all duration-300 whitespace-nowrap tracking-[0.01em] hover:bg-glass-hover hover:border-glass-border hover:shadow-glow focus-visible:outline-2 focus-visible:outline-accent-purple/60 focus-visible:outline-offset-2"
-              onClick={() => handleAuthOpen('login')}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-            >
-              {t('nav.login')}
-            </motion.button>
+            {isLoggedIn ? (
+              <div className="flex items-center gap-xs">
+                <div className="flex items-center gap-xs px-sm py-1 bg-glass-surface border border-glass-border rounded-full text-[0.82rem] text-primary">
+                  <User size={14} className="text-accent-purple" />
+                  <span className="hidden sm:inline max-w-[100px] truncate">{user?.name || user?.email}</span>
+                </div>
+                <motion.button
+                  className="flex items-center gap-1 p-sm bg-glass-surface border border-glass-border rounded-full text-secondary cursor-pointer transition-all duration-200 hover:text-red-400 hover:border-red-400/40"
+                  onClick={logout}
+                  whileHover={{ scale: 1.05 }}
+                  title="Logout"
+                >
+                  <LogOut size={16} />
+                </motion.button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-xs">
+                <motion.button
+                  className="flex items-center justify-center p-sm px-md lg:px-lg sm:text-[0.8rem] md:text-[0.85rem] lg:text-[0.9rem] font-sans font-medium bg-glass-surface border border-glass-border text-primary rounded-full cursor-pointer transition-all duration-300 whitespace-nowrap tracking-[0.01em] hover:bg-glass-hover hover:border-glass-border hover:shadow-glow"
+                  onClick={() => handleAuthOpen('login')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {t('nav.login')}
+                </motion.button>
+                <motion.button
+                  className="hidden sm:flex items-center justify-center p-sm px-md text-[0.85rem] font-sans font-medium bg-accent-purple text-white rounded-full cursor-pointer transition-all duration-300 whitespace-nowrap hover:bg-accent-purple/80 hover:shadow-glow"
+                  onClick={() => handleAuthOpen('join')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Join
+                </motion.button>
+              </div>
+            )}
           </div>
         </div>
       </motion.nav>

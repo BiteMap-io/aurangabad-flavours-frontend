@@ -36,28 +36,34 @@ export const hotelsApi = {
     return await api.get(`/restaurants/${id}`);
   },
 
-  async create(hotelData) {
+  async create(hotelData, menuFile = null) {
     const formData = new FormData();
+    const NESTED = ['extraFacilities', 'food', 'staff', 'environment'];
     Object.entries(hotelData).forEach(([key, val]) => {
       if (val === null || val === undefined) return;
       if (key === 'location') {
-        // Send as JSON string; backend parses req.body
         formData.append('location[type]', val.type || 'Point');
         formData.append('location[coordinates][0]', String(val.coordinates[0]));
         formData.append('location[coordinates][1]', String(val.coordinates[1]));
       } else if (key === 'facilities' && Array.isArray(val)) {
         val.forEach(f => formData.append('facilities', f));
+      } else if (key === 'menuItems') {
+        // skip — sent via file
+      } else if (NESTED.includes(key) && typeof val === 'object') {
+        formData.append(key, JSON.stringify(val));
       } else {
         formData.append(key, val);
       }
     });
+    if (menuFile) formData.append('menu', menuFile);
     return await api.post('/restaurants', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
 
-  async update(id, hotelData) {
+  async update(id, hotelData, menuFile = null) {
     const formData = new FormData();
+    const NESTED = ['extraFacilities', 'food', 'staff', 'environment'];
     Object.entries(hotelData).forEach(([key, val]) => {
       if (val === null || val === undefined) return;
       if (key === 'location') {
@@ -66,10 +72,15 @@ export const hotelsApi = {
         formData.append('location[coordinates][1]', String(val.coordinates[1]));
       } else if (key === 'facilities' && Array.isArray(val)) {
         val.forEach(f => formData.append('facilities', f));
+      } else if (key === 'menuItems') {
+        // skip — sent via file
+      } else if (NESTED.includes(key) && typeof val === 'object') {
+        formData.append(key, JSON.stringify(val));
       } else {
         formData.append(key, val);
       }
     });
+    if (menuFile) formData.append('menu', menuFile);
     return await api.put(`/restaurants/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });

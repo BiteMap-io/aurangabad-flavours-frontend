@@ -30,14 +30,19 @@ import EventForm from './pages/admin/EventForm'
 import ArticleForm from './pages/admin/ArticleForm'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import ToastContainer from './components/admin/Toast'
+import PagesManagement from './pages/admin/PagesManagement'
 
 import { LanguageProvider } from './context/LanguageContext'
 import { TouristModeProvider } from './context/TouristModeContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { GoogleMapsProvider } from './context/GoogleMapsContext'
+import { UserAuthProvider } from './context/UserAuthContext'
 
 function App() {
   return (
     <ThemeProvider>
+      <GoogleMapsProvider>
+      <UserAuthProvider>
       <AdminAuthProvider>
         <LanguageProvider>
           <TouristModeProvider>
@@ -66,6 +71,7 @@ function App() {
                     
                     <Route path="media" element={<MediaManager />} />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="pages" element={<PagesManagement />} />
                     <Route index element={<AdminDashboard />} />
                   </Route>
 
@@ -102,6 +108,8 @@ function App() {
           </TouristModeProvider>
         </LanguageProvider>
       </AdminAuthProvider>
+      </UserAuthProvider>
+      </GoogleMapsProvider>
     </ThemeProvider>
   )
 }

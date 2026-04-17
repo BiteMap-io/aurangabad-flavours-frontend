@@ -1,37 +1,114 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, Clock, Star, Navigation, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { X, MapPin, Clock, Star, Navigation, ChevronLeft, ChevronRight, Heart, Route, Loader } from 'lucide-react'
+import { useState, useCallback, useRef, useEffect, memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
+import { useNavigate } from 'react-router-dom'
+import { GoogleMap, Marker, DirectionsRenderer } from '@react-google-maps/api'
+import { useGoogleMapsLoaded } from '../context/GoogleMapsContext'
+import { useDirections } from '../hooks/useDirections'
+import { useUserAuth } from '../context/UserAuthContext'
+import api from '../services/api'
 
-// Fix for default marker icon in Leaflet with React
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-})
+const modalMapStyle = { width: '100%', height: '100%' }
 
-const MapInvalidator = () => {
-  const map = useMap()
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      map.invalidateSize()
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [map])
-  return null
+const USER_ICON = {
+  path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z',
+  fillColor: '#4285F4',
+  fillOpacity: 1,
+  strokeColor: '#ffffff',
+  strokeWeight: 2,
+  scale: 1,
 }
+
+const ModalMap = memo(({ position, title, directions, userLocation }) => {
+  const isLoaded = useGoogleMapsLoaded()
+  const mapRef = useRef(null)
+
+  const onLoad = useCallback((m) => {
+    mapRef.current = m
+    // Fire resize after modal open animation completes so map fills container
+    setTimeout(() => {
+      if (!m) return
+      window.google.maps.event.trigger(m, 'resize')
+      m.setCenter(position)
+      m.setZoom(15)
+    }, 350)
+  }, [position])
+
+  const onUnmount = useCallback(() => { mapRef.current = null }, [])
+
+  // Fit bounds when route arrives, re-center when cleared
+  useEffect(() => {
+    if (!mapRef.current) return
+    if (directions) {
+      mapRef.current.fitBounds(directions.routes[0].bounds)
+    } else {
+      window.google.maps.event.trigger(mapRef.current, 'resize')
+      mapRef.current.setCenter(position)
+      mapRef.current.setZoom(15)
+    }
+  }, [directions, position])
+
+  if (!isLoaded) return (
+    <div className="w-full h-full flex items-center justify-center text-secondary text-xs">Loading…</div>
+  )
+
+  return (
+    <GoogleMap
+      mapContainerStyle={modalMapStyle}
+      center={position}
+      zoom={15}
+      options={{ disableDefaultUI: true, scrollwheel: false }}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+    >
+      <Marker position={position} title={title} />
+      {userLocation && <Marker position={userLocation} title="You are here" icon={USER_ICON} />}
+      {directions && (
+        <DirectionsRenderer
+          directions={directions}
+          options={{
+            suppressMarkers: true,
+            polylineOptions: { strokeColor: '#8b5cf6', strokeWeight: 5, strokeOpacity: 0.9 },
+          }}
+        />
+      )}
+    </GoogleMap>
+  )
+})
 
 const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [userRating, setUserRating] = useState(0)
   const [hoveredRating, setHoveredRating] = useState(0)
   const [feedback, setFeedback] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
+
+  const { userLocation, directions, routeInfo, loading: dirLoading, error: dirError, getDirections, clear: clearRoute } = useDirections()
+  const { user, isLoggedIn } = useUserAuth()
+  const [reviewLoading, setReviewLoading] = useState(false)
+  const [reviewError, setReviewError] = useState('')
+  const [reviewSuccess, setReviewSuccess] = useState(false)
+  const [localReviews, setLocalReviews] = useState([])
+
+  // Reset route when modal closes or restaurant changes
+  useEffect(() => {
+    clearRoute()
+    setCurrentImageIndex(0)
+    setReviewError('')
+    setReviewSuccess(false)
+    setLocalReviews(restaurant?.reviews || [])
+  }, [restaurant, isOpen, clearRoute])
+
+  // Auto-trigger directions if card's "Get Directions" was clicked
+  useEffect(() => {
+    if (isOpen && restaurant?._autoDirections) {
+      getDirections(restaurant)
+    }
+  }, [isOpen, restaurant, getDirections])
 
   if (!restaurant) return null
 
@@ -49,15 +126,30 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
     setHoveredRating(0)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (userRating > 0) {
+    if (userRating === 0) return
+    if (!isLoggedIn) { setReviewError('Please log in to submit a review.'); return }
+
+    setReviewLoading(true)
+    setReviewError('')
+    try {
+      const id = restaurant._id || restaurant.id
+      const updated = await api.post(`/restaurants/${id}/reviews`, {
+        rating: userRating,
+        comment: feedback,
+      })
+      setLocalReviews(updated.reviews || [])
       setIsSubmitted(true)
       setTimeout(() => {
         setUserRating(0)
         setFeedback('')
         setIsSubmitted(false)
       }, 2000)
+    } catch (err) {
+      setReviewError(err?.error || 'Failed to submit review. Please try again.')
+    } finally {
+      setReviewLoading(false)
     }
   }
 
@@ -181,8 +273,22 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   <span className="opacity-50 mx-[0.125rem] lg:mx-1">•</span>
                   <Clock size={16} />
                   <span>{restaurant.travelTime}</span>
+                  {restaurant.foodType && (
+                    <>
+                      <span className="opacity-50 mx-[0.125rem] lg:mx-1">•</span>
+                      <span className={`font-semibold ${restaurant.foodType === 'veg' ? 'text-green-400' : restaurant.foodType === 'non-veg' ? 'text-red-400' : 'text-purple-400'}`}>
+                        {restaurant.foodType === 'veg' ? '🟢 Pure Veg' : restaurant.foodType === 'non-veg' ? '🔴 Non-Veg' : '🟡 Veg & Non-Veg'}
+                      </span>
+                    </>
+                  )}
                 </div>
-                <button className="flex items-center gap-1 lg:gap-xs py-1 px-2 md:py-xs md:px-md lg:py-[0.6rem] lg:px-[1.2rem] bg-glass-surface border border-glass-border rounded-md text-primary text-[0.75rem] md:text-[0.85rem] lg:text-[0.9rem] font-semibold cursor-pointer mt-xs lg:mt-sm transition-all duration-300 w-fit relative overflow-hidden hover:bg-glass-hover hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px] light:bg-white/90 light:border-black/10 light:hover:bg-white light:text-primary light:hover:shadow-glow/20">
+                <button className="flex items-center gap-1 lg:gap-xs py-1 px-2 md:py-xs md:px-md lg:py-[0.6rem] lg:px-[1.2rem] bg-glass-surface border border-glass-border rounded-md text-primary text-[0.75rem] md:text-[0.85rem] lg:text-[0.9rem] font-semibold cursor-pointer mt-xs lg:mt-sm transition-all duration-300 w-fit relative overflow-hidden hover:bg-glass-hover hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px] light:bg-white/90 light:border-black/10 light:hover:bg-white light:text-primary light:hover:shadow-glow/20"
+                  onClick={() => {
+                    const id = restaurant?._id || restaurant?.id
+                    onClose()
+                    navigate(`/map?directTo=${id}`)
+                  }}
+                >
                   <Navigation size={16} />
                   <span>{t('common.directions')}</span>
                 </button>
@@ -211,20 +317,125 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   </div>
                 </section>
 
+                {/* ── Highlights (ratings) ── */}
+                {(restaurant.food?.quality > 0 || restaurant.staff?.friendliness > 0 || restaurant.environment?.ambience > 0) && (
+                  <section className="flex flex-col gap-xs">
+                    <h2 className="text-[1rem] lg:text-[1.15rem] text-primary m-0 pb-xs border-b-2 border-transparent font-bold uppercase lg:text-[0.85rem] lg:tracking-[0.08em] light:border-black/10" style={{borderImage: 'linear-gradient(to right, var(--accent-purple), transparent) 1'}}>
+                      Highlights
+                    </h2>
+                    <div className="grid grid-cols-2 gap-xs max-md:grid-cols-1">
+                      {[
+                        { label: 'Food Quality', val: restaurant.food?.quality },
+                        { label: 'Food Hygiene', val: restaurant.food?.hygiene },
+                        { label: 'Kitchen Hygiene', val: restaurant.food?.kitchenHygiene },
+                        { label: 'Menu Variety', val: restaurant.food?.menuVariety },
+                        { label: 'Value for Money', val: restaurant.food?.valueForMoney },
+                        { label: 'Staff Friendliness', val: restaurant.staff?.friendliness },
+                        { label: 'Staff Appearance', val: restaurant.staff?.appearance },
+                        { label: 'Ambience', val: restaurant.environment?.ambience },
+                        { label: 'Outside Cleanliness', val: restaurant.environment?.outsideCleanliness },
+                      ].filter(h => h.val > 0).map(h => (
+                        <div key={h.label} className="flex items-center justify-between p-xs bg-glass-surface/30 border border-glass-border rounded-md">
+                          <span className="text-[0.8rem] text-secondary">{h.label}</span>
+                          <span className="text-[0.8rem] font-semibold text-accent-purple">{'⭐'.repeat(h.val)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── Extra Facilities ── */}
+                {restaurant.extraFacilities && Object.values(restaurant.extraFacilities).some(Boolean) && (
+                  <section className="flex flex-col gap-xs">
+                    <h2 className="text-[1rem] lg:text-[1.15rem] text-primary m-0 pb-xs border-b-2 border-transparent font-bold uppercase lg:text-[0.85rem] lg:tracking-[0.08em] light:border-black/10" style={{borderImage: 'linear-gradient(to right, var(--accent-purple), transparent) 1'}}>
+                      Amenities
+                    </h2>
+                    <div className="flex flex-wrap gap-xs">
+                      {restaurant.extraFacilities.ac && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">❄️ AC</span>}
+                      {restaurant.extraFacilities.disabilityAccess && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">♿ Disability Access</span>}
+                      {restaurant.extraFacilities.washroom && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">🚻 Washroom</span>}
+                      {restaurant.extraFacilities.parking && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">🅿️ Parking</span>}
+                      {restaurant.extraFacilities.parcel && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">📦 Parcel</span>}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── Special Dishes ── */}
+                {(restaurant.food?.signatureDishes || restaurant.food?.specialtyDishes) && (
+                  <section className="flex flex-col gap-xs">
+                    <h2 className="text-[1rem] lg:text-[1.15rem] text-primary m-0 pb-xs border-b-2 border-transparent font-bold uppercase lg:text-[0.85rem] lg:tracking-[0.08em] light:border-black/10" style={{borderImage: 'linear-gradient(to right, var(--accent-purple), transparent) 1'}}>
+                      Special Dishes
+                    </h2>
+                    <div className="flex flex-col gap-xs">
+                      {restaurant.food?.signatureDishes && (
+                        <div className="flex items-start gap-sm p-xs bg-glass-surface/30 border border-glass-border rounded-md">
+                          <span className="text-[0.75rem] text-tertiary font-semibold uppercase shrink-0 mt-0.5">Signature</span>
+                          <span className="text-[0.85rem] text-primary">{restaurant.food.signatureDishes}</span>
+                        </div>
+                      )}
+                      {restaurant.food?.specialtyDishes && (
+                        <div className="flex items-start gap-sm p-xs bg-glass-surface/30 border border-glass-border rounded-md">
+                          <span className="text-[0.75rem] text-tertiary font-semibold uppercase shrink-0 mt-0.5">Specialty</span>
+                          <span className="text-[0.85rem] text-primary">{restaurant.food.specialtyDishes}</span>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── Pricing & Info ── */}
+                {(restaurant.avgPricePerPerson > 0 || restaurant.seatingCapacity > 0 || restaurant.staff?.serviceType || restaurant.environment?.uniqueFeatures || restaurant.sustainabilityPractices) && (
+                  <section className="flex flex-col gap-xs">
+                    <h2 className="text-[1rem] lg:text-[1.15rem] text-primary m-0 pb-xs border-b-2 border-transparent font-bold uppercase lg:text-[0.85rem] lg:tracking-[0.08em] light:border-black/10" style={{borderImage: 'linear-gradient(to right, var(--accent-purple), transparent) 1'}}>
+                      Info & Pricing
+                    </h2>
+                    <div className="flex flex-wrap gap-xs">
+                      {restaurant.avgPricePerPerson > 0 && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">💰 ₹{restaurant.avgPricePerPerson}/person</span>}
+                      {restaurant.seatingCapacity > 0 && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">🪑 {restaurant.seatingCapacity} seats</span>}
+                      {restaurant.staff?.serviceType && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary capitalize">🍽️ {restaurant.staff.serviceType}</span>}
+                      {restaurant.environment?.uniqueFeatures && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">✨ {restaurant.environment.uniqueFeatures}</span>}
+                      {restaurant.sustainabilityPractices && <span className="py-1 px-sm bg-glass-surface border border-glass-border rounded-pill text-[0.78rem] text-secondary">🌱 {restaurant.sustainabilityPractices}</span>}
+                    </div>
+                  </section>
+                )}
+
                 <section className="flex flex-col gap-xs lg:gap-xs">
                   <h2 className="text-[1rem] lg:text-[1.15rem] text-primary m-0 pb-xs lg:pb-sm border-b-2 border-transparent font-bold tracking-[-0.01em] uppercase lg:text-[0.85rem] lg:tracking-[0.08em] flex items-center gap-sm light:text-primary light:border-black/10" style={{borderImage: 'linear-gradient(to right, var(--accent-purple), transparent) 1'}}>
                     {t('restaurant.menu')}
                   </h2>
                   <div className="flex flex-col gap-xs">
-                    {restaurant.menu?.map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-center p-[0.85rem] lg:p-[1rem] bg-glass-surface/30 border border-glass-border rounded-md transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple/30 hover:translate-x-1 hover:shadow-glow light:bg-white/90 light:border-black/10">
-                        <div className="flex flex-col gap-[0.25rem]">
-                          <span className="font-medium text-primary text-[0.9rem] lg:text-[1rem] light:text-primary light:font-semibold">{item.name}</span>
-                          <span className="text-[0.85rem] text-tertiary">{item.category}</span>
+                    {/* menuItems from Excel upload */}
+                    {restaurant.menuItems?.length > 0 ? (
+                      (() => {
+                        const categories = [...new Set(restaurant.menuItems.map(i => i.category || 'Other'))]
+                        return categories.map(cat => (
+                          <div key={cat} className="mb-sm">
+                            {cat && <p className="text-[0.75rem] text-tertiary uppercase tracking-wide mb-xs font-semibold">{cat}</p>}
+                            {restaurant.menuItems.filter(i => (i.category || 'Other') === cat).map((item, idx) => (
+                              <div key={idx} className="flex justify-between items-center p-[0.75rem] bg-glass-surface/30 border border-glass-border rounded-md mb-1 hover:bg-glass-hover transition-all duration-200 light:bg-white/90 light:border-black/10">
+                                <div className="flex items-center gap-sm">
+                                  <span className="text-[0.7rem]">{item.isVeg ? '🟢' : '🔴'}</span>
+                                  <span className="font-medium text-primary text-[0.88rem]">{item.name}</span>
+                                </div>
+                                <span className="font-semibold text-primary text-[0.9rem]">₹{item.price}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ))
+                      })()
+                    ) : restaurant.menu?.length > 0 ? (
+                      restaurant.menu.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center p-[0.85rem] lg:p-[1rem] bg-glass-surface/30 border border-glass-border rounded-md transition-all duration-300 hover:bg-glass-hover hover:border-accent-purple/30 hover:translate-x-1 hover:shadow-glow light:bg-white/90 light:border-black/10">
+                          <div className="flex flex-col gap-[0.25rem]">
+                            <span className="font-medium text-primary text-[0.9rem] lg:text-[1rem] light:text-primary light:font-semibold">{item.name}</span>
+                            <span className="text-[0.85rem] text-tertiary">{item.category}</span>
+                          </div>
+                          <span className="font-semibold text-primary text-[1rem] lg:text-[1.1rem] light:text-primary light:font-bold">₹{item.price}</span>
                         </div>
-                        <span className="font-semibold text-primary text-[1rem] lg:text-[1.1rem] light:text-primary light:font-bold">₹{item.price}</span>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-[0.85rem] text-tertiary italic">No menu available.</p>
+                    )}
                   </div>
                 </section>
 
@@ -291,11 +502,18 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
 
                     <button
                       type="submit"
-                      className="py-sm px-lg bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 self-start font-inherit disabled:opacity-60 disabled:cursor-not-allowed hover:not(:disabled):bg-glass-hover hover:not(:disabled):border-accent-purple hover:not(:disabled):shadow-glow hover:not(:disabled):-translate-y-[2px] active:not(:disabled):translate-y-0 focus:outline-[2px] focus:outline-accent-purple focus:outline-offset-2 light:bg-white/90 light:border-black/10 light:text-primary light:hover:not(:disabled):bg-white light:hover:not(:disabled):border-accent-purple light:hover:not(:disabled):shadow-glow/20"
-                      disabled={userRating === 0 || isSubmitted}
+                      className="py-sm px-lg bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] font-medium cursor-pointer transition-all duration-300 self-start font-inherit disabled:opacity-60 disabled:cursor-not-allowed hover:not(:disabled):bg-glass-hover hover:not(:disabled):border-accent-purple hover:not(:disabled):shadow-glow hover:not(:disabled):-translate-y-[2px] active:not(:disabled):translate-y-0 focus:outline-[2px] focus:outline-accent-purple focus:outline-offset-2 light:bg-white/90 light:border-black/10 light:text-primary light:hover:not(:disabled):bg-white light:hover:not(:disabled):border-accent-purple light:hover:not(:disabled):shadow-glow/20 flex items-center gap-sm"
+                      disabled={userRating === 0 || isSubmitted || reviewLoading}
                     >
+                      {reviewLoading && <Loader size={14} className="animate-spin" />}
                       {isSubmitted ? t('restaurant.thankYou') : t('restaurant.submitReview')}
                     </button>
+                    {!isLoggedIn && (
+                      <p className="text-[0.82rem] text-secondary mt-xs">
+                        Please <button type="button" className="text-accent-purple underline bg-transparent border-none cursor-pointer" onClick={() => { onClose(); }}>log in</button> to submit a review.
+                      </p>
+                    )}
+                    {reviewError && <p className="text-[0.82rem] text-red-400 mt-xs">{reviewError}</p>}
                   </form>
                 </section>
 
@@ -304,10 +522,15 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                     {t('common.reviews')}
                   </h2>
                   <div className="flex flex-col gap-sm">
-                    {restaurant.reviews?.map((review, idx) => (
+                    {localReviews.length === 0 && (
+                      <p className="text-[0.85rem] text-tertiary italic">No reviews yet. Be the first!</p>
+                    )}
+                    {localReviews.map((review, idx) => (
                       <div key={idx} className="p-sm lg:p-md bg-glass-surface/20 border border-glass-border rounded-md transition-all duration-300 border-l-[3px] border-l-accent-purple/30 hover:bg-glass-hover hover:border-l-accent-purple light:bg-white/90 light:border-black/10">
                         <div className="flex justify-between items-center mb-xs">
-                          <span className="font-semibold text-primary light:text-primary light:font-semibold">{typeof review.user === 'object' ? review.user.name : (review.user || 'Anonymous')}</span>
+                          <span className="font-semibold text-primary light:text-primary light:font-semibold text-[0.9rem]">
+                            {review.userName || (typeof review.user === 'object' ? review.user?.name : review.user) || 'Anonymous'}
+                          </span>
                           <div className="flex gap-[0.25rem]">
                             {[...Array(5)].map((_, i) => (
                               <Star
@@ -319,7 +542,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                             ))}
                           </div>
                         </div>
-                        <p className="text-secondary leading-[1.6] m-0">{review.comment}</p>
+                        <p className="text-secondary leading-[1.6] m-0 text-[0.88rem]">{review.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -332,26 +555,28 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   Location
                 </span>
                 <div className="relative h-[120px] md:h-[130px] lg:h-[180px] bg-background-secondary border border-glass-border rounded-lg overflow-hidden w-full shadow-glass transition-all duration-300 lg:hover:-translate-y-[2px] lg:hover:shadow-glow lg:hover:border-accent-purple/40 light:bg-white/90 light:border-black/10">
-                  <MapContainer
-                    center={restaurant.location?.coordinates ? [restaurant.location.coordinates[1], restaurant.location.coordinates[0]] : [19.8762, 75.3433]}
-                    zoom={13}
-                    scrollWheelZoom={false}
-                    className="h-full w-full bg-background-secondary rounded-lg"
-                    key={restaurant._id || restaurant.id}
-                  >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  {isOpen && (
+                    <ModalMap
+                      position={
+                        restaurant.location?.coordinates
+                          ? { lat: restaurant.location.coordinates[1], lng: restaurant.location.coordinates[0] }
+                          : { lat: 19.8762, lng: 75.3433 }
+                      }
+                      title={restaurant.name}
+                      directions={directions}
+                      userLocation={userLocation}
                     />
-                    <MapInvalidator />
-                    <Marker position={restaurant.location?.coordinates ? [restaurant.location.coordinates[1], restaurant.location.coordinates[0]] : [19.8762, 75.3433]}>
-                      <Popup>
-                        <strong>{restaurant.name}</strong>
-                        <br />
-                        {restaurant.area}
-                      </Popup>
-                    </Marker>
-                  </MapContainer>
+                  )}
+                </div>
+
+                {/* Full Address — shown directly below map */}
+                <div className="mt-sm p-sm bg-glass-surface/30 border border-glass-border rounded-lg">
+                  <p className="text-[0.72rem] text-tertiary uppercase tracking-wide mb-1 flex items-center gap-1">
+                    <MapPin size={11} /> Full Address
+                  </p>
+                  <p className="text-[0.82rem] text-secondary leading-[1.5] m-0">
+                    {restaurant.address || `${restaurant.area}, Aurangabad`}
+                  </p>
                 </div>
               </div>
             </div>

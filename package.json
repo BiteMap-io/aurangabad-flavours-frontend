@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.8",
     "@react-three/drei": "^9.121.5",
     "@react-three/fiber": "^8.17.14",
     "@react-three/rapier": "^1.5.0",
@@ -16,13 +17,11 @@
     "framer-motion": "^10.16.4",
     "i18next": "^25.7.4",
     "i18next-browser-languagedetector": "^8.2.0",
-    "leaflet": "^1.9.4",
     "lucide-react": "^0.294.0",
     "meshline": "^3.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^16.5.3",
-    "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.20.0",
     "three": "^0.182.0"
   },

@@ -1,147 +1,221 @@
-import { useEffect, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
+import { useCallback, useRef, useState, useEffect, memo } from 'react'
+import { GoogleMap, Marker, DirectionsRenderer, InfoWindow } from '@react-google-maps/api'
+import { useGoogleMapsLoaded } from '../context/GoogleMapsContext'
 
-// Fix for default marker icon in Leaflet with React
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-})
+const containerStyle = { width: '100%', height: '100%' }
 
-// Component to handle map resize after render
-const MapResizer = () => {
-  const map = useMap()
-  
-  useEffect(() => {
-    // Trigger resize after a short delay to ensure proper rendering
-    const timer = setTimeout(() => {
-      map.invalidateSize()
-    }, 100)
-    
-    return () => clearTimeout(timer)
-  }, [map])
-  
-  return null
+const mapOptions = {
+  disableDefaultUI: false,
+  clickableIcons: true,
+  scrollwheel: true,
+  gestureHandling: 'greedy',
 }
 
-const EmbeddedMap = ({ 
-  height = '300px', 
-  zoom = 13, 
+export default function EmbeddedMap({
+  height = '300px',
+  zoom = 13,
   restaurants = [],
-  center = [19.8762, 75.3433] // Aurangabad coordinates
-}) => {
-  const mapRef = useRef(null)
+  center = [19.8762, 75.3433],
+  userLocation = null,
+  selectedId = null,
+  directions = null,
+  onMarkerClick = null,
+  mapRef: externalMapRef = null,
+  travelMode = 'DRIVING',
+}) {
+  const isLoaded = useGoogleMapsLoaded()
+
+  if (!isLoaded) {
+    return (
+      <div
+        className="relative w-full overflow-hidden rounded-lg bg-glass-surface border border-glass-border flex items-center justify-center text-secondary text-sm"
+        style={{ height }}
+      >
+        Loading map…
+      </div>
+    )
+  }
 
   return (
-    <>
-      <style>
-        {`
-          .embedded-map-leaflet-container {
-            height: 100%;
-            width: 100%;
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            z-index: 1;
-          }
-          .embedded-map-leaflet-container .leaflet-tile-container img {
-            border-radius: 0;
-          }
-          .embedded-map-leaflet-container .leaflet-popup-content-wrapper {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(10px);
-          }
-          .embedded-map-leaflet-container .leaflet-popup-content {
-            margin: var(--spacing-sm);
-            font-size: 0.9rem;
-          }
-          .embedded-map-leaflet-container .leaflet-popup-tip {
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-          }
-          .embedded-map-leaflet-container .leaflet-control-zoom {
-            border: 1px solid var(--glass-border);
-            background: var(--glass-surface);
-            backdrop-filter: blur(10px);
-            border-radius: var(--radius-sm);
-          }
-          .embedded-map-leaflet-container .leaflet-control-zoom a {
-            background: var(--glass-surface);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-            transition: all 0.2s ease;
-          }
-          .embedded-map-leaflet-container .leaflet-control-zoom a:hover {
-            background: var(--glass-hover);
-            color: var(--text-primary);
-          }
-          .embedded-map-leaflet-container .leaflet-control-attribution {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            color: var(--text-secondary);
-            font-size: 0.7rem;
-            border-radius: var(--radius-sm);
-            padding: 2px 6px;
-          }
-          .embedded-map-leaflet-container .leaflet-control-attribution a {
-            color: var(--text-primary);
-          }
-        `}
-      </style>
-      <div className="relative w-full overflow-hidden rounded-lg bg-glass-surface border border-glass-border data-[theme=light]:bg-white/90 data-[theme=light]:border-[#e5e7eb]" style={{ height }}>
-        <MapContainer
-          center={center}
-          zoom={zoom}
-          scrollWheelZoom={false}
-          className="embedded-map-leaflet-container"
-          whenCreated={(mapInstance) => {
-            mapRef.current = mapInstance
-          }}
-        >
-          <MapResizer />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          
-          {restaurants.length > 0 ? (
-            restaurants.map((restaurant) => {
-              // Backend GeoJSON format is [lng, lat], Leaflet wants [lat, lng]
-              const coords = restaurant.location?.coordinates;
-              const position = (coords && coords.length === 2) 
-                ? [coords[1], coords[0]] 
-                : center;
-
-              return (
-                <Marker 
-                  key={restaurant._id || restaurant.id} 
-                  position={position}
-                >
-                  <Popup>
-                    <strong>{restaurant.name}</strong>
-                    <br />
-                    {restaurant.area || restaurant.cuisine}
-                  </Popup>
-                </Marker>
-              )
-            })
-          ) : (
-            <Marker position={center}>
-              <Popup>
-                <strong>Aurangabad</strong>
-                <br />
-                Explore restaurants in this area
-              </Popup>
-            </Marker>
-          )}
-        </MapContainer>
-      </div>
-    </>
+    <div
+      className="relative w-full overflow-hidden rounded-lg bg-glass-surface border border-glass-border"
+      style={{ height }}
+    >
+      <MapInner
+        center={{ lat: center[0], lng: center[1] }}
+        zoom={zoom}
+        restaurants={restaurants}
+        userLocation={userLocation}
+        selectedId={selectedId}
+        directions={directions}
+        onMarkerClick={onMarkerClick}
+        externalMapRef={externalMapRef}
+        travelMode={travelMode}
+      />
+    </div>
   )
 }
 
-export default EmbeddedMap
+const MapInner = memo(function MapInner({
+  center, zoom, restaurants,
+  userLocation, selectedId, directions,
+  onMarkerClick, externalMapRef, travelMode,
+}) {
+  const mapRef = useRef(null)
+  const [popup, setPopup] = useState(null)
+  const prevSel = useRef(null)
+
+  const onLoad = useCallback((map) => {
+    mapRef.current = map
+    if (externalMapRef) externalMapRef.current = map
+  }, [externalMapRef])
+
+  const onUnmount = useCallback(() => {
+    mapRef.current = null
+    if (externalMapRef) externalMapRef.current = null
+  }, [externalMapRef])
+
+  // Pan to selected marker when it changes
+  useEffect(() => {
+    if (!selectedId || selectedId === prevSel.current) return
+    prevSel.current = selectedId
+    const r = restaurants.find(r => (r._id || r.id) === selectedId)
+    if (!r || !mapRef.current) return
+    const c = r.location?.coordinates
+    if (c?.length === 2) mapRef.current.panTo({ lat: c[1], lng: c[0] })
+  }, [selectedId, restaurants])
+
+  const routeColor = travelMode === 'WALKING' ? '#22c55e'
+    : travelMode === 'TWO_WHEELER' ? '#f59e0b'
+    : '#8b5cf6'
+
+  // Selected marker icon — large purple circle
+  const selectedIcon = {
+    path: window.google.maps.SymbolPath.CIRCLE,
+    fillColor: '#8b5cf6',
+    fillOpacity: 1,
+    strokeColor: '#ffffff',
+    strokeWeight: 3,
+    scale: 14,
+  }
+
+  // User location icon — blue circle
+  const userIcon = {
+    path: window.google.maps.SymbolPath.CIRCLE,
+    fillColor: '#4285F4',
+    fillOpacity: 1,
+    strokeColor: '#ffffff',
+    strokeWeight: 3,
+    scale: 10,
+  }
+
+  return (
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={zoom}
+      options={mapOptions}
+      onLoad={onLoad}
+      onUnmount={onUnmount}
+      onClick={() => setPopup(null)}
+    >
+      {/* Restaurant markers — default Google red pin, purple when selected */}
+      {restaurants.map(r => {
+        const id = r._id || r.id
+        const c = r.location?.coordinates
+        if (!c || c.length < 2) return null
+        const pos = { lat: c[1], lng: c[0] }
+        const isSel = id === selectedId
+
+        return (
+          <Marker
+            key={id}
+            position={pos}
+            title={r.name}
+            icon={isSel ? selectedIcon : undefined}
+            zIndex={isSel ? 999 : 5}
+            animation={isSel ? window.google.maps.Animation.BOUNCE : null}
+            onClick={() => {
+              setPopup({ restaurant: r, position: pos })
+              onMarkerClick?.(r)
+            }}
+          />
+        )
+      })}
+
+      {/* Fallback center marker when no restaurants */}
+      {restaurants.length === 0 && (
+        <Marker position={center} title="Aurangabad" />
+      )}
+
+      {/* Info popup */}
+      {popup && (
+        <InfoWindow
+          position={popup.position}
+          onCloseClick={() => setPopup(null)}
+        >
+          <div style={{ fontFamily: 'Inter,sans-serif', minWidth: 160, maxWidth: 220 }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#111' }}>
+              {popup.restaurant.name}
+            </p>
+            <p style={{ margin: '3px 0 0', fontSize: 11, color: '#555' }}>
+              {popup.restaurant.cuisine}
+            </p>
+            {popup.restaurant.rating && (
+              <p style={{ margin: '3px 0 0', fontSize: 11, color: '#8b5cf6', fontWeight: 600 }}>
+                ⭐ {popup.restaurant.rating} · {popup.restaurant.area}
+              </p>
+            )}
+          </div>
+        </InfoWindow>
+      )}
+
+      {/* User location */}
+      {userLocation && (
+        <Marker
+          position={userLocation}
+          title="You are here"
+          icon={userIcon}
+          zIndex={1000}
+        />
+      )}
+
+      {/* Route */}
+      {directions && (
+        <DirectionsRenderer
+          directions={directions}
+          onLoad={renderer => { rendererRef.current = renderer }}
+          options={{
+            suppressMarkers: true,
+            polylineOptions: {
+              strokeColor: routeColor,
+              strokeWeight: 5,
+              strokeOpacity: 0.9,
+            },
+          }}
+        />
+      )}
+
+      {/* Destination red marker */}
+      {directions && (() => {
+        const dest = directions.routes?.[0]?.legs?.[0]?.end_location
+        if (!dest) return null
+        return (
+          <Marker
+            position={{ lat: dest.lat(), lng: dest.lng() }}
+            title="Destination"
+            icon={{
+              path: window.google.maps.SymbolPath.CIRCLE,
+              fillColor: '#e11d48',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+              scale: 12,
+            }}
+            zIndex={500}
+          />
+        )
+      })()}
+    </GoogleMap>
+  )
+})

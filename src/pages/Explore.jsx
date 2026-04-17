@@ -110,6 +110,12 @@ const Explore = () => {
     setIsModalOpen(true)
   }
 
+  const handleGetDirections = (restaurant) => {
+    // Open modal — the modal will auto-trigger directions via its own hook
+    setSelectedRestaurant({ ...restaurant, _autoDirections: true })
+    setIsModalOpen(true)
+  }
+
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedRestaurant(null)
@@ -176,6 +182,7 @@ const Explore = () => {
                   <RestaurantCard
                     restaurant={restaurant}
                     onClick={() => handleRestaurantClick(restaurant)}
+                    onGetDirections={handleGetDirections}
                   />
                 </motion.div>
               ))
