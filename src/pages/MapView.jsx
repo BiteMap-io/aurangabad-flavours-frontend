@@ -4,7 +4,7 @@ import { MapPin, Loader, Navigation, X, Clock, Route, Car, PersonStanding, Bike,
 import { useSearchParams } from 'react-router-dom'
 import RestaurantModal from '../components/RestaurantModal'
 import EmbeddedMap from '../components/EmbeddedMap'
-import { hotelsApi } from '../services/adminApi'
+import { hotelsApi, galleryApi } from '../services/adminApi'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const CSN_CENTER = { lat: 19.8762, lng: 75.3433 }
@@ -86,12 +86,28 @@ const MapView = () => {
   const listRef = useRef(null)
   const cardRefs = useRef({})
 
+  const [heroBg, setHeroBg] = useState("")
+
   // ── Fetch ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    hotelsApi.getAll()
-      .then(res => { const d = res.data || res; setRestaurants(Array.isArray(d) ? d : []) })
-      .catch(err => console.error('Failed to fetch restaurants:', err))
-      .finally(() => setLoading(false))
+    const fetchData = async () => {
+      try {
+        const [hotelsRes, galleryRes] = await Promise.all([
+          hotelsApi.getAll(),
+          galleryApi.getAll('map')
+        ])
+        const d = hotelsRes.data || hotelsRes
+        setRestaurants(Array.isArray(d) ? d : [])
+        
+        const g = galleryRes.data || galleryRes
+        if (Array.isArray(g) && g.length > 0) setHeroBg(g[0].url)
+      } catch (err) {
+        console.error('Failed to fetch map data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
 
   // ── Auto-route from ?directTo=id ───────────────────────────────────────────
@@ -349,7 +365,10 @@ const MapView = () => {
     <div className="min-h-screen">
 
       {/* ── Hero ── */}
-      <section className="relative min-h-[45vh] max-md:min-h-[38vh] flex items-center justify-center py-xl px-lg max-md:px-md mb-xl overflow-hidden bg-[url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1920&h=1080&fit=crop&q=80')] bg-cover bg-center bg-no-repeat">
+      <section 
+        className="relative min-h-[45vh] max-md:min-h-[38vh] flex items-center justify-center py-xl px-lg max-md:px-md mb-xl overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={heroBg ? { backgroundImage: `url(${heroBg})` } : { backgroundColor: 'var(--background-secondary)' }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/55 to-black/70 z-[1]" />
         <div className="relative z-[2] text-center max-w-[800px] w-full">
           <motion.h1 className="text-[3rem] max-md:text-[2rem] font-bold mb-sm text-white drop-shadow-lg"

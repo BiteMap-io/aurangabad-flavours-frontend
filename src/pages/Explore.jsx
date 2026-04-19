@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FilterBar from '../components/FilterBar'
-import { hotelsApi } from '../services/adminApi'
+import { hotelsApi, galleryApi } from '../services/adminApi'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
 
@@ -14,17 +14,27 @@ const Explore = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
+  const [heroImage, setHeroImage] = useState("")
   const [loading, setLoading] = useState(true)
   const { isTouristMode } = useTouristMode()
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await hotelsApi.getAll()
-        const data = response.data || response
-        setRestaurants(Array.isArray(data) ? data : [])
+        const [hotelsRes, galleryRes] = await Promise.all([
+          hotelsApi.getAll(),
+          galleryApi.getAll('explore')
+        ])
+        
+        const hotelsData = hotelsRes.data || hotelsRes
+        setRestaurants(Array.isArray(hotelsData) ? hotelsData : [])
+        
+        const galleryData = galleryRes.data || galleryRes
+        if (Array.isArray(galleryData) && galleryData.length > 0) {
+          setHeroImage(galleryData[0].url)
+        }
       } catch (error) {
-        console.error('Failed to fetch restaurants:', error)
+        console.error('Failed to fetch explore data:', error)
       } finally {
         setLoading(false)
       }
@@ -129,11 +139,13 @@ const Explore = () => {
     <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
       <div className="relative text-center mb-xl py-xl px-lg min-h-[200px] flex items-center justify-center overflow-hidden rounded-[2rem] bg-background-secondary border border-glass-border">
         {/* Background Image */}
-        <img
-          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&h=600&fit=crop&q=80"
-          alt="Restaurant interior"
-          className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.5] saturate-[0.8] light:brightness-[0.6]"
-        />
+        {heroImage && (
+          <img
+            src={heroImage}
+            alt="Explore background"
+            className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.5] saturate-[0.8] light:brightness-[0.6]"
+          />
+        )}
         
         {/* Dark Overlay */}
         <div className="absolute top-0 left-0 w-full h-full bg-black/50 z-10 light:bg-black/40" />

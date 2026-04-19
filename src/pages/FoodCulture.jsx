@@ -1,11 +1,23 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { BookOpen, Utensils, Users } from 'lucide-react'
 import { getPageContent } from '../hooks/usePageContent'
+import { galleryApi } from '../services/adminApi'
 
 const ICONS = [<BookOpen size={32} />, <Utensils size={32} />, <Users size={32} />]
 
 const FoodCulture = () => {
   const c = getPageContent('foodculture')
+  const [heroBg, setHeroBg] = useState("")
+
+  useEffect(() => {
+    galleryApi.getAll('foodculture').then(res => {
+      const data = res.data || res
+      if (Array.isArray(data) && data.length > 0) {
+        setHeroBg(data[0].url)
+      }
+    })
+  }, [])
 
   const sections = [
     { title: c.section1Title, content: c.section1Content },
@@ -21,7 +33,10 @@ const FoodCulture = () => {
 
   return (
     <div className="min-h-screen">
-      <section className="relative min-h-[50vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-[url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center bg-no-repeat max-md:py-lg max-md:px-md max-md:min-h-[40vh]">
+      <section 
+        className="relative min-h-[50vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-cover bg-center bg-no-repeat max-md:py-lg max-md:px-md max-md:min-h-[40vh]"
+        style={{ backgroundImage: `url(${heroBg})` }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60 z-[1]" />
         <div className="relative z-[2] text-center max-w-[800px]">
           <motion.h1 className="text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2] max-md:text-[2.5rem]"
