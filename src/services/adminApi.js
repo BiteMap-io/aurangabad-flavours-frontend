@@ -197,6 +197,39 @@ export const mediaApi = {
 // GET /v1/admin/stats         → { totalRestaurants, totalEvents, totalArticles, ... }
 // GET /v1/admin/recent-activity → [{ type, title, action, time, ... }]
 
+// ─── Gallery ────────────────────────────────────────────────────────────────
+// GET  /v1/gallery?tag=... → Public
+// POST /v1/gallery        → Admin only, multipart/form-data
+// DELETE /v1/gallery/:id  → Admin only
+
+export const galleryApi = {
+  async getAll(tag = '') {
+    const url = tag ? `/gallery?tag=${tag}` : '/gallery';
+    return await api.get(url);
+  },
+
+  async upload(imageData) {
+    // imageData should be an object with { image (File), title, description, tags (Array or comma-sep String) }
+    const formData = new FormData();
+    Object.entries(imageData).forEach(([key, val]) => {
+      if (val === null || val === undefined) return;
+      if (key === 'tags' && Array.isArray(val)) {
+        val.forEach(t => formData.append('tags', t));
+      } else {
+        formData.append(key, val);
+      }
+    });
+
+    return await api.post('/gallery', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  async delete(id) {
+    return await api.delete(`/gallery/${id}`);
+  }
+};
+
 export const dashboardApi = {
   async getStats() {
     return await api.get('/admin/stats');
