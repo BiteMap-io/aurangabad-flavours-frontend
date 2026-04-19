@@ -6,25 +6,36 @@ import { useTranslation } from 'react-i18next'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import MasonryGallery from '../components/MasonryGallery'
-import { hotelsApi } from '../services/adminApi'
+import { hotelsApi, galleryApi } from '../services/adminApi'
 
 const Home = () => {
   const { t } = useTranslation()
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
+  const [heroImage, setHeroImage] = useState("")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await hotelsApi.getAll()
-        if (response.success || Array.isArray(response)) {
-          const data = response.data || response
+        const [restaurantsRes, galleryRes] = await Promise.all([
+          hotelsApi.getAll(),
+          galleryApi.getAll('homepage')
+        ])
+
+        if (restaurantsRes.success || Array.isArray(restaurantsRes)) {
+          const data = restaurantsRes.data || restaurantsRes
           setRestaurants(data)
         }
+
+        const galleryData = galleryRes.data || galleryRes
+        if (Array.isArray(galleryData) && galleryData.length > 0) {
+          // Use the latest image with 'homepage' tag as hero
+          setHeroImage(galleryData[0].url)
+        }
       } catch (error) {
-        console.error('Failed to fetch restaurants:', error)
+        console.error('Failed to fetch data:', error)
       } finally {
         setLoading(false)
       }
@@ -51,7 +62,7 @@ const Home = () => {
       <section className="relative min-h-[60vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-background-secondary border-b border-glass-border">
         {/* Background Image */}
         <img
-          src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&h=1080&fit=crop&q=80"
+          src={heroImage}
           alt="Culinary spread"
           className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.6] saturate-[1.1] light:brightness-[0.7]"
         />
