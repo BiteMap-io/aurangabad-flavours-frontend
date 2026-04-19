@@ -31,6 +31,7 @@ import ArticleForm from './pages/admin/ArticleForm'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import ToastContainer from './components/admin/Toast'
 import PagesManagement from './pages/admin/PagesManagement'
+import GalleryManagement from './pages/admin/GalleryManagement'
 
 import { LanguageProvider } from './context/LanguageContext'
 import { TouristModeProvider } from './context/TouristModeContext'
@@ -72,6 +73,7 @@ function App() {
                     <Route path="media" element={<MediaManager />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="pages" element={<PagesManagement />} />
+                    <Route path="gallery" element={<GalleryManagement />} />
                     <Route index element={<AdminDashboard />} />
                   </Route>
 

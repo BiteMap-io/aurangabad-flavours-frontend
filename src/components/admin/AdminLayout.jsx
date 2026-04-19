@@ -31,6 +31,7 @@ const AdminLayout = () => {
     { path: '/admin/events', label: 'Events', icon: Calendar, section: 'main' },
     { path: '/admin/articles', label: 'Articles', icon: FileText, section: 'main' },
     { path: '/admin/pages', label: 'Pages', icon: PanelLeft, section: 'content' },
+    { path: '/admin/gallery', label: 'Gallery', icon: Image, section: 'content' },
     { path: '/admin/media', label: 'Media Manager', icon: Image, section: 'content' },
     { path: '/admin/settings', label: 'Settings', icon: Settings, section: 'content' }
   ]
