@@ -3,24 +3,34 @@ import { motion } from 'framer-motion'
 import { Loader } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
-import { hotelsApi } from '../services/adminApi'
+import { hotelsApi, galleryApi } from '../services/adminApi'
 
 const Cuisines = () => {
   const [selectedCuisine, setSelectedCuisine] = useState('')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
+  const [slideshowImages, setSlideshowImages] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const response = await hotelsApi.getAll()
-        const data = response.data || response
-        setRestaurants(Array.isArray(data) ? data : [])
+        const [hotelsRes, galleryRes] = await Promise.all([
+          hotelsApi.getAll(),
+          galleryApi.getAll('cuisines_slideshow')
+        ])
+        
+        const hotelsData = hotelsRes.data || hotelsRes
+        setRestaurants(Array.isArray(hotelsData) ? hotelsData : [])
+        
+        const galleryData = galleryRes.data || galleryRes
+        if (Array.isArray(galleryData) && galleryData.length > 0) {
+          setSlideshowImages(galleryData.map(item => item.url))
+        }
       } catch (error) {
-        console.error('Failed to fetch restaurants for cuisines:', error)
+        console.error('Failed to fetch cuisine data:', error)
       } finally {
         setLoading(false)
       }
@@ -55,25 +65,30 @@ const Cuisines = () => {
     setSelectedRestaurant(null)
   }
 
+  const keyframes = useMemo(() => {
+    if (slideshowImages.length === 0) return ''
+    const step = 100 / slideshowImages.length
+    return slideshowImages.map((url, i) => {
+      const start = i * step
+      const end = (i + 1) * step
+      return `${start}%, ${end}% { background-image: url('${url}'); }`
+    }).join('\n')
+  }, [slideshowImages])
+
   return (
     <>
-      <style>
-        {`
-          @keyframes cuisineSlideshow {
-            0%, 12.5% { background-image: url('https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            12.5%, 25% { background-image: url('https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            25%, 37.5% { background-image: url('https://images.unsplash.com/photo-1574071318508-1cdbab80d002?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            37.5%, 50% { background-image: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            50%, 62.5% { background-image: url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            62.5%, 75% { background-image: url('https://images.unsplash.com/photo-1563379091339-03246963d51a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            75%, 87.5% { background-image: url('https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-            87.5%, 100% { background-image: url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); }
-          }
-          .animate-cuisine-slideshow {
-            animation: cuisineSlideshow 40s infinite;
-          }
-        `}
-      </style>
+      {keyframes && (
+        <style>
+          {`
+            @keyframes cuisineSlideshow {
+              ${keyframes}
+            }
+            .animate-cuisine-slideshow {
+              animation: cuisineSlideshow ${slideshowImages.length * 5}s infinite;
+            }
+          `}
+        </style>
+      )}
       <div className="min-h-screen relative p-0 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 bg-background-primary bg-cover bg-center bg-no-repeat bg-fixed animate-cuisine-slideshow filter brightness-[1.1] contrast-[1.2] saturate-[1.1] light:brightness-[0.9] light:contrast-[1.1] light:saturate-[1.2] z-[0]" />
