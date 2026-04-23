@@ -95,8 +95,7 @@ const EventForm = () => {
       const payload = {
         ...formData,
         capacity: Number(formData.capacity),
-        // For events, image is a URL string (backend expects JSON)
-        image: imageMode === 'file' ? imagePreview : formData.image,
+        image: imageMode === 'file' ? imageFile : formData.image,
       };
 
       if (isEditMode) {

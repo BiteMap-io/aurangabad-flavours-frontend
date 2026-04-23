@@ -120,7 +120,7 @@ const ArticleForm = () => {
       const payload = {
         ...formData,
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
-        image: imageMode === 'file' ? imagePreview : formData.image,
+        image: imageMode === 'file' ? imageFile : formData.image,
       };
 
       if (isEditMode) {

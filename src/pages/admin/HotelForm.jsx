@@ -167,7 +167,7 @@ const HotelForm = () => {
         facilities: formData.facilities
           ? formData.facilities.split(',').map(f => f.trim()).filter(Boolean)
           : [],
-        image: imageMode === 'file' ? imagePreview : formData.image,
+        image: imageMode === 'file' ? imageFile : formData.image,
       };
 
       if (isEditMode) {
