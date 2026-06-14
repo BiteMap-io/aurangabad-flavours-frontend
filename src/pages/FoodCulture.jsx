@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { BookOpen, Utensils, Users } from 'lucide-react'
+import { BookOpen, Utensils, Users, Clock, MapPin } from 'lucide-react'
 import { getPageContent } from '../hooks/usePageContent'
-import { galleryApi } from '../services/adminApi'
+import { galleryApi, foodTrailsApi } from '../services/adminApi'
 
 const ICONS = [<BookOpen size={32} />, <Utensils size={32} />, <Users size={32} />]
 
 const FoodCulture = () => {
   const c = getPageContent('foodculture')
   const [heroBg, setHeroBg] = useState("")
+  const [trails, setTrails] = useState([])
 
   useEffect(() => {
     galleryApi.getAll('foodculture').then(res => {
@@ -16,7 +17,12 @@ const FoodCulture = () => {
       if (Array.isArray(data) && data.length > 0) {
         setHeroBg(data[0].url)
       }
-    })
+    }).catch(() => {})
+
+    foodTrailsApi.getAll().then(res => {
+      const data = res.data || res
+      setTrails(Array.isArray(data) ? data : [])
+    }).catch(() => {})
   }, [])
 
   const sections = [
@@ -63,6 +69,42 @@ const FoodCulture = () => {
             </motion.div>
           ))}
         </div>
+
+        {trails.length > 0 && (
+          <div className="mt-xl mb-xl">
+            <h2 className="text-[2rem] mb-lg text-primary text-center font-semibold">Food Trails</h2>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] max-md:grid-cols-1 gap-lg">
+              {trails.map((trail, i) => (
+                <motion.div key={trail._id || trail.id}
+                  className="p-lg bg-glass-surface backdrop-blur-[20px] border border-glass-border rounded-[1.5rem] transition-all duration-300 hover:bg-glass-hover hover:border-white/20"
+                  initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}>
+                  <div className="flex items-start gap-3 mb-sm">
+                    <div className="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center text-2xl"
+                      style={{ backgroundColor: (trail.color || '#a855f7') + '22' }}>
+                      {trail.icon || '🍽️'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[1.2rem] font-semibold text-primary m-0">{trail.name}</h3>
+                      <div className="flex items-center gap-3 text-[0.82rem] text-secondary mt-1">
+                        <span className="flex items-center gap-1"><Clock size={13} /> {trail.estimatedTime || '—'}</span>
+                        <span className="flex items-center gap-1"><MapPin size={13} /> {(trail.restaurantsId || []).length} stops</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-secondary leading-[1.7] m-0 mb-sm">{trail.description}</p>
+                  {Array.isArray(trail.highlights) && trail.highlights.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-sm">
+                      {trail.highlights.map((h, idx) => (
+                        <span key={idx} className="py-1 px-3 rounded-full bg-white/5 border border-glass-border text-secondary text-[0.8rem]">{h}</span>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-xl p-xl bg-glass-surface border border-glass-border rounded-[1.5rem] mb-xl">
           <h2 className="text-[2rem] mb-lg text-primary text-center font-semibold">Cultural Highlights</h2>

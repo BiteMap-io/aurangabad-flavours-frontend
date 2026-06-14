@@ -9,6 +9,9 @@
  *   Restaurants   GET/POST /v1/restaurants         | GET/PUT/DELETE /v1/restaurants/:id | PATCH /v1/restaurants/:id/toggle-featured
  *   Events        GET/POST /v1/events              | GET/PUT/DELETE /v1/events/:id
  *   Articles      GET/POST /v1/articles            | GET/PUT/DELETE /v1/articles/:id   | PATCH /v1/articles/:id/toggle-status
+ *   Dishes        GET/POST /v1/dishes              | GET/PUT/DELETE /v1/dishes/:id
+ *   Food Trails   GET/POST /v1/food-trails         | GET/PUT/DELETE /v1/food-trails/:id
+ *   Gallery       GET      /v1/gallery?tag=...      | POST /v1/gallery (multipart, field: 'image') | DELETE /v1/gallery/:id
  *   Media         GET      /v1/media               | POST /v1/media (multipart, field: 'file') | DELETE /v1/media/:id
  *   Settings      GET      /v1/settings            | PUT /v1/settings
  *   Admin         GET      /v1/admin/stats         | GET /v1/admin/recent-activity
@@ -27,6 +30,41 @@ import api from './api';
 //   rating, image (S3 URL via upload), description, location.coordinates, area
 // POST/PUT use multipart/form-data with image as binary field 'image'
 
+// Build the multipart body shared by restaurant create/update.
+//   hotelData.gallery         → array that may mix kept S3 URL strings and newly-added File objects
+//   hotelData.menuItems       → array of { name, category, price, isVeg } (JSON; only used when no
+//                               menu spreadsheet is uploaded — the file wins server-side)
+const buildHotelFormData = (hotelData, menuFile) => {
+  const formData = new FormData();
+  const NESTED = ['extraFacilities', 'food', 'staff', 'environment'];
+  Object.entries(hotelData).forEach(([key, val]) => {
+    if (val === null || val === undefined) return;
+    if (key === 'location') {
+      formData.append('location[type]', val.type || 'Point');
+      formData.append('location[coordinates][0]', String(val.coordinates[0]));
+      formData.append('location[coordinates][1]', String(val.coordinates[1]));
+    } else if (key === 'facilities' && Array.isArray(val)) {
+      val.forEach(f => formData.append('facilities', f));
+    } else if (key === 'gallery' && Array.isArray(val)) {
+      // New File objects upload as binary; kept URL strings are retained via existingGallery.
+      const keep = [];
+      val.forEach(g => {
+        if (g instanceof File) formData.append('gallery', g);
+        else if (typeof g === 'string' && g) keep.push(g);
+      });
+      formData.append('existingGallery', JSON.stringify(keep));
+    } else if (key === 'menuItems' && Array.isArray(val)) {
+      if (!menuFile) formData.append('menuItems', JSON.stringify(val));
+    } else if (NESTED.includes(key) && typeof val === 'object') {
+      formData.append(key, JSON.stringify(val));
+    } else {
+      formData.append(key, val);
+    }
+  });
+  if (menuFile) formData.append('menu', menuFile);
+  return formData;
+};
+
 export const hotelsApi = {
   async getAll() {
     return await api.get('/restaurants');
@@ -37,51 +75,13 @@ export const hotelsApi = {
   },
 
   async create(hotelData, menuFile = null) {
-    const formData = new FormData();
-    const NESTED = ['extraFacilities', 'food', 'staff', 'environment'];
-    Object.entries(hotelData).forEach(([key, val]) => {
-      if (val === null || val === undefined) return;
-      if (key === 'location') {
-        formData.append('location[type]', val.type || 'Point');
-        formData.append('location[coordinates][0]', String(val.coordinates[0]));
-        formData.append('location[coordinates][1]', String(val.coordinates[1]));
-      } else if (key === 'facilities' && Array.isArray(val)) {
-        val.forEach(f => formData.append('facilities', f));
-      } else if (key === 'menuItems') {
-        // skip — sent via file
-      } else if (NESTED.includes(key) && typeof val === 'object') {
-        formData.append(key, JSON.stringify(val));
-      } else {
-        formData.append(key, val);
-      }
-    });
-    if (menuFile) formData.append('menu', menuFile);
-    return await api.post('/restaurants', formData, {
+    return await api.post('/restaurants', buildHotelFormData(hotelData, menuFile), {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
 
   async update(id, hotelData, menuFile = null) {
-    const formData = new FormData();
-    const NESTED = ['extraFacilities', 'food', 'staff', 'environment'];
-    Object.entries(hotelData).forEach(([key, val]) => {
-      if (val === null || val === undefined) return;
-      if (key === 'location') {
-        formData.append('location[type]', val.type || 'Point');
-        formData.append('location[coordinates][0]', String(val.coordinates[0]));
-        formData.append('location[coordinates][1]', String(val.coordinates[1]));
-      } else if (key === 'facilities' && Array.isArray(val)) {
-        val.forEach(f => formData.append('facilities', f));
-      } else if (key === 'menuItems') {
-        // skip — sent via file
-      } else if (NESTED.includes(key) && typeof val === 'object') {
-        formData.append(key, JSON.stringify(val));
-      } else {
-        formData.append(key, val);
-      }
-    });
-    if (menuFile) formData.append('menu', menuFile);
-    return await api.put(`/restaurants/${id}`, formData, {
+    return await api.put(`/restaurants/${id}`, buildHotelFormData(hotelData, menuFile), {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
@@ -237,6 +237,73 @@ export const dashboardApi = {
 
   async getRecentActivity() {
     return await api.get('/admin/recent-activity');
+  }
+};
+
+// ─── Dishes ─────────────────────────────────────────────────────────────────
+// Pure JSON CRUD (no upload pipeline — `image` is a URL string).
+// Backend model required fields: name, image, category, restaurantId
+// GET/POST /v1/dishes | GET/PUT/DELETE /v1/dishes/:id  (mutations are admin-only)
+// Note: there is no "by restaurant" endpoint — fetch all and filter on restaurantId.
+
+export const dishesApi = {
+  async getAll() {
+    return await api.get('/dishes');
+  },
+
+  async getById(id) {
+    return await api.get(`/dishes/${id}`);
+  },
+
+  async getByRestaurant(restaurantId) {
+    const all = await api.get('/dishes');
+    const data = all.data || all;
+    if (!Array.isArray(data)) return [];
+    return data.filter(d => {
+      const rid = typeof d.restaurantId === 'object' && d.restaurantId !== null
+        ? (d.restaurantId._id || d.restaurantId.id)
+        : d.restaurantId;
+      return String(rid) === String(restaurantId);
+    });
+  },
+
+  async create(dishData) {
+    return await api.post('/dishes', dishData);
+  },
+
+  async update(id, dishData) {
+    return await api.put(`/dishes/${id}`, dishData);
+  },
+
+  async delete(id) {
+    return await api.delete(`/dishes/${id}`);
+  }
+};
+
+// ─── Food Trails ────────────────────────────────────────────────────────────
+// Pure JSON CRUD. Backend model required fields:
+//   name, description, icon, color, estimatedTime + restaurantsId[] / highlights[]
+// GET/POST /v1/food-trails | GET/PUT/DELETE /v1/food-trails/:id  (mutations admin-only)
+
+export const foodTrailsApi = {
+  async getAll() {
+    return await api.get('/food-trails');
+  },
+
+  async getById(id) {
+    return await api.get(`/food-trails/${id}`);
+  },
+
+  async create(trailData) {
+    return await api.post('/food-trails', trailData);
+  },
+
+  async update(id, trailData) {
+    return await api.put(`/food-trails/${id}`, trailData);
+  },
+
+  async delete(id) {
+    return await api.delete(`/food-trails/${id}`);
   }
 };
 

@@ -25,8 +25,8 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
       setDirError('No location data for this restaurant.')
       return
     }
-    // Navigate to map page — MapView will auto-trigger routing
-    navigate(`/map?directTo=${id}`)
+    // Open the dedicated single-place map page
+    navigate(`/place/${id}`)
   }
 
   return (
@@ -53,15 +53,15 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
 
       <div className="flex-1 flex flex-col gap-xs">
         <div className="flex justify-between items-start gap-sm">
-          <h3 className="text-xl font-semibold text-primary m-0">{restaurant.name}</h3>
-          <div className="flex items-center gap-1 px-2 py-1 bg-glass-surface border border-glass-border rounded-[0.5rem] text-sm font-semibold whitespace-nowrap">
-            <Star size={14} fill="var(--accent-purple)" color="var(--accent-purple)" className="drop-shadow-glow" />
+          <h3 className="text-[1.4rem] font-semibold text-primary m-0 leading-tight">{restaurant.name}</h3>
+          <div className="flex items-center gap-1 px-2 py-1 bg-glass-surface border border-glass-border rounded-[0.5rem] text-[0.95rem] font-semibold whitespace-nowrap">
+            <Star size={15} fill="var(--accent-purple)" color="var(--accent-purple)" className="drop-shadow-glow" />
             <span className="text-primary">{restaurant.rating}</span>
           </div>
         </div>
 
-        <p className="text-secondary text-[0.9rem] m-0">{restaurant.cuisine}</p>
-        <p className="text-primary text-[0.9rem] font-medium m-0">{restaurant.priceRange}</p>
+        <p className="text-secondary text-[1rem] m-0">{restaurant.cuisine}</p>
+        <p className="text-primary text-[1rem] font-medium m-0">{restaurant.priceRange}</p>
         
         <div className="flex flex-wrap gap-xs my-sm">
           {showMealTimeBadge && <MealTimeBadge mealTime={currentMealTime} />}
@@ -73,7 +73,7 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
         </div>
         
         {restaurant.description && (
-          <p className="text-secondary text-[0.85rem] leading-[1.4] my-xs line-clamp-2">
+          <p className="text-secondary text-[0.95rem] leading-[1.5] my-xs line-clamp-2">
             {restaurant.description.length > 100 
               ? `${restaurant.description.substring(0, 100)}...` 
               : restaurant.description}

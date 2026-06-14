@@ -184,7 +184,6 @@ const MapInner = memo(function MapInner({
       {directions && (
         <DirectionsRenderer
           directions={directions}
-          onLoad={renderer => { rendererRef.current = renderer }}
           options={{
             suppressMarkers: true,
             polylineOptions: {

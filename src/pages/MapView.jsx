@@ -61,6 +61,7 @@ const MapView = () => {
 
   // Routing
   const [activeRestaurant, setActiveRestaurant] = useState(null)
+  const [focusedRestaurant, setFocusedRestaurant] = useState(null) // shown as a dot + info card
   const [directions, setDirections] = useState(null)
   const [routeInfo, setRouteInfo] = useState(null)
   const [routeLoading, setRouteLoading] = useState(false)
@@ -110,24 +111,30 @@ const MapView = () => {
     fetchData()
   }, [])
 
-  // ── Auto-route from ?directTo=id ───────────────────────────────────────────
+  // ── Focus a place from ?directTo=id ────────────────────────────────────────
+  // Rather than auto-drawing the route, we centre the map on the hotel, mark it
+  // as a highlighted dot, and surface its info in a card. The route is only drawn
+  // if the user asks for it from that card.
   useEffect(() => {
     if (!directToId || loading || restaurants.length === 0) return
     const target = restaurants.find(r => (r._id || r.id) === directToId)
     if (!target?.location?.coordinates?.length) return
-    if (!navigator.geolocation) { setLocationError('Geolocation not supported.'); return }
 
-    setLocationLoading(true)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-        setUserLocation(loc)
-        setLocationLoading(false)
-        triggerRoute(target, loc, travelMode)
-      },
-      () => { setLocationLoading(false); setLocationError('Could not get location.') },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+    setFocusedRestaurant(target)
+    setActiveRestaurant(target)        // highlights its marker as a dot
+    const c = target.location.coordinates
+    setMapCenter([c[1], c[0]])
+    setMapZoom(16)
+    setTimeout(() => cardRefs.current[directToId]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300)
+
+    // Quietly grab the user's location so their blue dot shows too — but don't route.
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {},
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+      )
+    }
   }, [directToId, loading, restaurants])
 
   // ── Area stats ─────────────────────────────────────────────────────────────
@@ -685,6 +692,66 @@ const MapView = () => {
                 travelMode={travelMode}
               />
             )}
+
+            {/* ── Focused place info card (from "Get Directions") ── */}
+            <AnimatePresence>
+              {focusedRestaurant && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+                  className="absolute top-3 left-3 z-20 w-[290px] max-w-[calc(100%-1.5rem)]"
+                >
+                  <div className="bg-background-primary/95 backdrop-blur-xl border border-glass-border rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden">
+                    <div className="relative h-[120px] overflow-hidden">
+                      <img src={focusedRestaurant.image} alt={focusedRestaurant.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                      <button
+                        onClick={() => { setFocusedRestaurant(null); clearRoute() }}
+                        className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-black/55 backdrop-blur-md border border-white/10 text-white hover:bg-black/75 transition-all"
+                        aria-label="Close"
+                      >
+                        <X size={15} />
+                      </button>
+                      <div className="absolute bottom-2 left-3 right-3">
+                        <h3 className="text-white font-bold text-[1rem] m-0 leading-tight drop-shadow truncate">{focusedRestaurant.name}</h3>
+                        <p className="text-white/85 text-[0.78rem] m-0 truncate">{focusedRestaurant.cuisine}</p>
+                      </div>
+                    </div>
+
+                    <div className="p-3">
+                      <div className="flex items-center gap-sm flex-wrap text-[0.78rem] text-secondary mb-2">
+                        {focusedRestaurant.rating && (
+                          <span className="flex items-center gap-1 text-accent-purple font-semibold"><Star size={12} fill="currentColor" /> {focusedRestaurant.rating}</span>
+                        )}
+                        <span className="flex items-center gap-1"><MapPin size={12} /> {focusedRestaurant.area}</span>
+                        {focusedRestaurant.priceRange && <span className="font-semibold text-primary">{focusedRestaurant.priceRange}</span>}
+                      </div>
+                      {(focusedRestaurant.address || focusedRestaurant.area) && (
+                        <p className="text-[0.76rem] text-tertiary leading-[1.4] m-0 mb-3 line-clamp-2">
+                          {focusedRestaurant.address || `${focusedRestaurant.area}, Aurangabad`}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleCardClick(focusedRestaurant)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-accent-purple text-white rounded-lg text-[0.8rem] font-semibold transition-all hover:shadow-glow hover:-translate-y-[1px]"
+                        >
+                          <Navigation size={14} /> Show route
+                        </button>
+                        <button
+                          onClick={() => handleCardInfoClick(focusedRestaurant)}
+                          className="py-2 px-3 bg-glass-surface border border-glass-border text-secondary rounded-lg text-[0.8rem] font-semibold transition-all hover:border-accent-purple hover:text-primary"
+                        >
+                          Details
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* ── Floating Route Panel (Phase 2) ── */}
             <AnimatePresence>

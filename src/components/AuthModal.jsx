@@ -14,14 +14,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', confirmPassword: '',
-    rememberMe: false, acceptTerms: false
+    accountType: 'customer', rememberMe: false, acceptTerms: false
   })
 
   useEffect(() => { setMode(initialMode) }, [initialMode])
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ name: '', email: '', password: '', confirmPassword: '', rememberMe: false, acceptTerms: false })
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', accountType: 'customer', rememberMe: false, acceptTerms: false })
       setShowPassword(false)
       setShowConfirmPassword(false)
       setError('')
@@ -52,7 +52,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     try {
       const result = mode === 'login'
         ? await login(formData.email, formData.password)
-        : await signup(formData.name, formData.email, formData.password)
+        : await signup(formData.name, formData.email, formData.password, formData.accountType)
 
       if (result.success) {
         onClose()
@@ -69,7 +69,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const switchMode = (newMode) => {
     setMode(newMode)
     setError('')
-    setFormData({ name: '', email: '', password: '', confirmPassword: '', rememberMe: false, acceptTerms: false })
+    setFormData({ name: '', email: '', password: '', confirmPassword: '', accountType: 'customer', rememberMe: false, acceptTerms: false })
     setShowPassword(false)
     setShowConfirmPassword(false)
   }
@@ -125,6 +125,37 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                     className="p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
                     required
                   />
+                </div>
+              )}
+
+              {mode === 'join' && (
+                <div className="flex flex-col gap-xs">
+                  <label className="text-[0.9rem] font-medium text-primary">{t('auth.accountType', 'I am a')}</label>
+                  <div className="grid grid-cols-2 gap-sm">
+                    {[
+                      { value: 'customer', label: t('auth.customer', 'Food Lover') },
+                      { value: 'restaurant_owner', label: t('auth.owner', 'Restaurant Owner') },
+                    ].map(opt => (
+                      <label
+                        key={opt.value}
+                        className={`flex items-center justify-center gap-xs p-md rounded-md border cursor-pointer text-[0.9rem] font-medium transition-all duration-200 text-center ${
+                          formData.accountType === opt.value
+                            ? 'bg-accent-purple/15 border-accent-purple text-accent-purple'
+                            : 'bg-glass-surface border-glass-border text-secondary hover:border-accent-purple/50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="accountType"
+                          value={opt.value}
+                          checked={formData.accountType === opt.value}
+                          onChange={handleInputChange}
+                          className="hidden"
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
 

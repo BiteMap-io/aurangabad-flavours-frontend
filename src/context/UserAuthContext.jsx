@@ -20,6 +20,11 @@ export const UserAuthProvider = ({ children }) => {
       try { setUser(JSON.parse(stored)) } catch {}
     }
     setLoading(false)
+
+    // api.js fires this when a request 401s and the token is purged.
+    const onUnauthorized = () => setUser(null)
+    window.addEventListener('auth:unauthorized', onUnauthorized)
+    return () => window.removeEventListener('auth:unauthorized', onUnauthorized)
   }, [])
 
   const login = async (email, password) => {
@@ -33,8 +38,8 @@ export const UserAuthProvider = ({ children }) => {
     return { success: false, error: res.error || 'Login failed' }
   }
 
-  const signup = async (name, email, password) => {
-    const res = await api.post('/auth/signup', { name, email, password, userType: 'customer' })
+  const signup = async (name, email, password, userType = 'customer') => {
+    const res = await api.post('/auth/signup', { name, email, password, userType })
     if (res.token) {
       localStorage.setItem('userToken', res.token)
       localStorage.setItem('userData', JSON.stringify(res.user))

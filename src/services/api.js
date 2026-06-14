@@ -26,11 +26,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // Handle unauthorized errors (e.g., token expired)
+    // Handle unauthorized errors (e.g., token expired). Clear whichever session
+    // is present — an expired customer token must be purged too, not just admin.
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
-      // You might want to redirect to login or trigger a logout event here
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('userData');
+      // Let the app react (e.g. AdminAuthContext / UserAuthContext) to a forced logout.
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'));
     }
     return Promise.reject(error.response?.data || error.message);
   }

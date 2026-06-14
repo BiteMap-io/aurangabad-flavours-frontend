@@ -2,19 +2,21 @@ import { useState } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  LayoutDashboard, 
-  Building2, 
-  Calendar, 
-  FileText, 
-  Image, 
-  Settings, 
-  LogOut, 
-  Menu, 
+  LayoutDashboard,
+  Building2,
+  Calendar,
+  FileText,
+  Image,
+  Settings,
+  LogOut,
+  Menu,
   X,
   ChevronLeft,
   User,
   Sparkles,
-  PanelLeft
+  PanelLeft,
+  UtensilsCrossed,
+  Route
 } from 'lucide-react'
 import { useAdminAuth } from '../../context/AdminAuthContext'
 
@@ -30,6 +32,8 @@ const AdminLayout = () => {
     { path: '/admin/hotels', label: 'Hotels & Restaurants', icon: Building2, section: 'main' },
     { path: '/admin/events', label: 'Events', icon: Calendar, section: 'main' },
     { path: '/admin/articles', label: 'Articles', icon: FileText, section: 'main' },
+    { path: '/admin/dishes', label: 'Dishes', icon: UtensilsCrossed, section: 'main' },
+    { path: '/admin/food-trails', label: 'Food Trails', icon: Route, section: 'main' },
     { path: '/admin/pages', label: 'Pages', icon: PanelLeft, section: 'content' },
     { path: '/admin/gallery', label: 'Gallery', icon: Image, section: 'content' },
     { path: '/admin/media', label: 'Media Manager', icon: Image, section: 'content' },
@@ -83,7 +87,7 @@ const AdminLayout = () => {
       <nav className="flex-1 py-3 px-2 overflow-y-auto overflow-x-hidden">
         <div className="mb-1">
           {!collapsed && <span className="block text-[0.68rem] font-semibold tracking-wider uppercase text-gray-600 pt-2 px-3 pb-1 whitespace-nowrap">Menu</span>}
-          {navigationItems.slice(0, 4).map((item) => {
+          {navigationItems.filter(i => i.section === 'main').map((item) => {
             const Icon = item.icon
             const active = isActive(item.path)
             return (
@@ -120,7 +124,7 @@ const AdminLayout = () => {
 
         <div className="mb-1">
           {!collapsed && <span className="block text-[0.68rem] font-semibold tracking-wider uppercase text-gray-600 pt-2 px-3 pb-1 whitespace-nowrap">System</span>}
-          {navigationItems.slice(4).map((item) => {
+          {navigationItems.filter(i => i.section === 'content').map((item) => {
             const Icon = item.icon
             const active = isActive(item.path)
             return (
