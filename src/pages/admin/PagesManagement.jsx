@@ -103,7 +103,7 @@ const FoodCultureForm = ({ data, onChange }) => (
 )
 
 // ── Main component ────────────────────────────────────────────────────────────
-const PagesManagement = () => {
+const PagesManagement = ({ embedded = false }) => {
   const [activeTab, setActiveTab] = useState('about')
   const [data, setData] = useState({
     about:       getPageContent('about'),
@@ -128,11 +128,11 @@ const PagesManagement = () => {
   }
 
   return (
-    <div className="max-w-[1200px] mx-auto font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
+    <div className={embedded ? '' : "max-w-[1200px] mx-auto font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]"}>
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div>
-          <h1 className="text-[1.75rem] font-bold text-gray-100 m-0 mb-1 data-[theme=light]:text-gray-900">Pages Management</h1>
+          {!embedded && <h1 className="text-[1.75rem] font-bold text-gray-100 m-0 mb-1 data-[theme=light]:text-gray-900">Pages Management</h1>}
           <p className="text-gray-500 m-0">Edit content for About, Contact and Food Culture pages</p>
         </div>
         <div className="flex gap-3">

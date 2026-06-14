@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit, Trash2, Loader, Search, UtensilsCrossed, X, Save } from 'lucide-react'
-import { dishesApi, hotelsApi } from '../../services/adminApi'
+import { Plus, Edit, Trash2, Loader, Search, UtensilsCrossed, X, Save, Upload, Link as LinkIcon } from 'lucide-react'
+import { dishesApi, hotelsApi, mediaApi } from '../../services/adminApi'
 import { showToast } from '../../components/admin/Toast'
 import ConfirmModal from '../../components/admin/ConfirmModal'
 
@@ -17,6 +17,9 @@ const DishesManagement = () => {
   const [form, setForm] = useState(EMPTY)
   const [saving, setSaving] = useState(false)
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, dish: null })
+  const [imageMode, setImageMode] = useState('upload') // 'upload' | 'url'
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   useEffect(() => { loadAll() }, [])
 
@@ -44,14 +47,33 @@ const DishesManagement = () => {
     setForm(dish
       ? { name: dish.name || '', image: dish.image || '', category: dish.category || '', restaurantId: dish.restaurantId || '' }
       : EMPTY)
+    setImageMode('upload')
     setEditor({ open: true, dish })
   }
 
-  const closeEditor = () => { setEditor({ open: false, dish: null }); setForm(EMPTY) }
+  const closeEditor = () => { setEditor({ open: false, dish: null }); setForm(EMPTY); setUploading(false) }
+
+  const handleImageFile = async (file) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { showToast.error('Invalid file', 'Please choose an image'); return }
+    setUploading(true)
+    try {
+      const res = await mediaApi.upload(file)
+      const url = res?.url || res?.data?.url || res?.media?.url
+      if (!url) throw new Error('no url')
+      setForm(f => ({ ...f, image: url }))
+      showToast.success('Uploaded', 'Image uploaded')
+    } catch {
+      showToast.error('Upload failed', 'Could not upload image')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSave = async (e) => {
     e.preventDefault()
     if (!form.restaurantId) { showToast.error('Validation', 'Pick a restaurant for this dish'); return }
+    if (!form.image) { showToast.error('Validation', 'Add a dish image (upload a file or paste a URL)'); return }
     setSaving(true)
     try {
       if (editor.dish) {
@@ -187,8 +209,31 @@ const DishesManagement = () => {
                 <input className={inputCls} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} required placeholder="e.g. Main Course" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[0.85rem] text-gray-400">Image URL *</label>
-                <input className={inputCls} type="url" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} required placeholder="https://..." />
+                <label className="text-[0.85rem] text-gray-400">Dish Image *</label>
+                <div className="flex gap-1 p-1 bg-black/30 border border-white/10 rounded-xl w-fit">
+                  <button type="button" onClick={() => setImageMode('upload')}
+                    className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-[0.8rem] font-medium transition-all ${imageMode === 'upload' ? 'bg-purple-500 text-white' : 'text-gray-400 hover:text-white'}`}>
+                    <Upload size={14} /> Upload
+                  </button>
+                  <button type="button" onClick={() => setImageMode('url')}
+                    className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-[0.8rem] font-medium transition-all ${imageMode === 'url' ? 'bg-purple-500 text-white' : 'text-gray-400 hover:text-white'}`}>
+                    <LinkIcon size={14} /> Paste URL
+                  </button>
+                </div>
+
+                {imageMode === 'upload' ? (
+                  <>
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={e => handleImageFile(e.target.files?.[0])} />
+                    <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                      className="flex items-center justify-center gap-2 py-6 px-4 border-2 border-dashed border-white/15 rounded-xl text-gray-400 hover:border-purple-500 hover:text-white transition-all disabled:opacity-60">
+                      {uploading ? <><Loader size={18} className="animate-spin" /> Uploading…</> : <><Upload size={18} /> Choose an image file</>}
+                    </button>
+                  </>
+                ) : (
+                  <input className={inputCls} type="url" value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." />
+                )}
+
                 {form.image && <img src={form.image} alt="" className="mt-1 h-28 w-full object-cover rounded-lg" onError={e => { e.currentTarget.style.display = 'none' }} />}
               </div>
               <div className="flex flex-col gap-1.5">

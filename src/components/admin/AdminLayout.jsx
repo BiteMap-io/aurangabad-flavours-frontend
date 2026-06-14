@@ -14,7 +14,6 @@ import {
   ChevronLeft,
   User,
   Sparkles,
-  PanelLeft,
   UtensilsCrossed,
   Route
 } from 'lucide-react'
@@ -34,7 +33,6 @@ const AdminLayout = () => {
     { path: '/admin/articles', label: 'Articles', icon: FileText, section: 'main' },
     { path: '/admin/dishes', label: 'Dishes', icon: UtensilsCrossed, section: 'main' },
     { path: '/admin/food-trails', label: 'Food Trails', icon: Route, section: 'main' },
-    { path: '/admin/pages', label: 'Pages', icon: PanelLeft, section: 'content' },
     { path: '/admin/gallery', label: 'Gallery', icon: Image, section: 'content' },
     { path: '/admin/media', label: 'Media Manager', icon: Image, section: 'content' },
     { path: '/admin/settings', label: 'Settings', icon: Settings, section: 'content' }

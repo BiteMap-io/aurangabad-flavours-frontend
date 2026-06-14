@@ -37,7 +37,6 @@ const Settings = lazy(() => import('./pages/admin/Settings'))
 const HotelForm = lazy(() => import('./pages/admin/HotelForm'))
 const EventForm = lazy(() => import('./pages/admin/EventForm'))
 const ArticleForm = lazy(() => import('./pages/admin/ArticleForm'))
-const PagesManagement = lazy(() => import('./pages/admin/PagesManagement'))
 const GalleryManagement = lazy(() => import('./pages/admin/GalleryManagement'))
 const DishesManagement = lazy(() => import('./pages/admin/DishesManagement'))
 const FoodTrailsManagement = lazy(() => import('./pages/admin/FoodTrailsManagement'))
@@ -97,7 +96,8 @@ function App() {
 
                     <Route path="media" element={<MediaManager />} />
                     <Route path="settings" element={<Settings />} />
-                    <Route path="pages" element={<PagesManagement />} />
+                    {/* Pages content is now a tab inside Settings; keep the old path working */}
+                    <Route path="pages" element={<Settings />} />
                     <Route path="gallery" element={<GalleryManagement />} />
                     <Route index element={<AdminDashboard />} />
                   </Route>

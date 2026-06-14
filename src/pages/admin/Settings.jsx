@@ -10,31 +10,37 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  Loader
+  Loader,
+  SlidersHorizontal,
+  FileText
 } from 'lucide-react'
 import { settingsApi } from '../../services/adminApi'
 import { showToast } from '../../components/admin/Toast'
+import PagesManagement from './PagesManagement'
+
+const DEFAULT_SETTINGS = {
+  siteName: '',
+  contactEmail: '',
+  contactPhone: '',
+  address: '',
+  socialMedia: {
+    facebook: '',
+    instagram: '',
+    twitter: ''
+  },
+  features: {
+    showWelcomeIntro: true,
+    showFeaturedSection: true,
+    showTopPicks: true,
+    enableTouristMode: true
+  }
+}
 
 const Settings = () => {
-  const [settings, setSettings] = useState({
-    siteName: '',
-    contactEmail: '',
-    contactPhone: '',
-    address: '',
-    socialMedia: {
-      facebook: '',
-      instagram: '',
-      twitter: ''
-    },
-    features: {
-      showWelcomeIntro: true,
-      showFeaturedSection: true,
-      showTopPicks: true,
-      enableTouristMode: true
-    }
-  })
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [section, setSection] = useState('general') // 'general' | 'pages'
 
   useEffect(() => {
     loadSettings()
@@ -46,7 +52,15 @@ const Settings = () => {
       const response = await settingsApi.get()
       const data = response.data || response
       if (data && typeof data === 'object') {
-        setSettings(data)
+        // Backend returns {} when no settings doc exists yet, and may omit
+        // nested objects — deep-merge onto defaults so the form never reads
+        // a property off undefined (which white-screened the page).
+        setSettings({
+          ...DEFAULT_SETTINGS,
+          ...data,
+          socialMedia: { ...DEFAULT_SETTINGS.socialMedia, ...(data.socialMedia || {}) },
+          features: { ...DEFAULT_SETTINGS.features, ...(data.features || {}) },
+        })
       } else {
         showToast.error('Error', 'Failed to load settings')
       }
@@ -100,36 +114,56 @@ const Settings = () => {
     }))
   }
 
-  if (loading) {
-    return (
-      <div className="max-w-[1200px] mx-auto font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-center text-gray-500 data-[theme=light]:text-gray-500">
-          <Loader size={48} className="animate-spin mb-4 text-purple-500" />
-          <p className="m-0 text-[1rem]">Loading settings...</p>
-        </div>
-      </div>
-    )
-  }
+  const TABS = [
+    { id: 'general', label: 'Site Settings', icon: SlidersHorizontal },
+    { id: 'pages', label: 'Page Content', icon: FileText },
+  ]
 
   return (
     <div className="max-w-[1200px] mx-auto font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
       {/* Page Header */}
-      <div className="flex items-center justify-between mb-8 flex-wrap gap-4 max-md:flex-col max-md:items-stretch">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4 max-md:flex-col max-md:items-stretch">
         <div className="max-md:text-center">
           <h1 className="text-[1.75rem] font-bold text-gray-100 m-0 mb-1 max-[480px]:text-[1.5rem] data-[theme=light]:text-gray-900">Settings</h1>
-          <p className="text-gray-500 m-0 data-[theme=light]:text-gray-600">Configure your website settings and preferences</p>
+          <p className="text-gray-500 m-0 data-[theme=light]:text-gray-600">Configure your website settings and page content</p>
         </div>
-        <button 
-          className="inline-flex items-center justify-center gap-1.5 py-2 px-6 bg-gradient-to-br from-purple-500 to-[#9b59b6] border-none rounded-lg text-white font-semibold cursor-pointer transition-all duration-300 hover:not(:disabled):-translate-y-[2px] shadow-[0_4px_10px_rgba(138,43,226,0.2)] hover:not(:disabled):shadow-[0_8px_25px_rgba(138,43,226,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? <Loader size={20} className="animate-spin" /> : <Save size={20} />}
-          {saving ? 'Saving...' : 'Save Settings'}
-        </button>
+        {section === 'general' && (
+          <button
+            className="inline-flex items-center justify-center gap-1.5 py-2 px-6 bg-gradient-to-br from-purple-500 to-[#9b59b6] border-none rounded-lg text-white font-semibold cursor-pointer transition-all duration-300 hover:not(:disabled):-translate-y-[2px] shadow-[0_4px_10px_rgba(138,43,226,0.2)] hover:not(:disabled):shadow-[0_8px_25px_rgba(138,43,226,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? <Loader size={20} className="animate-spin" /> : <Save size={20} />}
+            {saving ? 'Saving...' : 'Save Settings'}
+          </button>
+        )}
       </div>
 
-      {/* Settings Grid */}
+      {/* Section tabs */}
+      <div className="flex gap-2 mb-8 border-b border-white/10 data-[theme=light]:border-black/10">
+        {TABS.map(tab => {
+          const Icon = tab.icon
+          return (
+            <button key={tab.id} onClick={() => setSection(tab.id)}
+              className={`flex items-center gap-2 py-2.5 px-4 text-[0.9rem] font-medium border-b-2 transition-all cursor-pointer bg-transparent
+                ${section === tab.id
+                  ? 'border-purple-500 text-purple-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
+              <Icon size={16} /> {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {section === 'pages' ? (
+        <PagesManagement embedded />
+      ) : loading ? (
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center text-gray-500 data-[theme=light]:text-gray-500">
+          <Loader size={48} className="animate-spin mb-4 text-purple-500" />
+          <p className="m-0 text-[1rem]">Loading settings...</p>
+        </div>
+      ) : (
+      /* Settings Grid */
       <div className="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-8 max-md:grid-cols-1 max-md:gap-6">
         
         {/* General Settings */}
@@ -372,6 +406,7 @@ const Settings = () => {
           </div>
         </motion.div>
       </div>
+      )}
     </div>
   )
 }

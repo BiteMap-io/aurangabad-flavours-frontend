@@ -49,20 +49,28 @@ const MediaManager = () => {
     }
   }
 
+  // The backend stores `type` as a full mimetype (e.g. "image/webp"), `size`
+  // as raw bytes, and the timestamp as `createdAt`. Normalize all of that here.
+  const isImage = (item) => (item?.type || '').startsWith('image/') || /\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i.test(item?.url || item?.name || '')
+  const isVideo = (item) => (item?.type || '').startsWith('video/') || /\.(mp4|webm|mov|mkv|avi)$/i.test(item?.url || item?.name || '')
+  const mediaDate = (item) => item?.createdAt || item?.uploadedAt || item?.updatedAt
+
   const filteredMedia = media
     .filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesType = filterType === 'all' || item.type === filterType
+      const matchesSearch = (item.name || '').toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesType = filterType === 'all'
+        || (filterType === 'image' && isImage(item))
+        || (filterType === 'video' && isVideo(item))
       return matchesSearch && matchesType
     })
     .sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.name.localeCompare(b.name)
+          return (a.name || '').localeCompare(b.name || '')
         case 'date':
-          return new Date(b.uploadedAt) - new Date(a.uploadedAt)
+          return new Date(mediaDate(b)) - new Date(mediaDate(a))
         case 'size':
-          return parseInt(b.size) - parseInt(a.size)
+          return (Number(b.size) || 0) - (Number(a.size) || 0)
         default:
           return 0
       }
@@ -148,22 +156,24 @@ const MediaManager = () => {
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    if (!dateString) return 'Unknown date'
+    const d = new Date(dateString)
+    if (isNaN(d.getTime())) return 'Unknown date'
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  }
+
+  const formatSize = (bytes) => {
+    const n = Number(bytes)
+    if (!n || isNaN(n)) return '—'
+    if (n < 1024) return `${n} B`
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`
+    return `${(n / (1024 * 1024)).toFixed(1)} MB`
   }
 
   const getFileIcon = (type) => {
-    switch (type) {
-      case 'image':
-        return <ImageIcon size={20} />
-      case 'video':
-        return <Video size={20} />
-      default:
-        return <File size={20} />
-    }
+    if ((type || '').startsWith('image/')) return <ImageIcon size={20} />
+    if ((type || '').startsWith('video/')) return <Video size={20} />
+    return <File size={20} />
   }
 
   return (
@@ -260,7 +270,7 @@ const MediaManager = () => {
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <div className="relative h-[150px] overflow-hidden cursor-pointer" onClick={() => openPreviewModal(mediaItem)}>
-                {mediaItem.type === 'image' ? (
+                {isImage(mediaItem) ? (
                   <img src={mediaItem.url} alt={mediaItem.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-transparent text-gray-500 data-[theme=light]:bg-black/5">
@@ -275,8 +285,8 @@ const MediaManager = () => {
               <div className="p-4 pb-2 flex-grow min-w-0 max-[480px]:p-2">
                 <h4 title={mediaItem.name} className="text-[0.9rem] font-semibold text-gray-100 m-0 mb-1 whitespace-nowrap overflow-hidden text-ellipsis data-[theme=light]:text-gray-900">{mediaItem.name}</h4>
                 <div className="flex justify-between text-[0.8rem] text-gray-500">
-                  <span>{mediaItem.size}</span>
-                  <span>{formatDate(mediaItem.uploadedAt)}</span>
+                  <span>{formatSize(mediaItem.size)}</span>
+                  <span>{formatDate(mediaDate(mediaItem))}</span>
                 </div>
               </div>
 
@@ -347,9 +357,9 @@ const MediaManager = () => {
             </button>
             
             <div className="flex-1 flex items-center justify-center min-h-[300px] max-h-[70vh] bg-black/20 overflow-hidden">
-              {previewModal.media?.type === 'image' ? (
+              {previewModal.media && isImage(previewModal.media) ? (
                 <img src={previewModal.media.url} alt={previewModal.media.name} className="max-w-full max-h-[70vh] w-auto h-auto object-contain" />
-              ) : previewModal.media?.type === 'video' ? (
+              ) : previewModal.media && isVideo(previewModal.media) ? (
                 <video controls className="max-w-full max-h-[70vh] w-auto h-auto object-contain">
                   <source src={previewModal.media.url} />
                   Your browser does not support the video tag.
@@ -368,8 +378,8 @@ const MediaManager = () => {
             <div className="p-6 border-t border-white/10 data-[theme=light]:border-black/10 bg-[#171717] data-[theme=light]:bg-white backdrop-blur-md">
               <h3 className="text-[1.1rem] text-gray-100 data-[theme=light]:text-gray-900 m-0 mb-2 font-semibold max-w-full overflow-hidden text-ellipsis whitespace-nowrap">{previewModal.media?.name}</h3>
               <div className="flex gap-6 text-[0.9rem] text-gray-500 max-md:flex-col max-md:gap-1">
-                <span>Size: {previewModal.media?.size}</span>
-                <span>Uploaded: {formatDate(previewModal.media?.uploadedAt)}</span>
+                <span>Size: {formatSize(previewModal.media?.size)}</span>
+                <span>Uploaded: {formatDate(mediaDate(previewModal.media))}</span>
               </div>
             </div>
           </div>
