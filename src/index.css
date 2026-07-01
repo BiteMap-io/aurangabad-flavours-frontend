@@ -204,4 +204,68 @@
     border-left-color: rgba(124, 58, 237, 0.5) !important;
     border-left-width: 3px !important;
   }
+
+  /* 2. Section headings purple gradient — light mode only */
+  [data-theme="light"] h1,
+  [data-theme="light"] h2 {
+    background: linear-gradient(135deg, #0f172a 0%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Keep headings on dark backgrounds (hero images) as white */
+  [data-theme="light"] .text-white h1,
+  [data-theme="light"] .text-white h2,
+  [data-theme="light"] h1.text-white,
+  [data-theme="light"] h2.text-white,
+  [data-theme="light"] .drop-shadow-lg {
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+  }
+
+  /* 3. Navbar bottom accent stripe — light mode only */
+  [data-theme="light"] nav {
+    border-bottom: 1px solid rgba(99, 102, 241, 0.15) !important;
+    box-shadow: 0 1px 0 0 rgba(124, 58, 237, 0.08),
+                0 2px 16px rgba(99, 102, 241, 0.06) !important;
+  }
+
+  [data-theme="light"] nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(124, 58, 237, 0.4), transparent);
+    pointer-events: none;
+  }
+
+  /* 5. Gradient section dividers — light mode only */
+  [data-theme="light"] .border-b.border-glass-border,
+  [data-theme="light"] .border-t.border-glass-border {
+    border-color: transparent !important;
+    position: relative;
+  }
+
+  [data-theme="light"] .border-b.border-glass-border::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(124, 58, 237, 0.3) 30%, rgba(124, 58, 237, 0.3) 70%, transparent);
+  }
+
+  [data-theme="light"] .border-t.border-glass-border::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(124, 58, 237, 0.3) 30%, rgba(124, 58, 237, 0.3) 70%, transparent);
+  }
 }
