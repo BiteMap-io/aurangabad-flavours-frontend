@@ -81,9 +81,9 @@
     --bg-primary: #ffffff;
     --bg-secondary: #f8fafc;
     
-    --glass-surface: rgba(255, 255, 255, 0.8);
+    --glass-surface: rgba(241, 243, 248, 0.9);
     --glass-border: rgba(99, 102, 241, 0.35);
-    --glass-hover: rgba(255, 255, 255, 0.95);
+    --glass-hover: rgba(234, 236, 242, 0.98);
     
     --text-primary: #0f172a;
     --text-secondary: #475569;
