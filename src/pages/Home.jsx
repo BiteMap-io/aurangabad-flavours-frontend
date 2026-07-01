@@ -7,6 +7,7 @@ import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import MasonryGallery from '../components/MasonryGallery'
 import { hotelsApi, galleryApi } from '../services/adminApi'
+import { SAMPLE_HOTELS, FALLBACK_HERO_IMAGE } from '../constants/sampleData'
 
 const Home = () => {
   const { t } = useTranslation()
@@ -26,16 +27,22 @@ const Home = () => {
 
         if (restaurantsRes.success || Array.isArray(restaurantsRes)) {
           const data = restaurantsRes.data || restaurantsRes
-          setRestaurants(data)
+          setRestaurants(data && data.length > 0 ? data : SAMPLE_HOTELS)
+        } else {
+          setRestaurants(SAMPLE_HOTELS)
         }
 
         const galleryData = galleryRes.data || galleryRes
         if (Array.isArray(galleryData) && galleryData.length > 0) {
           // Use the latest image with 'homepage' tag as hero
           setHeroImage(galleryData[0].url)
+        } else {
+          setHeroImage(FALLBACK_HERO_IMAGE)
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
+        setRestaurants(SAMPLE_HOTELS)
+        setHeroImage(FALLBACK_HERO_IMAGE)
       } finally {
         setLoading(false)
       }
