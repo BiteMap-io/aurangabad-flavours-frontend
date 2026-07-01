@@ -392,7 +392,7 @@ const MapView = () => {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25 }}>
             {!nearMeActive ? (
               <button onClick={handleNearMe} disabled={locationLoading}
-                className="flex items-center gap-xs py-sm px-lg bg-accent-purple hover:bg-accent-purple/80 border border-white/20 rounded-pill text-white font-semibold text-[1rem] cursor-pointer transition-all duration-300 disabled:opacity-60 hover:shadow-[0_0_24px_rgba(139,92,246,0.6)] hover:-translate-y-[2px]">
+                className="flex items-center gap-xs py-sm px-lg bg-accent-purple/10 hover:bg-accent-purple/20 border border-accent-purple/50 hover:border-accent-purple rounded-pill text-accent-purple font-semibold text-[1rem] cursor-pointer transition-all duration-300 disabled:opacity-60 hover:shadow-glow hover:-translate-y-[2px]">
                 {locationLoading ? <><Loader size={18} className="animate-spin" /> Locating…</> : <><Navigation size={18} /> Near Me</>}
               </button>
             ) : (
@@ -736,7 +736,7 @@ const MapView = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleCardClick(focusedRestaurant)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-accent-purple text-white rounded-lg text-[0.8rem] font-semibold transition-all hover:shadow-glow hover:-translate-y-[1px]"
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-lg text-[0.8rem] font-semibold transition-all hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[1px]"
                         >
                           <Navigation size={14} /> Show route
                         </button>

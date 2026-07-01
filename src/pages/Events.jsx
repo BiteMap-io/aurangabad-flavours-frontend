@@ -115,7 +115,7 @@ const Events = () => {
   }
 
   return (
-    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+    <div className="min-h-screen py-xl px-sm md:px-lg max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="text-center mb-xl">
         <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-pill bg-accent-purple/10 border border-accent-purple/25 text-accent-purple text-[0.85rem] font-semibold mb-md">

@@ -49,7 +49,7 @@ const TopPicks = () => {
   }
 
   return (
-    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+    <div className="min-h-screen py-xl px-sm md:px-lg max-w-[1400px] mx-auto">
       <div className="text-center mb-xl">
         <h1 className="text-[3rem] mb-sm text-primary font-bold">Top Picks</h1>
         <p className="text-[1.1rem] text-secondary">Curated selection of the best restaurants in Aurangabad</p>

@@ -60,7 +60,7 @@ const PlaceMap = () => {
       <div className="h-[calc(100vh-64px)] flex flex-col items-center justify-center text-secondary gap-4 px-6 text-center">
         <MapPin size={48} className="opacity-30" />
         <p className="m-0">We couldn't find that place.</p>
-        <button onClick={() => navigate('/explore')} className="py-2.5 px-5 bg-accent-purple text-white rounded-pill font-semibold hover:shadow-glow transition-all">
+        <button onClick={() => navigate('/explore')} className="py-2.5 px-5 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-pill font-semibold hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow transition-all">
           Back to Explore
         </button>
       </div>
@@ -149,7 +149,7 @@ const PlaceMap = () => {
             <button
               onClick={() => getDirections(restaurant)}
               disabled={routeLoading}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-accent-purple text-white rounded-xl text-[0.85rem] font-semibold transition-all hover:shadow-glow hover:-translate-y-[1px] disabled:opacity-60"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-xl text-[0.85rem] font-semibold transition-all hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[1px] disabled:opacity-60"
             >
               <Navigation size={16} /> Get directions
             </button>

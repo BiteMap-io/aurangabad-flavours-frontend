@@ -7,6 +7,12 @@ export const SAMPLE_HOTELS = [
     priceRange: '₹₹',
     rating: 4.6,
     image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&auto=format&fit=crop',
+    ],
     description:
       'A celebrated heritage dining spot in Aurangabad known for its authentic Marathwada thali, warm hospitality, and traditional recipes passed down through generations.',
     distance: '1.2 km',
@@ -35,6 +41,12 @@ export const SAMPLE_HOTELS = [
     priceRange: '₹₹₹',
     rating: 4.4,
     image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop',
+    gallery: [
+      'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=400&auto=format&fit=crop',
+    ],
     description:
       'One of Aurangabad\'s most iconic restaurants, famous for its slow-cooked dum biryani, sizzling tandoori platters, and rich Mughlai gravies in a regal setting.',
     distance: '2.5 km',

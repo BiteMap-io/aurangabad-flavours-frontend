@@ -348,7 +348,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   onClose()
                   navigate(`/place/${id}`)
                 }}
-                className="flex items-center gap-xs py-2 px-4 bg-accent-purple text-white rounded-full text-[0.85rem] font-semibold cursor-pointer transition-all duration-300 hover:shadow-glow hover:-translate-y-[1px]"
+                className="flex items-center gap-xs py-2 px-4 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-full text-[0.85rem] font-semibold cursor-pointer transition-all duration-300 hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[1px]"
               >
                 <Navigation size={16} />
                 <span>{t('common.directions')}</span>
@@ -545,7 +545,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
 
                     <button
                       type="submit"
-                      className="py-2.5 px-6 bg-accent-purple text-white rounded-lg text-[0.92rem] font-semibold cursor-pointer transition-all duration-200 self-start disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:shadow-glow hover:not-disabled:-translate-y-[1px] flex items-center gap-sm"
+                      className="py-2.5 px-6 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-lg text-[0.92rem] font-semibold cursor-pointer transition-all duration-200 self-start disabled:opacity-50 disabled:cursor-not-allowed hover:not-disabled:bg-accent-purple/20 hover:not-disabled:border-accent-purple hover:not-disabled:shadow-glow hover:not-disabled:-translate-y-[1px] flex items-center gap-sm"
                       disabled={userRating === 0 || isSubmitted || reviewLoading}
                     >
                       {reviewLoading && <Loader size={14} className="animate-spin" />}

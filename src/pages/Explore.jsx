@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams } from 'react-router-dom'
-import { X, SearchX } from 'lucide-react'
+import { X, SearchX, Search } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FilterBar from '../components/FilterBar'
@@ -23,7 +23,14 @@ const Explore = () => {
   const [restaurants, setRestaurants] = useState([])
   const [heroImage, setHeroImage] = useState("")
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   const { isTouristMode } = useTouristMode()
+
+  // Sync search query from URL on mount and when URL changes
+  useEffect(() => {
+    const qFromUrl = searchParams.get('q') || ''
+    setSearchQuery(qFromUrl)
+  }, [searchParams.get('q')])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,6 +83,23 @@ const Explore = () => {
       filtered = filterForTouristMode(filtered)
     }
 
+    // Search across multiple fields
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter((r) =>
+        r.name?.toLowerCase().includes(q) ||
+        r.cuisine?.toLowerCase().includes(q) ||
+        r.establishmentType?.toLowerCase().includes(q) ||
+        r.area?.toLowerCase().includes(q) ||
+        r.description?.toLowerCase().includes(q) ||
+        r.foodType?.toLowerCase().includes(q) ||
+        r.food?.signatureDishes?.toLowerCase().includes(q) ||
+        r.food?.specialtyDishes?.toLowerCase().includes(q) ||
+        r.environment?.uniqueFeatures?.toLowerCase().includes(q) ||
+        r.priceRange?.toLowerCase().includes(q)
+      )
+    }
+
     if (filters.establishmentType) {
       filtered = filtered.filter((r) => r.establishmentType === filters.establishmentType)
     }
@@ -120,7 +144,7 @@ const Explore = () => {
     }
 
     return filtered
-  }, [filters, isTouristMode, restaurants])
+  }, [filters, isTouristMode, restaurants, searchQuery])
 
   const handleRestaurantClick = (restaurant) => {
     setSelectedRestaurant(restaurant)
@@ -143,7 +167,7 @@ const Explore = () => {
   }
 
   return (
-    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+    <div className="min-h-screen py-xl px-sm md:px-lg max-w-[1400px] mx-auto">
       <div className="relative text-center mb-xl py-xl px-lg min-h-[200px] flex items-center justify-center overflow-hidden rounded-[2rem] bg-background-secondary border border-glass-border">
         {/* Background Image */}
         {heroImage && (
@@ -168,6 +192,46 @@ const Explore = () => {
         </div>
       </div>
 
+      {/* Search bar */}
+      <div className="relative mb-md">
+        <div className="flex items-center gap-sm bg-glass-surface border border-glass-border rounded-[1rem] px-md py-sm shadow-glass transition-all duration-300 focus-within:border-accent-purple/50 focus-within:shadow-glow">
+          <Search size={20} className="text-tertiary shrink-0" />
+          <input
+            type="text"
+            placeholder="Search by name, cuisine, type, area, dishes..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              // Update URL param so it's shareable
+              if (e.target.value) {
+                setSearchParams(prev => { prev.set('q', e.target.value); return prev })
+              } else {
+                setSearchParams(prev => { prev.delete('q'); return prev })
+              }
+            }}
+            className="flex-1 bg-transparent border-none outline-none text-primary text-[0.95rem] placeholder:text-tertiary"
+            aria-label="Search restaurants"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery('')
+                setSearchParams(prev => { prev.delete('q'); return prev })
+              }}
+              className="text-tertiary hover:text-primary transition-colors duration-200 shrink-0"
+              aria-label="Clear search"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="text-tertiary text-[0.8rem] mt-xs ml-xs">
+            Searching for "<span className="text-accent-purple font-medium">{searchQuery}</span>"
+          </p>
+        )}
+      </div>
+
       <FilterBar 
         filters={filters} 
         onFilterChange={handleFilterChange} 
@@ -175,10 +239,19 @@ const Explore = () => {
       />
 
       <div className="mt-xl">
-        <div className="mb-lg pb-md border-b border-glass-border">
+        <div className="mb-lg pb-md border-b border-glass-border flex items-center justify-between flex-wrap gap-xs">
           <span className="text-secondary text-[0.95rem]">
             {filteredRestaurants.length} restaurant{filteredRestaurants.length !== 1 ? 's' : ''} found
+            {searchQuery && <span className="text-accent-purple font-medium"> for "{searchQuery}"</span>}
           </span>
+          {(searchQuery || Object.values(filters).some(v => v && v !== false && (Array.isArray(v) ? v.length > 0 : true))) && (
+            <button
+              onClick={() => { setSearchQuery(''); setFilters({ establishmentType: '', cuisine: '', priceRange: '', rating: '', facilities: [], area: '', nearMe: false }) }}
+              className="flex items-center gap-1 text-[0.8rem] text-tertiary hover:text-accent-purple transition-colors duration-200"
+            >
+              <X size={14} /> Clear all
+            </button>
+          )}
         </div>
 
         <motion.div
@@ -220,7 +293,7 @@ const Explore = () => {
                   <p className="text-secondary text-[0.95rem]">Try adjusting your filters or searching in a different area.</p>
                 </div>
                 <button
-                  className="py-sm px-lg bg-accent-purple text-white rounded-pill text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 hover:bg-accent-purple/85 hover:shadow-glow hover:-translate-y-[2px] border-none"
+                  className="py-sm px-lg bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-pill text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]"
                   onClick={() => setFilters({
                     establishmentType: '',
                     cuisine: '',

@@ -11,7 +11,7 @@ const About = () => {
   })
 
   return (
-    <motion.div className="min-h-screen py-xl px-lg bg-background-primary"
+    <motion.div className="min-h-screen py-xl px-sm md:px-lg bg-background-primary"
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-xl">

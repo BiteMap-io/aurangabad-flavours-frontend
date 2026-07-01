@@ -1,17 +1,30 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { Star, UtensilsCrossed, MapPin, Award } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Star, UtensilsCrossed, MapPin, Award, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import MasonryGallery from '../components/MasonryGallery'
 import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
+import { SAMPLE_HOTELS, FALLBACK_HERO_IMAGE } from '../constants/sampleData'
 import useSEO from '../hooks/useSEO'
 
 const Home = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [homeSearch, setHomeSearch] = useState('')
+
+  const handleHomeSearch = (e) => {
+    e.preventDefault()
+    if (homeSearch.trim()) {
+      navigate(`/explore?q=${encodeURIComponent(homeSearch.trim())}`)
+    } else {
+      navigate('/explore')
+    }
+  }
+
   useSEO({
     title: 'Home — Discover Aurangabad\'s Best Restaurants',
     description: 'Explore top-rated restaurants, food culture and culinary experiences in Aurangabad. Curated by IHM MGM University.',
@@ -33,15 +46,21 @@ const Home = () => {
 
         if (restaurantsRes.success || Array.isArray(restaurantsRes)) {
           const data = restaurantsRes.data || restaurantsRes
-          setRestaurants(Array.isArray(data) ? data : [])
+          setRestaurants(Array.isArray(data) && data.length > 0 ? data : SAMPLE_HOTELS)
+        } else {
+          setRestaurants(SAMPLE_HOTELS)
         }
 
         const galleryData = galleryRes.data || galleryRes
         if (Array.isArray(galleryData) && galleryData.length > 0) {
           setHeroImage(galleryData[0].url)
+        } else {
+          setHeroImage(FALLBACK_HERO_IMAGE)
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
+        setRestaurants(SAMPLE_HOTELS)
+        setHeroImage(FALLBACK_HERO_IMAGE)
       } finally {
         setLoading(false)
       }
@@ -65,7 +84,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen pb-xl">
-      <section className="relative min-h-[60vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-background-secondary border-b border-glass-border">
+      <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center py-xl px-sm md:px-lg mb-xl overflow-hidden bg-background-secondary border-b border-glass-border">
         {/* Background Image */}
         <img
           src={heroImage}
@@ -73,8 +92,8 @@ const Home = () => {
           className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.6] saturate-[1.1] light:brightness-[0.7]"
         />
         
-        {/* Dark Overlay */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/60 to-black/40 z-10 light:from-black/40 light:to-black/20" />
+        {/* Dark Overlay — #5 lightened so hero image shows through */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/40 to-black/20 z-10" />
         
         {/* Content */}
         <motion.div
@@ -83,7 +102,7 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-[2.25rem] md:text-[2.5rem] xl:text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2]">
+          <h1 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.5rem] xl:text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2]">
             Discover Aurangabad's Culinary Treasures
           </h1>
           <p className="text-[1rem] md:text-[1.1rem] xl:text-[1.25rem] text-white/90 mb-lg drop-shadow-md opacity-95">
@@ -92,13 +111,34 @@ const Home = () => {
           <Link to="/explore" className="inline-block py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
             Explore Restaurants
           </Link>
+
+          {/* Search bar */}
+          <form onSubmit={handleHomeSearch} className="mt-lg w-full max-w-[560px] mx-auto">
+            <div className="flex items-center bg-white/10 backdrop-blur-[16px] border border-white/25 rounded-pill px-md py-sm gap-sm shadow-glass focus-within:border-accent-purple/60 focus-within:bg-white/15 transition-all duration-300">
+              <Search size={18} className="text-white/70 shrink-0" />
+              <input
+                type="text"
+                value={homeSearch}
+                onChange={(e) => setHomeSearch(e.target.value)}
+                placeholder="Search restaurants, cuisines, dishes..."
+                className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/50 text-[0.95rem]"
+                aria-label="Search restaurants"
+              />
+              <button
+                type="submit"
+                className="shrink-0 px-md py-xs bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 text-white text-[0.85rem] font-semibold rounded-pill transition-all duration-200 hover:shadow-glow cursor-pointer"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </motion.div>
       </section>
 
       {/* Stats bar */}
-      <div className="max-w-[1400px] mx-auto px-lg -mt-sm mb-xl">
+      <div className="max-w-[1400px] mx-auto px-sm md:px-lg -mt-sm mb-xl">
         <motion.div
-          className="flex flex-wrap items-center justify-center gap-md md:gap-xl py-md px-lg bg-glass-surface border border-glass-border rounded-[1.5rem] shadow-glass"
+          className="flex flex-wrap items-center justify-center gap-sm md:gap-xl py-sm md:py-md px-sm md:px-lg bg-glass-surface border border-glass-border border-t-[2px] border-t-accent-purple/40 rounded-[1.5rem] shadow-glass"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -125,7 +165,7 @@ const Home = () => {
         </motion.div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-lg">
+      <div className="max-w-[1400px] mx-auto px-sm md:px-lg">
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-lg mb-xl">
           <motion.div
             className="col-span-1 bg-glass-surface backdrop-blur-[24px] border border-glass-border rounded-[2rem] p-lg transition-all duration-400 shadow-glass hover:bg-glass-hover hover:border-accent-purple/20 hover:-translate-y-[6px] hover:shadow-glow/20"
@@ -176,7 +216,13 @@ const Home = () => {
         </section>
 
         <section className="mt-xl">
-          <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold mb-lg text-primary tracking-[-0.02em] leading-[1.2]">Featured Restaurants</h2>
+          {/* #7 — Featured section with icon and subtitle */}
+          <div className="flex flex-col mb-lg">
+            <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold text-primary tracking-[-0.02em] leading-[1.2] m-0">
+              🍽️ Featured Restaurants
+            </h2>
+            <p className="text-secondary text-[0.95rem] mt-xs m-0">Hand-picked by our culinary team at IHM MGM University</p>
+          </div>
           <div className="flex flex-col gap-md">
             {loading ? (
               <SkeletonList count={3} />
