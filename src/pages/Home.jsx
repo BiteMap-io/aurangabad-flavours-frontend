@@ -91,7 +91,7 @@ const Home = () => {
           <p className="text-[1rem] md:text-[1.1rem] xl:text-[1.25rem] text-white/90 mb-lg drop-shadow-md opacity-95">
             Curated by Institute of Hotel Management, MGM University
           </p>
-          <Link to="/explore" className="inline-block py-sm px-lg bg-accent-purple text-white font-semibold rounded-pill transition-all duration-300 shadow-[0_4px_20px_rgba(124,58,237,0.5)] hover:bg-accent-purple/90 hover:shadow-[0_4px_28px_rgba(124,58,237,0.7)] hover:-translate-y-[2px]">
+          <Link to="/explore" className="inline-block py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
             Explore Restaurants
           </Link>
         </motion.div>
