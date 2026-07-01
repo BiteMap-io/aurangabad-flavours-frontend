@@ -81,9 +81,10 @@
     --bg-primary: #faf8f5;
     --bg-secondary: #f4f6fb;
     
-    --glass-surface: rgba(235, 232, 255, 0.45);
-    --glass-border: rgba(99, 102, 241, 0.35);
-    --glass-hover: rgba(228, 225, 255, 0.65);
+    /* 1. Rich solid white cards instead of transparent */
+    --glass-surface: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(99, 102, 241, 0.2);
+    --glass-hover: rgba(248, 246, 255, 1);
     
     --text-primary: #0f172a;
     --text-secondary: #334155;
@@ -92,8 +93,9 @@
     --accent-purple: #7c3aed;
     --accent-gold: #d97706;
     
-    --shadow-glass: 0 4px 24px rgba(99, 102, 241, 0.12), 0 1px 4px rgba(99, 102, 241, 0.06);
-    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.18);
+    /* 4. Stronger colored shadow on hover */
+    --shadow-glass: 0 2px 16px rgba(99, 102, 241, 0.1), 0 1px 4px rgba(99, 102, 241, 0.06);
+    --shadow-glow: 0 8px 32px rgba(124, 58, 237, 0.18), 0 2px 8px rgba(124, 58, 237, 0.1);
     
     --background-primary: var(--bg-primary);
     --background-secondary: var(--bg-secondary);
@@ -157,9 +159,49 @@
     background: #94a3b8;
   }
 
-  /* Light mode — warm gradient page background */
+  /* Light mode — warm gradient page background + background orbs (7) */
   [data-theme="light"] body {
     background: linear-gradient(160deg, #faf8f5 0%, #f4f1ff 60%, #eef2ff 100%);
     min-height: 100vh;
+  }
+
+  /* Background decorative orbs — pure CSS, light mode only */
+  [data-theme="light"] #root::before {
+    content: '';
+    position: fixed;
+    top: -120px;
+    right: -120px;
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(124, 58, 237, 0.04) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  [data-theme="light"] #root::after {
+    content: '';
+    position: fixed;
+    bottom: -100px;
+    left: -100px;
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(217, 119, 6, 0.1) 0%, rgba(217, 119, 6, 0.03) 50%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 4. Card hover lift with colored shadow — light mode only */
+  [data-theme="light"] .hover\:shadow-glass:hover,
+  [data-theme="light"] .hover\:shadow-glow:hover {
+    box-shadow: 0 8px 32px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(124, 58, 237, 0.08) !important;
+    transform: translateY(-3px);
+  }
+
+  /* 1. Card left accent stripe on hover — light mode only */
+  [data-theme="light"] .hover\:border-accent-purple\/20:hover {
+    border-left-color: rgba(124, 58, 237, 0.5) !important;
+    border-left-width: 3px !important;
   }
 }
