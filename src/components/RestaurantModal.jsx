@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, MapPin, Clock, Star, Navigation, ChevronLeft, ChevronRight, Heart, Loader } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { X, MapPin, Clock, Star, Navigation, ChevronLeft, ChevronRight, Heart, Loader, Share2, Image as ImageIconStack } from 'lucide-react'
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { useDirections } from '../hooks/useDirections'
 import { useUserAuth } from '../context/UserAuthContext'
 import api from '../services/api'
 import { dishesApi } from '../services/adminApi'
+import { showToast } from './admin/Toast'
 
 const modalMapStyle = { width: '100%', height: '100%' }
 
@@ -104,6 +106,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const { userLocation, directions, routeInfo, loading: dirLoading, error: dirError, getDirections, clear: clearRoute } = useDirections()
   const { user, isLoggedIn } = useUserAuth()
@@ -170,6 +173,33 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
     touchStartX.current = null
   }
 
+  const openLightbox = (index) => {
+    setCurrentImageIndex(index)
+    setLightboxOpen(true)
+  }
+
+  // Shares a server-rendered link (not the raw SPA URL) so WhatsApp/Facebook/etc.
+  // link previews show the restaurant's real name and photo — they don't run the
+  // JS that would be needed to read tags off the client-rendered page.
+  const handleShare = async () => {
+    const id = restaurant?._id || restaurant?.id
+    const shareUrl = `${import.meta.env.VITE_API_BASE_URL}/share/restaurant/${id}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: restaurant.name, text: `Check out ${restaurant.name} on Aurangabad Flavours`, url: shareUrl })
+      } catch {
+        // User cancelled the native share sheet — no error needed.
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      showToast.success('Link copied', 'Share it with your friends!')
+    } catch {
+      showToast.error('Error', 'Could not copy the link')
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (userRating === 0) return
@@ -229,130 +259,123 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', stiffness: 320, damping: 34 }}
           >
-            {/* ── Hero gallery ── */}
-            <div className="relative w-full shrink-0">
-              <div
-                className="relative w-full h-[230px] sm:h-[280px] lg:h-[340px] overflow-hidden bg-background-secondary"
-                onTouchStart={onTouchStart}
-                onTouchEnd={onTouchEnd}
-              >
-                <img
-                  src={hasImages ? images[safeIndex] : PLACEHOLDER_IMG}
-                  alt={`${restaurant.name} — photo ${safeIndex + 1}`}
-                  onError={onImgError}
-                  className="w-full h-full object-cover"
-                  draggable={false}
-                />
-                {/* Legibility gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/40 pointer-events-none" />
+            {/* ── Header: details on the left, 4-photo grid on the right ── */}
+            <div className="relative w-full shrink-0 border-b border-glass-border">
+              {/* Top-right controls float over the whole header */}
+              <div className="absolute top-sm right-sm md:top-md md:right-md z-10 flex items-center gap-xs">
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full backdrop-blur-md border bg-black/55 border-white/10 text-white transition-all duration-300 hover:bg-black/75"
+                >
+                  <Share2 size={17} />
+                </button>
+                <button
+                  onClick={() => setIsFavorite(f => !f)}
+                  aria-label="Save"
+                  className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full backdrop-blur-md border transition-all duration-300 ${isFavorite ? 'bg-[#ff4757] border-[#ff4757] text-white' : 'bg-black/55 border-white/10 text-white hover:bg-black/75'}`}
+                >
+                  <Heart size={18} fill={isFavorite ? '#fff' : 'none'} />
+                </button>
+                <button
+                  onClick={onClose}
+                  aria-label={t('accessibility.closeModal')}
+                  className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-black/55 backdrop-blur-md border border-white/10 text-white transition-all duration-300 hover:bg-black/75 hover:rotate-90"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-                {/* Top controls */}
-                <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-sm md:p-md">
-                  {hasImages && images.length > 1 ? (
-                    <span className="py-1 px-2.5 bg-black/55 backdrop-blur-md border border-white/10 rounded-full text-white text-[0.75rem] font-medium">
-                      {safeIndex + 1} / {images.length}
-                    </span>
-                  ) : <span />}
-
-                  <div className="flex items-center gap-xs">
-                    <button
-                      onClick={() => setIsFavorite(f => !f)}
-                      aria-label="Save"
-                      className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full backdrop-blur-md border transition-all duration-300 ${isFavorite ? 'bg-[#ff4757] border-[#ff4757] text-white' : 'bg-black/55 border-white/10 text-white hover:bg-black/75'}`}
-                    >
-                      <Heart size={18} fill={isFavorite ? '#fff' : 'none'} />
-                    </button>
-                    <button
-                      onClick={onClose}
-                      aria-label={t('accessibility.closeModal')}
-                      className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-black/55 backdrop-blur-md border border-white/10 text-white transition-all duration-300 hover:bg-black/75 hover:rotate-90"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Carousel arrows */}
-                {hasImages && images.length > 1 && (
-                  <>
-                    <button onClick={prevImage} aria-label="Previous photo"
-                      className="absolute top-1/2 -translate-y-1/2 left-2 md:left-3 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-black/45 backdrop-blur-md border border-white/10 text-white transition-all hover:bg-black/70">
-                      <ChevronLeft size={22} />
-                    </button>
-                    <button onClick={nextImage} aria-label="Next photo"
-                      className="absolute top-1/2 -translate-y-1/2 right-2 md:right-3 w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-black/45 backdrop-blur-md border border-white/10 text-white transition-all hover:bg-black/70">
-                      <ChevronRight size={22} />
-                    </button>
-                  </>
-                )}
-
-                {/* Title overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-md lg:p-lg flex flex-col gap-1.5">
+              <div className="flex flex-col md:flex-row gap-md lg:gap-lg p-md lg:p-lg pb-sm">
+                {/* Left: details */}
+                <div className="flex-1 min-w-0 flex flex-col gap-sm pr-[7.5rem] md:pr-[9rem] order-2 md:order-1">
                   {restaurant.ihmRecommended && (
-                    <span className="self-start bg-gradient-to-r from-accent-purple to-[#9b59b6] text-white rounded-full px-2.5 py-1 text-[0.7rem] font-semibold shadow-glow mb-0.5">
+                    <span className="self-start bg-gradient-to-r from-accent-purple to-[#9b59b6] text-white rounded-full px-2.5 py-1 text-[0.7rem] font-semibold shadow-glow">
                       {t('restaurant.ihmRecommended')}
                     </span>
                   )}
-                  <h1 className="text-[1.5rem] sm:text-[1.8rem] lg:text-[2.3rem] leading-[1.05] m-0 font-bold text-white tracking-[-0.02em] drop-shadow-lg">
+                  <h1 className="text-[1.4rem] sm:text-[1.7rem] lg:text-[2rem] leading-[1.1] m-0 font-bold text-primary tracking-[-0.02em]">
                     {restaurant.name}
                   </h1>
-                  <div className="flex items-center gap-sm flex-wrap text-white/90">
+                  <div className="flex items-center gap-sm flex-wrap text-secondary">
                     <span className="text-[0.9rem] font-medium">{restaurant.cuisine}</span>
-                    <span className="flex items-center gap-1 bg-white/15 backdrop-blur-md rounded-full px-2 py-0.5">
+                    <span className="flex items-center gap-1 bg-glass-surface border border-glass-border rounded-full px-2 py-0.5">
                       <Star size={14} fill="#fbbf24" color="#fbbf24" />
-                      <span className="text-[0.85rem] font-bold text-white">{averageRating}</span>
-                      <span className="text-[0.75rem] text-white/70">({reviewCount})</span>
+                      <span className="text-[0.85rem] font-bold text-primary">{averageRating}</span>
+                      <span className="text-[0.75rem] text-tertiary">({reviewCount})</span>
                     </span>
                     {restaurant.priceRange && (
-                      <span className="text-[0.9rem] font-semibold text-white">{restaurant.priceRange}</span>
+                      <span className="text-[0.9rem] font-semibold text-primary">{restaurant.priceRange}</span>
                     )}
+                  </div>
+
+                  <div className="flex items-center gap-xs text-secondary text-[0.82rem] flex-wrap">
+                    <MapPin size={15} className="text-accent-purple" />
+                    <span>{restaurant.area}</span>
+                    {restaurant.distance && (<><span className="opacity-40">•</span><span>{restaurant.distance}</span></>)}
+                    {restaurant.travelTime && (<><span className="opacity-40">•</span><Clock size={14} /><span>{restaurant.travelTime}</span></>)}
+                    {foodTypeLabel && (
+                      <>
+                        <span className="opacity-40">•</span>
+                        <span className={`font-semibold ${restaurant.foodType === 'veg' ? 'text-green-400' : restaurant.foodType === 'non-veg' ? 'text-red-400' : 'text-purple-400'}`}>
+                          {foodTypeLabel}
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  {restaurant.description && (
+                    <p className="text-secondary leading-[1.6] m-0 text-[0.88rem] line-clamp-3 md:line-clamp-none">{restaurant.description}</p>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      const id = restaurant?._id || restaurant?.id
+                      onClose()
+                      navigate(`/place/${id}`)
+                    }}
+                    className="flex items-center gap-xs py-2 px-4 bg-accent-purple text-white rounded-full text-[0.85rem] font-semibold cursor-pointer transition-all duration-300 hover:shadow-glow hover:-translate-y-[1px] self-start mt-1"
+                  >
+                    <Navigation size={16} />
+                    <span>{t('common.directions')}</span>
+                  </button>
+                </div>
+
+                {/* Right: 4-photo grid */}
+                <div className="w-full md:w-[300px] lg:w-[340px] md:shrink-0 order-1 md:order-2">
+                  <div
+                    className="grid grid-cols-2 gap-1.5 rounded-xl overflow-hidden h-[220px] md:h-[240px]"
+                    onTouchStart={onTouchStart}
+                    onTouchEnd={onTouchEnd}
+                  >
+                    {hasImages ? (
+                      images.slice(0, 4).map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => openLightbox(index)}
+                          className="relative overflow-hidden bg-background-secondary group"
+                        >
+                          <img src={image} alt={`${restaurant.name} — photo ${index + 1}`} onError={onImgError} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                          {index === 3 && images.length > 4 && (
+                            <div className="absolute inset-0 bg-black/55 flex items-center justify-center text-white font-semibold text-[0.95rem] gap-1.5">
+                              <ImageIconStack size={16} /> +{images.length - 4}
+                            </div>
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <button onClick={() => openLightbox(0)} className="col-span-2 relative overflow-hidden bg-background-secondary">
+                        <img src={PLACEHOLDER_IMG} alt={restaurant.name} className="w-full h-full object-cover" />
+                      </button>
+                    )}
+                    {/* Fill remaining grid slots so the layout stays a full 2x2 even with <4 photos */}
+                    {hasImages && images.length > 0 && images.length < 4 &&
+                      Array.from({ length: 4 - images.length }).map((_, i) => (
+                        <div key={`empty-${i}`} className="bg-background-secondary/60 border border-dashed border-glass-border" />
+                      ))}
                   </div>
                 </div>
               </div>
-
-              {/* Thumbnail strip */}
-              {hasImages && images.length > 1 && (
-                <div className="flex gap-xs p-sm bg-background-secondary overflow-x-auto scrollbar-none border-b border-glass-border/40 light:bg-background-primary">
-                  {images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`shrink-0 w-[56px] h-[42px] rounded-md overflow-hidden border-2 transition-all duration-200 ${index === safeIndex ? 'border-accent-purple' : 'border-transparent opacity-55 hover:opacity-100'}`}
-                    >
-                      <img src={image} alt={`Thumbnail ${index + 1}`} onError={onImgError} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ── Meta row + Directions ── */}
-            <div className="flex items-center justify-between gap-md flex-wrap px-md lg:px-lg py-sm border-b border-glass-border">
-              <div className="flex items-center gap-xs text-secondary text-[0.82rem] flex-wrap">
-                <MapPin size={15} className="text-accent-purple" />
-                <span>{restaurant.area}</span>
-                {restaurant.distance && (<><span className="opacity-40">•</span><span>{restaurant.distance}</span></>)}
-                {restaurant.travelTime && (<><span className="opacity-40">•</span><Clock size={14} /><span>{restaurant.travelTime}</span></>)}
-                {foodTypeLabel && (
-                  <>
-                    <span className="opacity-40">•</span>
-                    <span className={`font-semibold ${restaurant.foodType === 'veg' ? 'text-green-400' : restaurant.foodType === 'non-veg' ? 'text-red-400' : 'text-purple-400'}`}>
-                      {foodTypeLabel}
-                    </span>
-                  </>
-                )}
-              </div>
-              <button
-                onClick={() => {
-                  const id = restaurant?._id || restaurant?.id
-                  onClose()
-                  navigate(`/place/${id}`)
-                }}
-                className="flex items-center gap-xs py-2 px-4 bg-accent-purple text-white rounded-full text-[0.85rem] font-semibold cursor-pointer transition-all duration-300 hover:shadow-glow hover:-translate-y-[1px]"
-              >
-                <Navigation size={16} />
-                <span>{t('common.directions')}</span>
-              </button>
             </div>
 
             {/* ── Body ── */}
@@ -616,6 +639,71 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* ── Fullscreen photo lightbox — portaled so it covers the whole viewport ── */}
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && lightboxOpen && hasImages && (
+            <motion.div
+              className="fixed inset-0 z-[3000] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setLightboxOpen(false)}
+            >
+              <button
+                onClick={() => setLightboxOpen(false)}
+                aria-label="Close"
+                className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 border border-white/15 text-white hover:bg-white/20 transition-all z-10"
+              >
+                <X size={24} />
+              </button>
+
+              <span className="absolute top-5 left-1/2 -translate-x-1/2 py-1 px-3 bg-white/10 border border-white/15 rounded-full text-white text-[0.8rem] font-medium">
+                {safeIndex + 1} / {images.length}
+              </span>
+
+              <div className="relative w-full h-full flex items-center justify-center px-16" onClick={e => e.stopPropagation()}
+                onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
+              >
+                {images.length > 1 && (
+                  <button onClick={prevImage} aria-label="Previous photo"
+                    className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 border border-white/15 text-white hover:bg-white/20 transition-all">
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                <img
+                  src={images[safeIndex]}
+                  alt={`${restaurant.name} — photo ${safeIndex + 1}`}
+                  onError={onImgError}
+                  className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl border border-white/10"
+                />
+                {images.length > 1 && (
+                  <button onClick={nextImage} aria-label="Next photo"
+                    className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center rounded-full bg-white/10 border border-white/15 text-white hover:bg-white/20 transition-all">
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+              </div>
+
+              {images.length > 1 && (
+                <div className="flex gap-xs p-sm overflow-x-auto scrollbar-none max-w-[92vw]" onClick={e => e.stopPropagation()}>
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`shrink-0 w-[56px] h-[42px] rounded-md overflow-hidden border-2 transition-all duration-200 ${index === safeIndex ? 'border-accent-purple' : 'border-transparent opacity-55 hover:opacity-100'}`}
+                    >
+                      <img src={image} alt={`Thumbnail ${index + 1}`} onError={onImgError} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
     </AnimatePresence>
   )

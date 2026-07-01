@@ -66,12 +66,19 @@ const buildHotelFormData = (hotelData, menuFile) => {
 };
 
 export const hotelsApi = {
-  async getAll() {
-    return await api.get('/restaurants');
+  // status: undefined (public/approved), 'pending' | 'approved' | 'rejected' | 'all' (admin only)
+  async getAll(status) {
+    const url = status ? `/restaurants?status=${status}` : '/restaurants';
+    return await api.get(url);
   },
 
   async getById(id) {
     return await api.get(`/restaurants/${id}`);
+  },
+
+  // Every restaurant owned by the authenticated restaurant_owner, any approval status.
+  async getMine() {
+    return await api.get('/restaurants/mine');
   },
 
   async create(hotelData, menuFile = null) {
@@ -92,6 +99,14 @@ export const hotelsApi = {
 
   async toggleFeatured(id) {
     return await api.patch(`/restaurants/${id}/toggle-featured`);
+  },
+
+  async approve(id) {
+    return await api.patch(`/restaurants/${id}/approve`);
+  },
+
+  async reject(id, reason = '') {
+    return await api.patch(`/restaurants/${id}/reject`, { reason });
   }
 };
 
@@ -256,15 +271,7 @@ export const dishesApi = {
   },
 
   async getByRestaurant(restaurantId) {
-    const all = await api.get('/dishes');
-    const data = all.data || all;
-    if (!Array.isArray(data)) return [];
-    return data.filter(d => {
-      const rid = typeof d.restaurantId === 'object' && d.restaurantId !== null
-        ? (d.restaurantId._id || d.restaurantId.id)
-        : d.restaurantId;
-      return String(rid) === String(restaurantId);
-    });
+    return await api.get(`/dishes?restaurantId=${restaurantId}`);
   },
 
   async create(dishData) {
@@ -304,6 +311,33 @@ export const foodTrailsApi = {
 
   async delete(id) {
     return await api.delete(`/food-trails/${id}`);
+  }
+};
+
+// ─── Offers ─────────────────────────────────────────────────────────────────
+// Restaurant-owner-managed discounts. GET is public; mutations are scoped
+// server-side to admins or the restaurant's own owner.
+// tiers: [{ minSpend, discountPercent }]  audience: 'all' | 'student'
+
+export const offersApi = {
+  async getByRestaurant(restaurantId) {
+    return await api.get(`/offers?restaurantId=${restaurantId}`);
+  },
+
+  async getById(id) {
+    return await api.get(`/offers/${id}`);
+  },
+
+  async create(offerData) {
+    return await api.post('/offers', offerData);
+  },
+
+  async update(id, offerData) {
+    return await api.put(`/offers/${id}`, offerData);
+  },
+
+  async delete(id) {
+    return await api.delete(`/offers/${id}`);
   }
 };
 

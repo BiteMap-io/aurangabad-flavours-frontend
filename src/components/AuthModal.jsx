@@ -6,14 +6,14 @@ import { useUserAuth } from '../context/UserAuthContext'
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const { t } = useTranslation()
-  const { login, signup } = useUserAuth()
+  const { login, signup, guestLogin } = useUserAuth()
   const [mode, setMode] = useState(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', confirmPassword: '',
+    name: '', email: '', password: '', confirmPassword: '', phone: '',
     accountType: 'customer', rememberMe: false, acceptTerms: false
   })
 
@@ -21,7 +21,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ name: '', email: '', password: '', confirmPassword: '', accountType: 'customer', rememberMe: false, acceptTerms: false })
+      setFormData({ name: '', email: '', password: '', confirmPassword: '', phone: '', accountType: 'customer', rememberMe: false, acceptTerms: false })
       setShowPassword(false)
       setShowConfirmPassword(false)
       setError('')
@@ -52,7 +52,9 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
     try {
       const result = mode === 'login'
         ? await login(formData.email, formData.password)
-        : await signup(formData.name, formData.email, formData.password, formData.accountType)
+        : mode === 'guest'
+          ? await guestLogin(formData.name, formData.email, formData.phone)
+          : await signup(formData.name, formData.email, formData.password, formData.accountType)
 
       if (result.success) {
         onClose()
@@ -69,7 +71,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const switchMode = (newMode) => {
     setMode(newMode)
     setError('')
-    setFormData({ name: '', email: '', password: '', confirmPassword: '', accountType: 'customer', rememberMe: false, acceptTerms: false })
+    setFormData({ name: '', email: '', password: '', confirmPassword: '', phone: '', accountType: 'customer', rememberMe: false, acceptTerms: false })
     setShowPassword(false)
     setShowConfirmPassword(false)
   }
@@ -104,14 +106,26 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
           <div className="p-sm pt-[calc(1rem+20px)] md:p-md md:pt-[calc(1.5rem+20px)] lg:p-xl lg:pt-[calc(2rem+20px)] min-h-fit">
             <div className="text-center mb-md lg:mb-lg">
               <h2 className="text-[1.25rem] md:text-[1.5rem] lg:text-[1.75rem] font-bold text-primary mb-sm font-['Playfair_Display',serif]">
-                {mode === 'login' ? t('auth.login') : t('auth.join')}
+                {mode === 'login' ? t('auth.login') : mode === 'guest' ? 'Continue as Guest' : t('auth.join')}
               </h2>
               <p className="text-secondary text-[0.95rem] m-0">
-                {mode === 'login' ? 'Sign in to your account' : 'Create your account to get started'}
+                {mode === 'login' ? 'Sign in to your account' : mode === 'guest' ? 'Just a few details — no password needed' : 'Create your account to get started'}
               </p>
             </div>
 
             <form className="flex flex-col gap-sm lg:gap-md" onSubmit={handleSubmit}>
+              {mode === 'guest' && (
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="name" className="text-[0.9rem] font-medium text-primary">{t('auth.name')}</label>
+                  <input
+                    type="text" id="name" name="name" value={formData.name} onChange={handleInputChange}
+                    placeholder={t('auth.name')}
+                    className="p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
+                    required
+                  />
+                </div>
+              )}
+
               {mode === 'join' && (
                 <div className="flex flex-col gap-xs">
                   <label htmlFor="name" className="text-[0.9rem] font-medium text-primary">{t('auth.name')}</label>
@@ -173,28 +187,41 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                 />
               </div>
 
-              <div className="flex flex-col gap-xs">
-                <label htmlFor="password" className="text-[0.9rem] font-medium text-primary">{t('auth.password')}</label>
-                <div className="relative">
+              {mode === 'guest' && (
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="phone" className="text-[0.9rem] font-medium text-primary">Phone <span className="text-secondary font-normal">(optional)</span></label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    placeholder={t('auth.password')}
-                    className="w-full p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
-                    required
+                    type="tel" id="phone" name="phone" value={formData.phone} onChange={handleInputChange}
+                    placeholder="+91 98765 43210"
+                    className="p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
                   />
-                  <button
-                    type="button"
-                    className="absolute right-md top-1/2 -translate-y-1/2 bg-transparent border-none text-secondary cursor-pointer p-0 flex items-center justify-center transition-colors duration-200 hover:text-primary"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
                 </div>
-              </div>
+              )}
+
+              {mode !== 'guest' && (
+                <div className="flex flex-col gap-xs">
+                  <label htmlFor="password" className="text-[0.9rem] font-medium text-primary">{t('auth.password')}</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder={t('auth.password')}
+                      className="w-full p-md bg-glass-surface border border-glass-border rounded-md text-primary text-[0.95rem] transition-all duration-300 focus:outline-none focus:border-accent-purple focus:shadow-glow placeholder:text-secondary"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-md top-1/2 -translate-y-1/2 bg-transparent border-none text-secondary cursor-pointer p-0 flex items-center justify-center transition-colors duration-200 hover:text-primary"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {mode === 'join' && (
                 <div className="flex flex-col gap-xs">
@@ -259,7 +286,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
               <button type="submit" disabled={loading} className="w-full p-md lg:px-lg lg:py-md bg-accent-purple border-none rounded-pill text-white text-[1rem] font-semibold cursor-pointer transition-all duration-300 mt-xs hover:bg-accent-purple/90 hover:shadow-glow hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-sm">
                 {loading && <Loader size={16} className="animate-spin" />}
-                {mode === 'login' ? t('auth.login') : t('auth.createAccount')}
+                {mode === 'login' ? t('auth.login') : mode === 'guest' ? 'Continue' : t('auth.createAccount')}
               </button>
 
               {error && (
@@ -267,21 +294,43 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
               )}
             </form>
 
-            <div className="text-center mt-md pt-md border-t border-glass-border">
-              {mode === 'login' ? (
+            <div className="text-center mt-md pt-md border-t border-glass-border flex flex-col gap-xs">
+              {mode === 'login' && (
+                <>
+                  <p className="text-secondary text-[0.9rem] m-0">
+                    {t('auth.newHere')}{' '}
+                    <button
+                      type="button"
+                      className="bg-transparent border-none text-accent-purple text-[0.9rem] font-semibold cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80"
+                      onClick={() => switchMode('join')}
+                    >
+                      {t('auth.join')}
+                    </button>
+                  </p>
+                  <button
+                    type="button"
+                    className="bg-transparent border-none text-secondary text-[0.85rem] cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80 underline"
+                    onClick={() => switchMode('guest')}
+                  >
+                    Continue as Guest
+                  </button>
+                </>
+              )}
+              {mode === 'join' && (
                 <p className="text-secondary text-[0.9rem] m-0">
-                  {t('auth.newHere')}{' '}
+                  {t('auth.alreadyAccount')}{' '}
                   <button
                     type="button"
                     className="bg-transparent border-none text-accent-purple text-[0.9rem] font-semibold cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80"
-                    onClick={() => switchMode('join')}
+                    onClick={() => switchMode('login')}
                   >
-                    {t('auth.join')}
+                    {t('auth.login')}
                   </button>
                 </p>
-              ) : (
+              )}
+              {mode === 'guest' && (
                 <p className="text-secondary text-[0.9rem] m-0">
-                  {t('auth.alreadyAccount')}{' '}
+                  Prefer an account?{' '}
                   <button
                     type="button"
                     className="bg-transparent border-none text-accent-purple text-[0.9rem] font-semibold cursor-pointer no-underline transition-opacity duration-200 hover:opacity-80"

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Star, MapPin, Navigation, Loader, Clock, Route, ExternalLink, X } from 'lucide-react'
+import { ArrowLeft, Star, MapPin, Navigation, Loader, Clock, Route, ExternalLink, X, Share2 } from 'lucide-react'
 import EmbeddedMap from '../components/EmbeddedMap'
 import { useDirections } from '../hooks/useDirections'
 import { hotelsApi } from '../services/adminApi'
+import { showToast } from '../components/admin/Toast'
 
 const CSN_CENTER = [19.8762, 75.3433]
 
@@ -44,6 +45,26 @@ const PlaceMap = () => {
   const openInGoogleMaps = () => {
     if (coords?.length !== 2) return
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`, '_blank')
+  }
+
+  // Shares a server-rendered link (not this SPA URL) so WhatsApp/Facebook/etc.
+  // link previews show the restaurant's real name and photo.
+  const handleShare = async () => {
+    const shareUrl = `${import.meta.env.VITE_API_BASE_URL}/share/restaurant/${id}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: restaurant.name, text: `Check out ${restaurant.name} on Aurangabad Flavours`, url: shareUrl })
+      } catch {
+        // User cancelled the native share sheet.
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      showToast.success('Link copied', 'Share it with your friends!')
+    } catch {
+      showToast.error('Error', 'Could not copy the link')
+    }
   }
 
   if (loading) {
@@ -159,6 +180,13 @@ const PlaceMap = () => {
               className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-glass-surface border border-glass-border text-secondary rounded-xl text-[0.85rem] font-semibold transition-all hover:border-accent-purple hover:text-primary"
             >
               <ExternalLink size={15} /> <span className="max-md:hidden">Maps</span>
+            </button>
+            <button
+              onClick={handleShare}
+              title="Share"
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-glass-surface border border-glass-border text-secondary rounded-xl text-[0.85rem] font-semibold transition-all hover:border-accent-purple hover:text-primary"
+            >
+              <Share2 size={15} />
             </button>
           </div>
         </div>

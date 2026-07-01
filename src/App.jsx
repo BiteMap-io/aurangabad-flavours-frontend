@@ -11,6 +11,7 @@ import Footer from './components/Footer'
 import { AdminAuthProvider } from './context/AdminAuthContext'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import ToastContainer from './components/admin/Toast'
+import OwnerProtectedRoute from './components/partner/OwnerProtectedRoute'
 
 // Code-split everything else so first-time visitors don't download the whole
 // admin panel + every page up front. Each becomes its own lazily-loaded chunk.
@@ -42,6 +43,10 @@ const DishesManagement = lazy(() => import('./pages/admin/DishesManagement'))
 const FoodTrailsManagement = lazy(() => import('./pages/admin/FoodTrailsManagement'))
 const FoodTrailForm = lazy(() => import('./pages/admin/FoodTrailForm'))
 
+const PartnerLogin = lazy(() => import('./pages/partner/PartnerLogin'))
+const PartnerDashboard = lazy(() => import('./pages/partner/PartnerDashboard'))
+const PartnerRestaurantManage = lazy(() => import('./pages/partner/PartnerRestaurantManage'))
+
 import { LanguageProvider } from './context/LanguageContext'
 import { TouristModeProvider } from './context/TouristModeContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -66,6 +71,29 @@ function App() {
             <Router>
               <div className="min-h-screen flex flex-col bg-background-primary">
                 <Routes>
+                  {/* Partner (Restaurant Owner) Routes */}
+                  <Route path="/partner" element={<Suspense fallback={<PageLoader />}><PartnerLogin /></Suspense>} />
+                  <Route path="/partner/dashboard" element={
+                    <OwnerProtectedRoute>
+                      <Suspense fallback={<PageLoader />}><PartnerDashboard /></Suspense>
+                    </OwnerProtectedRoute>
+                  } />
+                  <Route path="/partner/hotels/new" element={
+                    <OwnerProtectedRoute>
+                      <Suspense fallback={<PageLoader />}><HotelForm ownerMode /></Suspense>
+                    </OwnerProtectedRoute>
+                  } />
+                  <Route path="/partner/hotels/:id/edit" element={
+                    <OwnerProtectedRoute>
+                      <Suspense fallback={<PageLoader />}><HotelForm ownerMode /></Suspense>
+                    </OwnerProtectedRoute>
+                  } />
+                  <Route path="/partner/hotels/:id/manage" element={
+                    <OwnerProtectedRoute>
+                      <Suspense fallback={<PageLoader />}><PartnerRestaurantManage /></Suspense>
+                    </OwnerProtectedRoute>
+                  } />
+
                   {/* Admin Routes */}
                   <Route path="/admin/login" element={<Suspense fallback={<PageLoader />}><AdminLogin /></Suspense>} />
                   <Route path="/admin/*" element={
