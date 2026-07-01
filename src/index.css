@@ -78,22 +78,22 @@
 
   [data-theme="light"] {
     /* Pure Light Polish Theme */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
+    --bg-primary: #faf8f5;
+    --bg-secondary: #f4f6fb;
     
-    --glass-surface: rgba(241, 243, 248, 0.9);
+    --glass-surface: rgba(235, 232, 255, 0.45);
     --glass-border: rgba(99, 102, 241, 0.35);
-    --glass-hover: rgba(234, 236, 242, 0.98);
+    --glass-hover: rgba(228, 225, 255, 0.65);
     
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #94a3b8;
+    --text-secondary: #334155;
+    --text-tertiary: #64748b;
     
-    --accent-purple: #7c3aed; /* Punchy Deep Purple for Light Mode */
+    --accent-purple: #7c3aed;
     --accent-gold: #d97706;
     
-    --shadow-glass: 0 10px 40px -10px rgba(139, 92, 246, 0.08);
-    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.1);
+    --shadow-glass: 0 4px 24px rgba(99, 102, 241, 0.12), 0 1px 4px rgba(99, 102, 241, 0.06);
+    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.18);
     
     --background-primary: var(--bg-primary);
     --background-secondary: var(--bg-secondary);
@@ -155,5 +155,11 @@
 
   [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+  }
+
+  /* Light mode — warm gradient page background */
+  [data-theme="light"] body {
+    background: linear-gradient(160deg, #faf8f5 0%, #f4f1ff 60%, #eef2ff 100%);
+    min-height: 100vh;
   }
 }
