@@ -72,7 +72,7 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
       </div>
 
       {/* ── Desktop: 2×2 image grid — fills full card height ── */}
-      <div className="relative hidden md:grid grid-cols-2 grid-rows-2 gap-[2px] w-[280px] self-stretch shrink-0">
+      <div className="relative hidden md:grid grid-cols-2 grid-rows-2 gap-[2px] w-[360px] self-stretch shrink-0">
         {galleryImages.map((img, i) => (
           <div key={i} className="overflow-hidden">
             <img
