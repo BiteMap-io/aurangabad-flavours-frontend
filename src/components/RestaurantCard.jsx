@@ -17,6 +17,22 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
   const showMealTimeBadge = isSuitableForMealTime(restaurant, currentMealTime)
   const crowdLevel = getCrowdLevel(restaurant)
 
+  // Build a 4-image array for the desktop grid
+  // Use gallery images if available, otherwise repeat the main image
+  const galleryImages = (() => {
+    const imgs = []
+    if (Array.isArray(restaurant.gallery) && restaurant.gallery.length > 0) {
+      restaurant.gallery.forEach(g => {
+        if (typeof g === 'string') imgs.push(g)
+        else if (g?.url) imgs.push(g.url)
+      })
+    }
+    if (restaurant.image) imgs.unshift(restaurant.image)
+    const fallback = restaurant.image || ''
+    while (imgs.length < 4) imgs.push(fallback)
+    return imgs.slice(0, 4)
+  })()
+
   const handleGetDirections = (e) => {
     e.stopPropagation()
     const id = restaurant?._id || restaurant?.id
@@ -25,7 +41,6 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
       setDirError('No location data for this restaurant.')
       return
     }
-    // Open the dedicated single-place map page
     navigate(`/place/${id}`)
   }
 
@@ -38,7 +53,8 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
       whileHover={{ scale: 1.02, y: -4 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="relative w-full md:w-[200px] h-[200px] md:h-[150px] rounded-md overflow-hidden shrink-0">
+      {/* ── Mobile: single image (unchanged) ── */}
+      <div className="relative w-full h-[200px] rounded-md overflow-hidden shrink-0 md:hidden">
         <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover" loading="lazy" />
         {restaurant.ihmRecommended && (
           <div className="absolute top-xs left-xs px-2 py-1 rounded-[0.5rem] text-xs font-semibold backdrop-blur-[10px] text-white bg-accent-purple/80">IHM Recommended</div>
@@ -48,6 +64,30 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
         )}
         {isTouristMode && restaurant.rating >= 4.3 && (
           <div className="absolute top-[4.5rem] left-xs px-2 py-1 rounded-[0.5rem] text-xs font-semibold backdrop-blur-[10px] text-white bg-blue-500/70">Tourist Friendly</div>
+        )}
+      </div>
+
+      {/* ── Desktop: 2×2 image grid ── */}
+      <div className="relative hidden md:grid grid-cols-2 grid-rows-2 gap-[3px] w-[220px] h-[200px] rounded-[1rem] overflow-hidden shrink-0">
+        {galleryImages.map((img, i) => (
+          <div key={i} className="relative overflow-hidden">
+            <img
+              src={img}
+              alt={`${restaurant.name} photo ${i + 1}`}
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        ))}
+        {/* Badges overlaid on the grid */}
+        {restaurant.ihmRecommended && (
+          <div className="absolute top-xs left-xs px-2 py-1 rounded-[0.5rem] text-xs font-semibold backdrop-blur-[10px] text-white bg-accent-purple/80 z-10">IHM Recommended</div>
+        )}
+        {restaurant.verified && (
+          <div className="absolute top-[2.5rem] left-xs px-2 py-1 rounded-[0.5rem] text-xs font-semibold backdrop-blur-[10px] text-white bg-green-500/70 z-10">Verified</div>
+        )}
+        {isTouristMode && restaurant.rating >= 4.3 && (
+          <div className="absolute top-[4.5rem] left-xs px-2 py-1 rounded-[0.5rem] text-xs font-semibold backdrop-blur-[10px] text-white bg-blue-500/70 z-10">Tourist Friendly</div>
         )}
       </div>
 
