@@ -4,6 +4,7 @@ import { Loader } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import { hotelsApi, galleryApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const Cuisines = () => {
   const [selectedCuisine, setSelectedCuisine] = useState('')
@@ -12,6 +13,11 @@ const Cuisines = () => {
   const [restaurants, setRestaurants] = useState([])
   const [slideshowImages, setSlideshowImages] = useState([])
   const [loading, setLoading] = useState(true)
+  useSEO({
+    title: 'Explore by Cuisine',
+    description: 'Browse Aurangabad restaurants by cuisine type — Marathwada, Mughlai, North Indian, South Indian and more.',
+    url: '/cuisines',
+  })
 
   useEffect(() => {
     const fetchData = async () => {

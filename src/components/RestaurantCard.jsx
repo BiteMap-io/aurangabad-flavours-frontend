@@ -39,7 +39,7 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
       transition={{ duration: 0.3 }}
     >
       <div className="relative w-full md:w-[200px] h-[200px] md:h-[150px] rounded-md overflow-hidden shrink-0">
-        <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover" />
+        <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover" loading="lazy" />
         {restaurant.ihmRecommended && (
           <div className="absolute top-xs left-xs px-2 py-1 rounded-[0.5rem] text-xs font-semibold backdrop-blur-[10px] text-white bg-accent-purple/80">IHM Recommended</div>
         )}

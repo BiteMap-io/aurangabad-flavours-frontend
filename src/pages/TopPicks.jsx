@@ -4,12 +4,18 @@ import { Award, Star } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import { hotelsApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const TopPicks = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
+  useSEO({
+    title: 'Top Picks — Best Restaurants',
+    description: 'Discover the highest rated and IHM recommended restaurants in Aurangabad, curated by hospitality experts.',
+    url: '/top-picks',
+  })
 
   useEffect(() => {
     const fetchData = async () => {

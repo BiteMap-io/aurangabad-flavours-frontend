@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, ArrowRight, Search, BookOpen, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { articlesApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const CATEGORIES = ['All', 'News', 'Features', 'Interviews', 'Guides', 'Awards']
 
@@ -41,6 +42,11 @@ const Articles = () => {
   const [category, setCategory] = useState('All')
   const [query, setQuery] = useState('')
   const [error, setError] = useState(null)
+  useSEO({
+    title: 'Articles & Stories',
+    description: 'Read articles on food culture, restaurant reviews, dining guides and culinary stories from Aurangabad by IHM MGM University.',
+    url: '/articles',
+  })
 
   useEffect(() => {
     setLoading(true)

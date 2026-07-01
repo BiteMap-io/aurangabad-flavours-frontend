@@ -9,9 +9,15 @@ import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
+import useSEO from '../hooks/useSEO'
 
 const Explore = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  useSEO({
+    title: 'Explore Restaurants',
+    description: 'Browse and filter all restaurants in Aurangabad by cuisine, price, rating and more. Find your perfect dining experience.',
+    url: '/explore',
+  })
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])

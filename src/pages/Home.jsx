@@ -9,9 +9,15 @@ import MasonryGallery from '../components/MasonryGallery'
 import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
 import { SAMPLE_HOTELS, FALLBACK_HERO_IMAGE } from '../constants/sampleData'
+import useSEO from '../hooks/useSEO'
 
 const Home = () => {
   const { t } = useTranslation()
+  useSEO({
+    title: 'Home — Discover Aurangabad\'s Best Restaurants',
+    description: 'Explore top-rated restaurants, food culture and culinary experiences in Aurangabad. Curated by IHM MGM University.',
+    url: '/',
+  })
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
@@ -150,7 +156,7 @@ const Home = () => {
                       className="group flex gap-md p-md rounded-[1.5rem] cursor-pointer transition-all duration-300 border border-transparent hover:bg-glass-hover hover:border-glass-border hover:translate-x-1 hover:shadow-glass"
                       onClick={() => handleRestaurantClick(restaurant)}
                     >
-                      <img src={restaurant.image} alt={restaurant.name} className="w-[80px] h-[80px] rounded-[1.5rem] object-cover shadow-glass transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow/20" />
+                      <img src={restaurant.image} alt={restaurant.name} className="w-[80px] h-[80px] rounded-[1.5rem] object-cover shadow-glass transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow/20" loading="lazy" />
                       <div className="flex-1 flex flex-col justify-center gap-1">
                         <h4 className="font-sans text-[1rem] font-semibold text-primary m-0 tracking-[-0.01em] leading-[1.3]">{restaurant.name}</h4>
                         <div className="flex items-center gap-1 mt-1">
