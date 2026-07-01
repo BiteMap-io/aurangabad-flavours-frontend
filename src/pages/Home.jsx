@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Star } from 'lucide-react'
+import { Star, UtensilsCrossed, MapPin, Award } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import MasonryGallery from '../components/MasonryGallery'
+import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
 import { SAMPLE_HOTELS, FALLBACK_HERO_IMAGE } from '../constants/sampleData'
 
@@ -90,11 +91,41 @@ const Home = () => {
           <p className="text-[1rem] md:text-[1.1rem] xl:text-[1.25rem] text-white/90 mb-lg drop-shadow-md opacity-95">
             Curated by Institute of Hotel Management, MGM University
           </p>
-          <Link to="/explore" className="inline-block py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
+          <Link to="/explore" className="inline-block py-sm px-lg bg-accent-purple text-white font-semibold rounded-pill transition-all duration-300 shadow-[0_4px_20px_rgba(124,58,237,0.5)] hover:bg-accent-purple/90 hover:shadow-[0_4px_28px_rgba(124,58,237,0.7)] hover:-translate-y-[2px]">
             Explore Restaurants
           </Link>
         </motion.div>
       </section>
+
+      {/* Stats bar */}
+      <div className="max-w-[1400px] mx-auto px-lg -mt-sm mb-xl">
+        <motion.div
+          className="flex flex-wrap items-center justify-center gap-md md:gap-xl py-md px-lg bg-glass-surface border border-glass-border rounded-[1.5rem] shadow-glass"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <UtensilsCrossed size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">{restaurants.length || '50'}+</strong> Restaurants</span>
+          </div>
+          <div className="w-px h-4 bg-glass-border hidden md:block" />
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <MapPin size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">Aurangabad</strong>, Maharashtra</span>
+          </div>
+          <div className="w-px h-4 bg-glass-border hidden md:block" />
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <Award size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">IHM</strong> Curated Guide</span>
+          </div>
+          <div className="w-px h-4 bg-glass-border hidden md:block" />
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <Star size={16} fill="var(--accent-purple)" color="var(--accent-purple)" />
+            <span>MGM University</span>
+          </div>
+        </motion.div>
+      </div>
 
       <div className="max-w-[1400px] mx-auto px-lg">
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-lg mb-xl">
@@ -150,7 +181,7 @@ const Home = () => {
           <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold mb-lg text-primary tracking-[-0.02em] leading-[1.2]">Featured Restaurants</h2>
           <div className="flex flex-col gap-md">
             {loading ? (
-              <div className="text-tertiary text-center py-xl">Discovering restaurants...</div>
+              <SkeletonList count={3} />
             ) : (
               restaurants.length > 0 ? (
                 restaurants.slice(0, 6).map((restaurant) => (

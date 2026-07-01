@@ -6,6 +6,7 @@ import LanyardSimple from './components/LanyardSimple'
 import WelcomeIntro from './components/WelcomeIntro'
 import Home from './pages/Home'
 import Footer from './components/Footer'
+import BackToTop from './components/BackToTop'
 
 // Admin Components (eager — tiny wrappers used on every admin view)
 import { AdminAuthProvider } from './context/AdminAuthContext'
@@ -133,6 +134,7 @@ function App() {
                 
                 {/* Toast Notifications */}
                 <ToastContainer />
+                <BackToTop />
               </div>
             </Router>
           </TouristModeProvider>

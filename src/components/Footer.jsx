@@ -6,7 +6,7 @@ const Footer = () => {
   const { language } = useLanguage()
 
   return (
-    <footer className="mt-xl p-0 bg-gradient-to-b from-transparent via-background-primary via-30% to-background-secondary relative border-t border-glass-border">
+    <footer className="mt-xl p-0 bg-gradient-to-b from-transparent via-background-primary via-30% to-background-secondary relative border-t border-glass-border light:bg-gradient-to-b light:from-[#f0eeff] light:to-[#eef2ff]">
       <div className="h-[1px] opacity-30 shadow-glow bg-gradient-to-r from-transparent via-accent-purple/45 to-transparent" />
       
       <div className="max-w-[1400px] mx-auto py-lg px-md md:py-xl md:px-lg">

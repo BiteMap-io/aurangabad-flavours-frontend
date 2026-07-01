@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { X, SearchX } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FilterBar from '../components/FilterBar'
+import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
@@ -181,7 +182,7 @@ const Explore = () => {
           transition={{ duration: 0.5 }}
         >
           {loading ? (
-            <div className="text-center text-secondary py-xl">Searching for flavours...</div>
+            <SkeletonList count={4} />
           ) : (
             filteredRestaurants.length > 0 ? (
               filteredRestaurants.map((restaurant, index) => (
@@ -199,10 +200,21 @@ const Explore = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="text-center p-xl bg-glass-surface border border-glass-border rounded-[1.5rem]">
-                <p className="text-secondary text-[1.1rem] mb-md">No restaurants found matching your criteria.</p>
+              <motion.div
+                className="flex flex-col items-center justify-center text-center p-xl bg-glass-surface border border-glass-border rounded-[1.5rem] gap-md"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="w-16 h-16 rounded-full bg-accent-purple/10 flex items-center justify-center">
+                  <SearchX size={32} className="text-accent-purple" />
+                </div>
+                <div>
+                  <p className="text-primary text-[1.2rem] font-semibold mb-xs">No restaurants found</p>
+                  <p className="text-secondary text-[0.95rem]">Try adjusting your filters or searching in a different area.</p>
+                </div>
                 <button
-                  className="py-sm px-lg bg-glass-surface border border-glass-border rounded-[0.5rem] text-primary text-[1rem] font-medium cursor-pointer transition-all duration-300 hover:bg-glass-hover hover:border-[#8A2BE2] hover:shadow-[0_0_15px_#8A2BE2]"
+                  className="py-sm px-lg bg-accent-purple text-white rounded-pill text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 hover:bg-accent-purple/85 hover:shadow-glow hover:-translate-y-[2px] border-none"
                   onClick={() => setFilters({
                     establishmentType: '',
                     cuisine: '',
@@ -213,9 +225,9 @@ const Explore = () => {
                     nearMe: false,
                   })}
                 >
-                  Clear Filters
+                  Clear all filters
                 </button>
-              </div>
+              </motion.div>
             )
           )}
         </motion.div>

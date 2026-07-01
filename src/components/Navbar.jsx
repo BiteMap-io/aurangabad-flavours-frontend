@@ -37,7 +37,7 @@ const Navbar = () => {
   return (
     <>
       <motion.nav
-        className="sticky top-0 z-[1000] w-full px-sm py-sm md:px-md lg:px-lg bg-background-primary/75 backdrop-blur-[24px] border-b border-glass-border shadow-glass"
+        className="sticky top-0 z-[1000] w-full px-sm py-sm md:px-md lg:px-lg bg-background-primary/75 backdrop-blur-[24px] border-b border-glass-border shadow-glass light:bg-[rgba(250,248,245,0.85)] light:shadow-[0_2px_16px_rgba(99,102,241,0.08)]"
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
