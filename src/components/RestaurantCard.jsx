@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { MapPin, Clock, Star, Navigation } from 'lucide-react'
+import { MapPin, Clock, Star, Navigation, Heart } from 'lucide-react'
 import { useTouristMode } from '../context/TouristModeContext'
 import MealTimeBadge from './MealTimeBadge'
 import CrowdIndicator from './CrowdIndicator'
@@ -7,29 +7,15 @@ import { getCurrentMealTime, isSuitableForMealTime, getCrowdLevel } from '../uti
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
+const RestaurantCard = ({ restaurant, onClick }) => {
   const { isTouristMode } = useTouristMode()
   const [dirError, setDirError] = useState('')
+  const [liked, setLiked] = useState(false)
   const navigate = useNavigate()
 
   const currentMealTime = getCurrentMealTime()
   const showMealTimeBadge = isSuitableForMealTime(restaurant, currentMealTime)
   const crowdLevel = getCrowdLevel(restaurant)
-
-  // Build 4-image array for desktop 2×2 grid
-  const galleryImages = (() => {
-    const imgs = []
-    if (restaurant.image) imgs.push(restaurant.image)
-    if (Array.isArray(restaurant.gallery)) {
-      restaurant.gallery.forEach(g => {
-        const url = typeof g === 'string' ? g : g?.url
-        if (url && url !== restaurant.image) imgs.push(url)
-      })
-    }
-    const fallback = restaurant.image || ''
-    while (imgs.length < 4) imgs.push(fallback)
-    return imgs.slice(0, 4)
-  })()
 
   const handleGetDirections = (e) => {
     e.stopPropagation()
@@ -42,195 +28,131 @@ const RestaurantCard = ({ restaurant, onClick, onGetDirections }) => {
     navigate(`/place/${id}`)
   }
 
-  // #1 — rating color: green ≥4.5, orange 4.0-4.4, red below
+  const handleLike = (e) => {
+    e.stopPropagation()
+    setLiked(l => !l)
+  }
+
   const ratingColor =
     restaurant.rating >= 4.5
-      ? 'bg-green-500 text-white'
+      ? 'bg-green-500'
       : restaurant.rating >= 4.0
-      ? 'bg-orange-500 text-white'
-      : 'bg-red-500 text-white'
+      ? 'bg-orange-500'
+      : 'bg-red-500'
 
   return (
     <motion.div
-      // #10 — left border hover accent
-      className="flex flex-col md:flex-row bg-glass-surface backdrop-blur-[20px] border border-glass-border border-l-[3px] border-l-transparent hover:border-l-accent-purple rounded-[1.5rem] cursor-pointer transition-all duration-300 relative hover:bg-glass-hover hover:shadow-glass overflow-hidden"
+      className="group relative bg-glass-surface border border-glass-border rounded-[1.25rem] overflow-hidden cursor-pointer transition-all duration-300 hover:border-accent-purple/30 hover:shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
       onClick={onClick}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01, y: -3 }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ y: -4, scale: 1.01 }}
+      transition={{ duration: 0.25 }}
     >
-      {/* ── Mobile: single full-width image ── */}
-      <div className="relative w-full h-[200px] shrink-0 md:hidden">
-        <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover" loading="lazy" />
-        {/* #3 — gradient overlay with name on mobile */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        {/* #4 — IHM ribbon badge */}
-        {restaurant.ihmRecommended && (
-          <div className="absolute top-2 left-0 flex items-center gap-1 pl-3 pr-2 py-1 bg-accent-purple text-white text-[0.7rem] font-bold tracking-wide rounded-r-full shadow-lg">
-            ⭐ IHM Pick
-          </div>
-        )}
-        {restaurant.verified && (
-          <div className="absolute top-9 left-0 flex items-center gap-1 pl-3 pr-2 py-1 bg-green-500 text-white text-[0.7rem] font-bold rounded-r-full shadow-lg">
-            ✓ Verified
-          </div>
-        )}
-        {isTouristMode && restaurant.rating >= 4.3 && (
-          <div className="absolute top-16 left-0 flex items-center gap-1 pl-3 pr-2 py-1 bg-blue-500 text-white text-[0.7rem] font-bold rounded-r-full shadow-lg">
-            🗺 Tourist Friendly
-          </div>
-        )}
-      </div>
+      {/* Hero Image */}
+      <div className="relative w-full aspect-[4/3] overflow-hidden">
+        <img
+          src={restaurant.image}
+          alt={restaurant.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-      {/* ── Desktop: 2×2 image grid — fills full card height ── */}
-      <div className="relative hidden md:grid grid-cols-2 grid-rows-2 gap-[2px] w-[360px] self-stretch shrink-0">
-        {galleryImages.map((img, i) => (
-          <div key={i} className="overflow-hidden">
-            <img
-              src={img}
-              alt={`${restaurant.name} ${i + 1}`}
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-              loading="lazy"
-            />
-          </div>
-        ))}
-        {/* #3 — bottom gradient overlay on grid */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent pointer-events-none z-10" />
-        {/* #3 — restaurant name over gradient */}
-        <div className="absolute bottom-3 left-3 right-3 z-20">
-          <p className="text-white font-bold text-[1rem] leading-tight drop-shadow-lg line-clamp-1">{restaurant.name}</p>
-          <p className="text-white/80 text-[0.75rem] mt-0.5">{restaurant.cuisine}</p>
-        </div>
-        {/* #4 — IHM ribbon badge */}
-        {restaurant.ihmRecommended && (
-          <div className="absolute top-3 left-0 flex items-center gap-1 pl-3 pr-2 py-1 bg-accent-purple text-white text-[0.7rem] font-bold tracking-wide rounded-r-full shadow-lg z-20">
-            ⭐ IHM Pick
-          </div>
-        )}
-        {restaurant.verified && (
-          <div className="absolute top-10 left-0 flex items-center gap-1 pl-3 pr-2 py-1 bg-green-500 text-white text-[0.7rem] font-bold rounded-r-full shadow-lg z-20">
-            ✓ Verified
-          </div>
-        )}
-        {isTouristMode && restaurant.rating >= 4.3 && (
-          <div className="absolute top-[4.5rem] left-0 flex items-center gap-1 pl-3 pr-2 py-1 bg-blue-500 text-white text-[0.7rem] font-bold rounded-r-full shadow-lg z-20">
-            🗺 Tourist Friendly
-          </div>
-        )}
-      </div>
-
-      {/* ── Text content — #8 more breathing room ── */}
-      <div className="flex-1 flex flex-col gap-sm p-sm md:p-lg">
-
-        {/* #1 — prominent rating badge + name row */}
-        <div className="flex justify-between items-start gap-sm">
-          <h3 className="text-[1.35rem] font-bold text-primary m-0 leading-tight">{restaurant.name}</h3>
-          {restaurant.rating && (
-            <div className={`flex items-center gap-1 px-3 py-1 rounded-lg text-[1rem] font-bold whitespace-nowrap shrink-0 shadow-md ${ratingColor}`}>
-              <Star size={14} fill="white" color="white" />
-              <span>{restaurant.rating}</span>
-            </div>
+        {/* Badges top-left */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+          {restaurant.ihmRecommended && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-accent-purple text-white text-[0.68rem] font-bold rounded-full shadow-lg">
+              ⭐ IHM Pick
+            </span>
+          )}
+          {restaurant.verified && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500 text-white text-[0.68rem] font-bold rounded-full shadow-lg">
+              ✓ Verified
+            </span>
+          )}
+          {isTouristMode && restaurant.rating >= 4.3 && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500 text-white text-[0.68rem] font-bold rounded-full shadow-lg">
+              🗺 Tourist Friendly
+            </span>
           )}
         </div>
 
-        {/* #2 — cuisine · price on one line */}
-        <p className="text-secondary text-[0.95rem] m-0">
-          {restaurant.cuisine}{restaurant.priceRange ? <span className="text-tertiary"> · {restaurant.priceRange}</span> : ''}
+        {/* Favourite button top-right */}
+        <motion.button
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white hover:bg-black/60"
+          onClick={handleLike}
+          aria-label="Save restaurant"
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }}
+        >
+          <Heart size={15} fill={liked ? '#ec4899' : 'none'} color={liked ? '#ec4899' : 'white'} />
+        </motion.button>
+
+        {/* Rating bottom-right of image */}
+        {restaurant.rating && (
+          <div className={`absolute bottom-3 right-3 z-10 flex items-center gap-1 px-2 py-0.5 ${ratingColor} text-white text-[0.82rem] font-bold rounded-full shadow-md`}>
+            <Star size={12} fill="white" color="white" />
+            {restaurant.rating}
+          </div>
+        )}
+      </div>
+
+      {/* Card Content */}
+      <div className="p-md flex flex-col gap-xs">
+        <h3 className="font-serif text-[1.1rem] font-bold text-primary leading-[1.25] line-clamp-1 m-0">
+          {restaurant.name}
+        </h3>
+
+        <p className="text-secondary text-[0.82rem] m-0 line-clamp-1">
+          {[restaurant.cuisine, restaurant.area, restaurant.priceRange].filter(Boolean).join(' · ')}
         </p>
 
-        <div className="flex flex-wrap gap-xs">
+        <div className="flex flex-wrap gap-[0.3rem] mt-[0.1rem]">
           {showMealTimeBadge && <MealTimeBadge mealTime={currentMealTime} />}
           <CrowdIndicator level={crowdLevel} />
-          {restaurant.foodType === 'veg' && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.72rem] font-semibold bg-green-500/15 text-green-400 border border-green-500/30 leading-none">🟢 Pure Veg</span>}
-          {restaurant.foodType === 'non-veg' && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.72rem] font-semibold bg-red-500/15 text-red-400 border border-red-500/30 leading-none">🔴 Non-Veg</span>}
-          {restaurant.foodType === 'both' && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.72rem] font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 leading-none">🟡 Veg & Non-Veg</span>}
+          {restaurant.foodType === 'veg' && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.65rem] font-semibold bg-green-500/15 text-green-400 border border-green-500/25 leading-none">
+              🟢 Pure Veg
+            </span>
+          )}
+          {restaurant.foodType === 'non-veg' && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.65rem] font-semibold bg-red-500/15 text-red-400 border border-red-500/25 leading-none">
+              🔴 Non-Veg
+            </span>
+          )}
+          {restaurant.foodType === 'both' && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.65rem] font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/25 leading-none">
+              🟡 Veg & Non-Veg
+            </span>
+          )}
         </div>
 
-        {restaurant.description && (
-          <p className="text-secondary text-[0.9rem] leading-[1.6] line-clamp-2 m-0">
-            {restaurant.description.length > 120
-              ? `${restaurant.description.substring(0, 120)}...`
-              : restaurant.description}
-          </p>
-        )}
-
-        {/* Highlights */}
-        {(restaurant.food?.quality > 0 || restaurant.environment?.ambience > 0 || restaurant.staff?.friendliness > 0) && (
-          <div className="flex flex-wrap gap-xs">
-            {restaurant.food?.quality > 0 && (
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.72rem] text-secondary">
-                🍽️ Food <span className="text-accent-purple font-semibold">{'★'.repeat(restaurant.food.quality)}</span>
-              </span>
-            )}
-            {restaurant.environment?.ambience > 0 && (
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.72rem] text-secondary">
-                ✨ Ambience <span className="text-accent-purple font-semibold">{'★'.repeat(restaurant.environment.ambience)}</span>
-              </span>
-            )}
-            {restaurant.staff?.friendliness > 0 && (
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.72rem] text-secondary">
-                😊 Service <span className="text-accent-purple font-semibold">{'★'.repeat(restaurant.staff.friendliness)}</span>
-              </span>
-            )}
-            {restaurant.food?.valueForMoney > 0 && (
-              <span className="flex items-center gap-1 px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.72rem] text-secondary">
-                💰 Value <span className="text-accent-purple font-semibold">{'★'.repeat(restaurant.food.valueForMoney)}</span>
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Facilities */}
-        {restaurant.extraFacilities && Object.values(restaurant.extraFacilities).some(Boolean) && (
-          <div className="flex flex-wrap gap-xs">
-            {restaurant.extraFacilities.ac && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">❄️ AC</span>}
-            {restaurant.extraFacilities.parking && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">🅿️ Parking</span>}
-            {restaurant.extraFacilities.washroom && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">🚻 Washroom</span>}
-            {restaurant.extraFacilities.parcel && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">📦 Parcel</span>}
-            {restaurant.extraFacilities.disabilityAccess && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">♿ Accessible</span>}
-          </div>
-        )}
-
-        {/* Signature dishes */}
         {(restaurant.food?.signatureDishes || restaurant.food?.specialtyDishes) && (
-          <p className="text-[0.78rem] text-tertiary line-clamp-1 m-0">
+          <p className="text-[0.75rem] text-tertiary line-clamp-1 m-0">
             🍴 {[restaurant.food.signatureDishes, restaurant.food.specialtyDishes].filter(Boolean).join(' · ')}
           </p>
         )}
 
-        {/* Pricing info */}
-        {(restaurant.avgPricePerPerson > 0 || restaurant.seatingCapacity > 0 || restaurant.staff?.serviceType || restaurant.environment?.uniqueFeatures) && (
-          <div className="flex flex-wrap gap-xs">
-            {restaurant.avgPricePerPerson > 0 && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">💰 ₹{restaurant.avgPricePerPerson}/person</span>}
-            {restaurant.seatingCapacity > 0 && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">🪑 {restaurant.seatingCapacity} seats</span>}
-            {restaurant.staff?.serviceType && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary capitalize">🍽️ {restaurant.staff.serviceType}</span>}
-            {restaurant.environment?.uniqueFeatures && <span className="px-2 py-0.5 bg-glass-surface border border-glass-border rounded-full text-[0.7rem] text-secondary">✨ {restaurant.environment.uniqueFeatures}</span>}
-          </div>
-        )}
-
-        {/* #9 — prominent Get Directions + location row */}
-        <div className="flex gap-sm mt-auto pt-sm items-center flex-wrap">
-          <div className="flex items-center gap-xs text-tertiary text-[0.82rem]">
-            <MapPin size={13} />
+        <div className="flex items-center gap-sm pt-xs mt-auto border-t border-glass-border/60">
+          <div className="flex items-center gap-1 text-tertiary text-[0.78rem]">
+            <MapPin size={12} />
             <span>{restaurant.distance}</span>
           </div>
-          <div className="flex items-center gap-xs text-tertiary text-[0.82rem]">
-            <Clock size={13} />
+          <div className="flex items-center gap-1 text-tertiary text-[0.78rem]">
+            <Clock size={12} />
             <span>{restaurant.travelTime}</span>
           </div>
-          {/* #9 — prominent pill button */}
           <button
-            className="flex items-center gap-1 ml-auto py-1 px-sm bg-accent-purple/10 hover:bg-accent-purple/20 border border-accent-purple/30 hover:border-accent-purple rounded-md text-accent-purple text-[0.8rem] font-semibold cursor-pointer transition-all duration-200"
+            className="ml-auto flex items-center gap-1 py-1 px-sm bg-accent-purple/10 hover:bg-accent-purple/20 border border-accent-purple/30 hover:border-accent-purple rounded-md text-accent-purple text-[0.75rem] font-semibold cursor-pointer transition-all duration-200"
             onClick={handleGetDirections}
             aria-label={`Get directions to ${restaurant.name}`}
           >
-            <Navigation size={13} /> Get Directions
+            <Navigation size={12} /> Directions
           </button>
-          {dirError && (
-            <span className="w-full text-[0.75rem] text-red-400 mt-1">{dirError}</span>
-          )}
         </div>
+
+        {dirError && <span className="text-[0.72rem] text-red-400">{dirError}</span>}
       </div>
     </motion.div>
   )

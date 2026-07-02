@@ -60,9 +60,9 @@ const TopPicks = () => {
           <Award size={28} className="text-primary" />
           <h2 className="text-[2rem] text-primary m-0 font-semibold">IHM Recommended</h2>
         </div>
-        <div className="flex flex-col gap-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
           {loading ? (
-            <div className="text-secondary py-xl text-center">Loading recommendations...</div>
+            <div className="col-span-full text-secondary py-xl text-center">Loading recommendations...</div>
           ) : (
             ihmRecommended.length > 0 ? (
               ihmRecommended.map((restaurant, index) => (
@@ -79,7 +79,7 @@ const TopPicks = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="text-secondary py-xl text-center">No recommended restaurants yet.</div>
+              <div className="col-span-full text-secondary py-xl text-center">No recommended restaurants yet.</div>
             )
           )}
         </div>
@@ -90,7 +90,7 @@ const TopPicks = () => {
           <Star size={28} fill="#FFD700" color="#FFD700" />
           <h2 className="text-[2rem] text-primary m-0 font-semibold">Highest Rated</h2>
         </div>
-        <div className="flex flex-col gap-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
           {loading ? (
             <div className="text-secondary py-xl text-center">Loading top rated...</div>
           ) : (
@@ -109,7 +109,7 @@ const TopPicks = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="text-secondary py-xl text-center">No rated restaurants yet.</div>
+              <div className="col-span-full text-secondary py-xl text-center">No rated restaurants yet.</div>
             )
           )}
         </div>

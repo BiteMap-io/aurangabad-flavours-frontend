@@ -47,7 +47,6 @@ const Home = () => {
           const data = restaurantsRes.data || restaurantsRes
           setRestaurants(Array.isArray(data) ? data : [])
         }
-
         const galleryData = galleryRes.data || galleryRes
         if (Array.isArray(galleryData) && galleryData.length > 0) {
           setHeroImage(galleryData[0].url)
@@ -229,9 +228,9 @@ const Home = () => {
             </div>
             <p className="text-secondary text-[0.95rem] mt-xs m-0 ml-[2.5rem]">Hand-picked by our culinary team at IHM MGM University</p>
           </div>
-          <div className="flex flex-col gap-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
             {loading ? (
-              <SkeletonList count={3} />
+              <div className="col-span-full"><SkeletonList count={3} /></div>
             ) : (
               restaurants.length > 0 ? (
                 restaurants.slice(0, 6).map((restaurant) => (
