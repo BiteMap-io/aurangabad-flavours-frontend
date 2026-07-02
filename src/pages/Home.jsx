@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
-import { Star, UtensilsCrossed, MapPin, Award, Search } from 'lucide-react'
+import { Star, UtensilsCrossed, MapPin, Award, Search, ChefHat } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import MasonryGallery from '../components/MasonryGallery'
 import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
-import { SAMPLE_HOTELS, FALLBACK_HERO_IMAGE } from '../constants/sampleData'
 import useSEO from '../hooks/useSEO'
 
 const Home = () => {
@@ -46,21 +45,15 @@ const Home = () => {
 
         if (restaurantsRes.success || Array.isArray(restaurantsRes)) {
           const data = restaurantsRes.data || restaurantsRes
-          setRestaurants(Array.isArray(data) && data.length > 0 ? data : SAMPLE_HOTELS)
-        } else {
-          setRestaurants(SAMPLE_HOTELS)
+          setRestaurants(Array.isArray(data) ? data : [])
         }
 
         const galleryData = galleryRes.data || galleryRes
         if (Array.isArray(galleryData) && galleryData.length > 0) {
           setHeroImage(galleryData[0].url)
-        } else {
-          setHeroImage(FALLBACK_HERO_IMAGE)
         }
       } catch (error) {
         console.error('Failed to fetch data:', error)
-        setRestaurants(SAMPLE_HOTELS)
-        setHeroImage(FALLBACK_HERO_IMAGE)
       } finally {
         setLoading(false)
       }
@@ -108,9 +101,15 @@ const Home = () => {
           <p className="text-[1rem] md:text-[1.1rem] xl:text-[1.25rem] text-white/90 mb-lg drop-shadow-md opacity-95">
             Curated by Institute of Hotel Management, MGM University
           </p>
-          <Link to="/explore" className="inline-block py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
-            Explore Restaurants
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-sm mt-0">
+            <Link to="/explore" className="inline-flex items-center gap-xs py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
+              Explore Restaurants
+            </Link>
+            <Link to="/map" className="inline-flex items-center gap-xs py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
+              <MapPin size={17} />
+              Map View
+            </Link>
+          </div>
 
           {/* Search bar */}
           <form onSubmit={handleHomeSearch} className="mt-lg w-full max-w-[560px] mx-auto">
@@ -126,7 +125,7 @@ const Home = () => {
               />
               <button
                 type="submit"
-                className="shrink-0 px-md py-xs bg-white/10 hover:bg-white/20 border border-white/30 hover:border-white/50 text-white text-[0.85rem] font-semibold rounded-pill transition-all duration-200 hover:shadow-glow cursor-pointer"
+                className="shrink-0 px-md py-xs bg-accent-purple/20 hover:bg-accent-purple/35 border border-accent-purple/60 hover:border-accent-purple text-white text-[0.85rem] font-semibold rounded-pill transition-all duration-200 hover:shadow-glow cursor-pointer"
               >
                 Search
               </button>
@@ -174,8 +173,10 @@ const Home = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="flex items-center gap-sm mb-lg pb-md border-b border-glass-border">
-              <Star size={24} fill="var(--accent-purple)" color="var(--accent-purple)" className="drop-shadow-glow" />
-              <h2 className="font-sans text-[1.1rem] md:text-[1.25rem] xl:text-[1.4rem] font-semibold text-primary m-0 tracking-[-0.01em] bg-gradient-to-r from-primary to-accent-purple bg-clip-text text-transparent">Top 5 Highest Rated</h2>
+              <div className="w-8 h-8 rounded-lg bg-accent-purple/15 border border-accent-purple/20 flex items-center justify-center shrink-0">
+                <Star size={16} fill="var(--accent-purple)" color="var(--accent-purple)" />
+              </div>
+              <h2 className="font-sans text-[1.1rem] md:text-[1.25rem] xl:text-[1.4rem] font-semibold text-primary m-0 tracking-[-0.01em]">Top 5 Highest Rated</h2>
             </div>
             <div className="flex flex-col gap-md">
               {loading ? (
@@ -218,10 +219,15 @@ const Home = () => {
         <section className="mt-xl">
           {/* #7 — Featured section with icon and subtitle */}
           <div className="flex flex-col mb-lg">
-            <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold text-primary tracking-[-0.02em] leading-[1.2] m-0">
-              🍽️ Featured Restaurants
-            </h2>
-            <p className="text-secondary text-[0.95rem] mt-xs m-0">Hand-picked by our culinary team at IHM MGM University</p>
+            <div className="flex items-center gap-sm mb-xs">
+              <div className="w-8 h-8 rounded-lg bg-accent-purple/15 border border-accent-purple/20 flex items-center justify-center shrink-0">
+                <ChefHat size={16} className="text-accent-purple" />
+              </div>
+              <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold text-primary tracking-[-0.02em] leading-[1.2] m-0">
+                Featured Restaurants
+              </h2>
+            </div>
+            <p className="text-secondary text-[0.95rem] mt-xs m-0 ml-[2.5rem]">Hand-picked by our culinary team at IHM MGM University</p>
           </div>
           <div className="flex flex-col gap-md">
             {loading ? (

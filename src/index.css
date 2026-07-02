@@ -139,6 +139,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
     font-weight: 600;
+    scroll-margin-top: 80px;
   }
 
   code {
@@ -247,14 +248,14 @@
     -webkit-text-fill-color: white !important;
   }
 
-  /* ── 13. Gradient section dividers ── */
-  [data-theme="light"] .border-b.border-glass-border,
-  [data-theme="light"] .border-t.border-glass-border {
+  /* ── 13. Gradient section dividers — excludes sticky/fixed elements ── */
+  [data-theme="light"] .border-b.border-glass-border:not(.sticky):not(.fixed),
+  [data-theme="light"] .border-t.border-glass-border:not(.sticky):not(.fixed) {
     border-color: transparent !important;
     position: relative;
   }
 
-  [data-theme="light"] .border-b.border-glass-border::after {
+  [data-theme="light"] .border-b.border-glass-border:not(.sticky):not(.fixed)::after {
     content: '';
     position: absolute;
     bottom: -1px;
@@ -264,7 +265,7 @@
     background: linear-gradient(to right, transparent, rgba(109, 40, 217, 0.2) 25%, rgba(109, 40, 217, 0.2) 75%, transparent);
   }
 
-  [data-theme="light"] .border-t.border-glass-border::before {
+  [data-theme="light"] .border-t.border-glass-border:not(.sticky):not(.fixed)::before {
     content: '';
     position: absolute;
     top: -1px;

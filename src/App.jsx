@@ -109,7 +109,9 @@ function App() {
                       <WelcomeIntro />
                       <LanyardSimple />
                       <Navbar />
-                      <main className="flex-1 w-full">
+                      {/* Spacer equal to fixed navbar height (py-sm*2 + h-[60px] = 92px) */}
+                      <div className="h-[92px] shrink-0" aria-hidden="true" />
+                      <main className="flex-1 w-full" style={{ scrollPaddingTop: '92px' }}>
                         <Suspense fallback={<PageLoader />}>
                           <Routes>
                             <Route path="/" element={<Home />} />
