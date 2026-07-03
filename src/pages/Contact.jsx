@@ -1,12 +1,18 @@
 import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Clock } from 'lucide-react'
 import { getPageContent } from '../hooks/usePageContent'
+import useSEO from '../hooks/useSEO'
 
 const Contact = () => {
   const c = getPageContent('contact')
+  useSEO({
+    title: 'Contact Us',
+    description: 'Get in touch with the Aurangabad Flavors Guide team at IHM MGM University. Find our location, phone and email.',
+    url: '/contact',
+  })
 
   return (
-    <motion.div className="min-h-screen py-xl px-lg bg-background-primary"
+    <motion.div className="min-h-screen py-xl px-sm md:px-lg bg-background-primary"
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-xl">

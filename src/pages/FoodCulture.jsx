@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { BookOpen, Utensils, Users, Clock, MapPin } from 'lucide-react'
 import { getPageContent } from '../hooks/usePageContent'
 import { galleryApi, foodTrailsApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const ICONS = [<BookOpen size={32} />, <Utensils size={32} />, <Users size={32} />]
 
@@ -10,6 +11,11 @@ const FoodCulture = () => {
   const c = getPageContent('foodculture')
   const [heroBg, setHeroBg] = useState("")
   const [trails, setTrails] = useState([])
+  useSEO({
+    title: 'Food Culture of Aurangabad',
+    description: 'Explore the rich food culture, culinary traditions and food trails of Aurangabad, Maharashtra.',
+    url: '/food-culture',
+  })
 
   useEffect(() => {
     galleryApi.getAll('foodculture').then(res => {
