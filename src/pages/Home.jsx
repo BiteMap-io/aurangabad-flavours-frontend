@@ -1,15 +1,34 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { Star } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Star, UtensilsCrossed, MapPin, Award, Search, ChefHat } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import MasonryGallery from '../components/MasonryGallery'
+import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const Home = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
+  const [homeSearch, setHomeSearch] = useState('')
+
+  const handleHomeSearch = (e) => {
+    e.preventDefault()
+    if (homeSearch.trim()) {
+      navigate(`/explore?q=${encodeURIComponent(homeSearch.trim())}`)
+    } else {
+      navigate('/explore')
+    }
+  }
+
+  useSEO({
+    title: 'Home — Discover Aurangabad\'s Best Restaurants',
+    description: 'Explore top-rated restaurants, food culture and culinary experiences in Aurangabad. Curated by IHM MGM University.',
+    url: '/',
+  })
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
@@ -26,12 +45,10 @@ const Home = () => {
 
         if (restaurantsRes.success || Array.isArray(restaurantsRes)) {
           const data = restaurantsRes.data || restaurantsRes
-          setRestaurants(data)
+          setRestaurants(Array.isArray(data) ? data : [])
         }
-
         const galleryData = galleryRes.data || galleryRes
         if (Array.isArray(galleryData) && galleryData.length > 0) {
-          // Use the latest image with 'homepage' tag as hero
           setHeroImage(galleryData[0].url)
         }
       } catch (error) {
@@ -59,7 +76,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen pb-xl">
-      <section className="relative min-h-[60vh] flex items-center justify-center py-xl px-lg mb-xl overflow-hidden bg-background-secondary border-b border-glass-border">
+      <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center justify-center py-xl px-sm md:px-lg mb-xl overflow-hidden bg-background-secondary border-b border-glass-border">
         {/* Background Image */}
         <img
           src={heroImage}
@@ -67,8 +84,8 @@ const Home = () => {
           className="absolute top-0 left-0 w-full h-full object-cover z-0 brightness-[0.6] saturate-[1.1] light:brightness-[0.7]"
         />
         
-        {/* Dark Overlay */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/60 to-black/40 z-10 light:from-black/40 light:to-black/20" />
+        {/* Dark Overlay — #5 lightened so hero image shows through */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/40 to-black/20 z-10" />
         
         {/* Content */}
         <motion.div
@@ -77,19 +94,76 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-[2.25rem] md:text-[2.5rem] xl:text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2]">
+          <h1 className="text-[1.75rem] sm:text-[2.25rem] md:text-[2.5rem] xl:text-[3.5rem] font-bold mb-md text-white drop-shadow-lg leading-[1.2]">
             Discover Aurangabad's Culinary Treasures
           </h1>
           <p className="text-[1rem] md:text-[1.1rem] xl:text-[1.25rem] text-white/90 mb-lg drop-shadow-md opacity-95">
             Curated by Institute of Hotel Management, MGM University
           </p>
-          <Link to="/explore" className="inline-block py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
-            Explore Restaurants
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-sm mt-0">
+            <Link to="/explore" className="inline-flex items-center gap-xs py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
+              Explore Restaurants
+            </Link>
+            <Link to="/map" className="inline-flex items-center gap-xs py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
+              <MapPin size={17} />
+              Map View
+            </Link>
+          </div>
+
+          {/* Search bar */}
+          <form onSubmit={handleHomeSearch} className="mt-lg w-full max-w-[560px] mx-auto">
+            <div className="flex items-center bg-white/10 backdrop-blur-[16px] border border-white/25 rounded-pill px-md py-sm gap-sm shadow-glass focus-within:border-accent-purple/60 focus-within:bg-white/15 transition-all duration-300">
+              <Search size={18} className="text-white/70 shrink-0" />
+              <input
+                type="text"
+                value={homeSearch}
+                onChange={(e) => setHomeSearch(e.target.value)}
+                placeholder="Search restaurants, cuisines, dishes..."
+                className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/50 text-[0.95rem]"
+                aria-label="Search restaurants"
+              />
+              <button
+                type="submit"
+                className="shrink-0 px-md py-xs bg-accent-purple/20 hover:bg-accent-purple/35 border border-accent-purple/60 hover:border-accent-purple text-white text-[0.85rem] font-semibold rounded-pill transition-all duration-200 hover:shadow-glow cursor-pointer"
+              >
+                Search
+              </button>
+            </div>
+          </form>
         </motion.div>
       </section>
 
-      <div className="max-w-[1400px] mx-auto px-lg">
+      {/* Stats bar */}
+      <div className="max-w-[1400px] mx-auto px-sm md:px-lg -mt-sm mb-xl">
+        <motion.div
+          className="flex flex-wrap items-center justify-center gap-sm md:gap-xl py-sm md:py-md px-sm md:px-lg bg-glass-surface border border-glass-border border-t-[2px] border-t-accent-purple/40 rounded-[1.5rem] shadow-glass"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <UtensilsCrossed size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">{restaurants.length || '50'}+</strong> Restaurants</span>
+          </div>
+          <div className="w-px h-4 bg-glass-border hidden md:block" />
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <MapPin size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">Aurangabad</strong>, Maharashtra</span>
+          </div>
+          <div className="w-px h-4 bg-glass-border hidden md:block" />
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <Award size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">IHM</strong> Curated Guide</span>
+          </div>
+          <div className="w-px h-4 bg-glass-border hidden md:block" />
+          <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
+            <Star size={16} fill="var(--accent-purple)" color="var(--accent-purple)" />
+            <span>MGM University</span>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-sm md:px-lg">
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-lg mb-xl">
           <motion.div
             className="col-span-1 bg-glass-surface backdrop-blur-[24px] border border-glass-border rounded-[2rem] p-lg transition-all duration-400 shadow-glass hover:bg-glass-hover hover:border-accent-purple/20 hover:-translate-y-[6px] hover:shadow-glow/20"
@@ -98,8 +172,10 @@ const Home = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="flex items-center gap-sm mb-lg pb-md border-b border-glass-border">
-              <Star size={24} fill="var(--accent-purple)" color="var(--accent-purple)" className="drop-shadow-glow" />
-              <h2 className="font-sans text-[1.1rem] md:text-[1.25rem] xl:text-[1.4rem] font-semibold text-primary m-0 tracking-[-0.01em] bg-gradient-to-r from-primary to-accent-purple bg-clip-text text-transparent">Top 5 Highest Rated</h2>
+              <div className="w-8 h-8 rounded-lg bg-accent-purple/15 border border-accent-purple/20 flex items-center justify-center shrink-0">
+                <Star size={16} fill="var(--accent-purple)" color="var(--accent-purple)" />
+              </div>
+              <h2 className="font-sans text-[1.1rem] md:text-[1.25rem] xl:text-[1.4rem] font-semibold text-primary m-0 tracking-[-0.01em]">Top 5 Highest Rated</h2>
             </div>
             <div className="flex flex-col gap-md">
               {loading ? (
@@ -112,7 +188,7 @@ const Home = () => {
                       className="group flex gap-md p-md rounded-[1.5rem] cursor-pointer transition-all duration-300 border border-transparent hover:bg-glass-hover hover:border-glass-border hover:translate-x-1 hover:shadow-glass"
                       onClick={() => handleRestaurantClick(restaurant)}
                     >
-                      <img src={restaurant.image} alt={restaurant.name} className="w-[80px] h-[80px] rounded-[1.5rem] object-cover shadow-glass transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow/20" />
+                      <img src={restaurant.image} alt={restaurant.name} className="w-[80px] h-[80px] rounded-[1.5rem] object-cover shadow-glass transition-all duration-300 group-hover:scale-105 group-hover:shadow-glow/20" loading="lazy" />
                       <div className="flex-1 flex flex-col justify-center gap-1">
                         <h4 className="font-sans text-[1rem] font-semibold text-primary m-0 tracking-[-0.01em] leading-[1.3]">{restaurant.name}</h4>
                         <div className="flex items-center gap-1 mt-1">
@@ -140,10 +216,21 @@ const Home = () => {
         </section>
 
         <section className="mt-xl">
-          <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold mb-lg text-primary tracking-[-0.02em] leading-[1.2]">Featured Restaurants</h2>
-          <div className="flex flex-col gap-md">
+          {/* #7 — Featured section with icon and subtitle */}
+          <div className="flex flex-col mb-lg">
+            <div className="flex items-center gap-sm mb-xs">
+              <div className="w-8 h-8 rounded-lg bg-accent-purple/15 border border-accent-purple/20 flex items-center justify-center shrink-0">
+                <ChefHat size={16} className="text-accent-purple" />
+              </div>
+              <h2 className="font-sans text-[1.5rem] md:text-[1.75rem] xl:text-[2rem] font-bold text-primary tracking-[-0.02em] leading-[1.2] m-0">
+                Featured Restaurants
+              </h2>
+            </div>
+            <p className="text-secondary text-[0.95rem] mt-xs m-0 ml-[2.5rem]">Hand-picked by our culinary team at IHM MGM University</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
             {loading ? (
-              <div className="text-tertiary text-center py-xl">Discovering restaurants...</div>
+              <div className="col-span-full"><SkeletonList count={3} /></div>
             ) : (
               restaurants.length > 0 ? (
                 restaurants.slice(0, 6).map((restaurant) => (

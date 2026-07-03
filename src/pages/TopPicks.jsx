@@ -4,12 +4,18 @@ import { Award, Star } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import { hotelsApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const TopPicks = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
+  useSEO({
+    title: 'Top Picks — Best Restaurants',
+    description: 'Discover the highest rated and IHM recommended restaurants in Aurangabad, curated by hospitality experts.',
+    url: '/top-picks',
+  })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +49,7 @@ const TopPicks = () => {
   }
 
   return (
-    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+    <div className="min-h-screen py-xl px-sm md:px-lg max-w-[1400px] mx-auto">
       <div className="text-center mb-xl">
         <h1 className="text-[3rem] mb-sm text-primary font-bold">Top Picks</h1>
         <p className="text-[1.1rem] text-secondary">Curated selection of the best restaurants in Aurangabad</p>
@@ -54,9 +60,9 @@ const TopPicks = () => {
           <Award size={28} className="text-primary" />
           <h2 className="text-[2rem] text-primary m-0 font-semibold">IHM Recommended</h2>
         </div>
-        <div className="flex flex-col gap-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
           {loading ? (
-            <div className="text-secondary py-xl text-center">Loading recommendations...</div>
+            <div className="col-span-full text-secondary py-xl text-center">Loading recommendations...</div>
           ) : (
             ihmRecommended.length > 0 ? (
               ihmRecommended.map((restaurant, index) => (
@@ -73,7 +79,7 @@ const TopPicks = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="text-secondary py-xl text-center">No recommended restaurants yet.</div>
+              <div className="col-span-full text-secondary py-xl text-center">No recommended restaurants yet.</div>
             )
           )}
         </div>
@@ -84,7 +90,7 @@ const TopPicks = () => {
           <Star size={28} fill="#FFD700" color="#FFD700" />
           <h2 className="text-[2rem] text-primary m-0 font-semibold">Highest Rated</h2>
         </div>
-        <div className="flex flex-col gap-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
           {loading ? (
             <div className="text-secondary py-xl text-center">Loading top rated...</div>
           ) : (
@@ -103,7 +109,7 @@ const TopPicks = () => {
                 </motion.div>
               ))
             ) : (
-              <div className="text-secondary py-xl text-center">No rated restaurants yet.</div>
+              <div className="col-span-full text-secondary py-xl text-center">No rated restaurants yet.</div>
             )
           )}
         </div>

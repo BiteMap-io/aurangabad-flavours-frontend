@@ -75,12 +75,13 @@ const CardNav = ({ isOpen, onClose }) => {
           tabIndex={-1}
         >
           <motion.div
-            className="relative w-full max-w-[1000px] max-h-[85vh] md:max-h-[70vh] bg-background-primary/95 backdrop-blur-[24px] border border-glass-border rounded-xl shadow-glass overflow-hidden"
+            className="relative w-full max-w-[1000px] max-h-[90vh] bg-background-primary/95 backdrop-blur-[24px] border border-glass-border rounded-xl shadow-glass overflow-hidden flex flex-col"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
           >
+            {/* Fixed close button */}
             <button
               className="absolute top-md right-md lg:top-lg lg:right-lg bg-glass-surface border border-glass-border rounded-md text-primary w-10 h-10 lg:w-[44px] lg:h-[44px] flex items-center justify-center cursor-pointer transition-all duration-200 z-10 hover:bg-glass-hover hover:scale-105 focus-visible:outline-[2px] focus-visible:outline-accent-purple focus-visible:outline-offset-2"
               onClick={onClose}
@@ -89,7 +90,8 @@ const CardNav = ({ isOpen, onClose }) => {
               <X size={24} />
             </button>
 
-            <div className="p-sm md:p-md lg:p-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md lg:gap-xl items-start md:min-h-[350px] lg:min-h-[300px]">
+            {/* Scrollable content */}
+            <div className="overflow-y-auto overscroll-contain p-sm pt-[3.5rem] md:pt-sm md:p-md lg:p-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md lg:gap-xl items-start md:min-h-[350px] lg:min-h-[300px]">
               {navigationGroups.map((group, groupIndex) => (
                 <motion.div
                   key={group.title}

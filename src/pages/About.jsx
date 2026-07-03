@@ -1,11 +1,17 @@
 import { motion } from 'framer-motion'
 import { getPageContent } from '../hooks/usePageContent'
+import useSEO from '../hooks/useSEO'
 
 const About = () => {
   const c = getPageContent('about')
+  useSEO({
+    title: 'About Us',
+    description: 'Learn about the Aurangabad Flavors Guide, curated by the Institute of Hotel Management at MGM University, Aurangabad.',
+    url: '/about',
+  })
 
   return (
-    <motion.div className="min-h-screen py-xl px-lg bg-background-primary"
+    <motion.div className="min-h-screen py-xl px-sm md:px-lg bg-background-primary"
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
       <div className="max-w-[1200px] mx-auto">
         <div className="text-center mb-xl">

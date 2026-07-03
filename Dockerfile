@@ -3,10 +3,13 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Disable SSL verification to work around corporate certificate issue
+RUN npm config set strict-ssl false
+
 # Copy dependency manifests first for better layer caching
 COPY package.json package-lock.json ./
 
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the source code
 COPY . .

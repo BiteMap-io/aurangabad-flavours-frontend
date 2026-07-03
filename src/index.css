@@ -77,24 +77,34 @@
   }
 
   [data-theme="light"] {
-    /* Pure Light Polish Theme */
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    
-    --glass-surface: rgba(255, 255, 255, 0.8);
-    --glass-border: rgba(139, 92, 246, 0.1);
-    --glass-hover: rgba(255, 255, 255, 0.95);
-    
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #94a3b8;
-    
-    --accent-purple: #7c3aed; /* Punchy Deep Purple for Light Mode */
-    --accent-gold: #d97706;
-    
-    --shadow-glass: 0 10px 40px -10px rgba(139, 92, 246, 0.08);
-    --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.1);
-    
+    /* ── 1. Layered background system ── */
+    --bg-primary: #fafafc;      /* page background — warm neutral */
+    --bg-secondary: #f7f5ff;    /* section background — faint lavender */
+
+    /* ── Cards: pure white, elevated appearance ── */
+    --glass-surface: rgba(255, 255, 255, 0.98);
+    --glass-hover: rgba(252, 250, 255, 1);
+
+    /* ── 13. Softer borders — not harsh, not invisible ── */
+    --glass-border: rgba(124, 58, 237, 0.14);
+
+    /* ── 7. Typography — stronger contrast hierarchy ── */
+    --text-primary: #0d1117;     /* near-black for headings */
+    --text-secondary: #2d3748;   /* dark slate for body */
+    --text-tertiary: #64748b;    /* muted but readable */
+
+    --accent-purple: #6d28d9;    /* slightly deeper for light bg contrast */
+    --accent-gold: #b45309;
+
+    /* ── 5, 9, 12. Shadow system — layered elevation ── */
+    /* Default card shadow: subtle depth */
+    --shadow-glass: 0 1px 3px rgba(0, 0, 0, 0.05),
+                    0 4px 16px rgba(124, 58, 237, 0.08),
+                    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    /* Glow: hover elevated shadow */
+    --shadow-glow: 0 8px 28px rgba(109, 40, 217, 0.18),
+                   0 2px 8px rgba(109, 40, 217, 0.1);
+
     --background-primary: var(--bg-primary);
     --background-secondary: var(--bg-secondary);
     --glass-bg: var(--glass-surface);
@@ -107,18 +117,29 @@
     box-sizing: border-box;
   }
 
+  html {
+    width: 100%;
+  }
+
   body {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
     font-weight: 600;
+    scroll-margin-top: 80px;
   }
 
   code {
@@ -155,5 +176,141 @@
 
   [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+  }
+
+  /* ── 1. Page background — layered warm gradient ── */
+  [data-theme="light"] body {
+    background:
+      linear-gradient(160deg, #fafafc 0%, #f3f0ff 55%, #eef2ff 100%);
+    min-height: 100vh;
+  }
+
+  /* ── Background decorative orbs ── */
+  [data-theme="light"] #root::before {
+    content: '';
+    position: fixed;
+    top: -60px;
+    right: 0;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(109, 40, 217, 0.08) 0%, rgba(109, 40, 217, 0.02) 55%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  [data-theme="light"] #root::after {
+    content: '';
+    position: fixed;
+    bottom: -60px;
+    left: 0;
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(circle, rgba(180, 83, 9, 0.06) 0%, rgba(180, 83, 9, 0.01) 55%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── 5, 15. Card hover lift — premium elevation ── */
+  [data-theme="light"] .hover\:shadow-glass:hover,
+  [data-theme="light"] .hover\:shadow-glow:hover {
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.04),
+      0 12px 32px rgba(109, 40, 217, 0.14),
+      0 2px 8px rgba(109, 40, 217, 0.07) !important;
+    transform: translateY(-4px);
+    transition: box-shadow 250ms ease, transform 250ms ease;
+  }
+
+  /* ── 5. Card left accent stripe on hover ── */
+  [data-theme="light"] .hover\:border-accent-purple\/20:hover {
+    border-left-color: rgba(109, 40, 217, 0.45) !important;
+    border-left-width: 3px !important;
+  }
+
+  /* ── 7. Heading gradient — dark-to-purple ── */
+  [data-theme="light"] h1,
+  [data-theme="light"] h2 {
+    background: linear-gradient(135deg, #0d1117 0%, #6d28d9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Keep headings on dark backgrounds as white */
+  [data-theme="light"] .text-white h1,
+  [data-theme="light"] .text-white h2,
+  [data-theme="light"] h1.text-white,
+  [data-theme="light"] h2.text-white,
+  [data-theme="light"] .drop-shadow-lg {
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+  }
+
+  /* ── 13. Gradient section dividers — excludes sticky/fixed elements ── */
+  [data-theme="light"] .border-b.border-glass-border:not(.sticky):not(.fixed),
+  [data-theme="light"] .border-t.border-glass-border:not(.sticky):not(.fixed) {
+    border-color: transparent !important;
+    position: relative;
+  }
+
+  [data-theme="light"] .border-b.border-glass-border:not(.sticky):not(.fixed)::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(109, 40, 217, 0.2) 25%, rgba(109, 40, 217, 0.2) 75%, transparent);
+  }
+
+  [data-theme="light"] .border-t.border-glass-border:not(.sticky):not(.fixed)::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(109, 40, 217, 0.2) 25%, rgba(109, 40, 217, 0.2) 75%, transparent);
+  }
+
+  /* ── 16. Body text — improved line height and contrast ── */
+  [data-theme="light"] body {
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── 11. Badges — softer bg, better padding ── */
+  [data-theme="light"] .bg-glass-surface.border.border-glass-border {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-color: rgba(109, 40, 217, 0.14) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255,255,255,0.9) inset;
+  }
+
+  /* ── 9. Buttons — better focus ring ── */
+  [data-theme="light"] button:focus-visible,
+  [data-theme="light"] a:focus-visible {
+    outline: 2px solid rgba(109, 40, 217, 0.7);
+    outline-offset: 3px;
+  }
+
+  /* ── Scrollbar refinement ── */
+  [data-theme="light"] ::-webkit-scrollbar-track {
+    background: #f0eeff;
+  }
+
+  [data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: rgba(109, 40, 217, 0.45);
+    border: 2px solid #f0eeff;
+    background-clip: padding-box;
+    border-radius: 9999px;
+  }
+
+  [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(109, 40, 217, 0.7);
+    border: 2px solid #f0eeff;
+    background-clip: padding-box;
+    border-radius: 9999px;
   }
 }

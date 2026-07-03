@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, MapPin, X, ChevronLeft, ChevronRight, Clock, Users, Ticket, CalendarDays } from 'lucide-react'
 import { eventsApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -19,6 +20,11 @@ const Events = () => {
   const [calCursor, setCalCursor] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(null)
   const cardRefs = useRef({})
+  useSEO({
+    title: 'Events & Food Festivals',
+    description: 'Upcoming food festivals, special menus and culinary events in Aurangabad. Stay updated with the latest dining events.',
+    url: '/events',
+  })
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -109,7 +115,7 @@ const Events = () => {
   }
 
   return (
-    <div className="min-h-screen py-xl px-lg max-w-[1400px] mx-auto">
+    <div className="min-h-screen py-xl px-sm md:px-lg max-w-[1400px] mx-auto">
       {/* Header */}
       <div className="text-center mb-xl">
         <span className="inline-flex items-center gap-2 py-1.5 px-4 rounded-pill bg-accent-purple/10 border border-accent-purple/25 text-accent-purple text-[0.85rem] font-semibold mb-md">

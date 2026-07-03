@@ -49,14 +49,28 @@ export const UserAuthProvider = ({ children }) => {
     return { success: false, error: res.error || 'Signup failed' }
   }
 
+  const guestLogin = async (name, email, phone) => {
+    const res = await api.post('/auth/guest', { name, email, phone })
+    if (res.token) {
+      localStorage.setItem('userToken', res.token)
+      localStorage.setItem('userData', JSON.stringify(res.user))
+      setUser(res.user)
+      return { success: true }
+    }
+    return { success: false, error: res.error || 'Guest login failed' }
+  }
+
   const logout = () => {
     localStorage.removeItem('userToken')
     localStorage.removeItem('userData')
     setUser(null)
   }
 
+  const isOwner = user?.userType === 'restaurant_owner'
+  const isGuest = user?.userType === 'guest'
+
   return (
-    <UserAuthContext.Provider value={{ user, loading, login, signup, logout, isLoggedIn: !!user }}>
+    <UserAuthContext.Provider value={{ user, loading, login, signup, guestLogin, logout, isLoggedIn: !!user, isOwner, isGuest }}>
       {children}
     </UserAuthContext.Provider>
   )

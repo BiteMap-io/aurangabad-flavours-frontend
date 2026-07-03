@@ -23,10 +23,11 @@ const STEPS = [
   { key: 'menu', label: 'Menu & Extras', icon: UtensilsCrossed, blurb: 'Optional menu and quality notes' },
 ];
 
-const HotelForm = () => {
+const HotelForm = ({ ownerMode = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
+  const backPath = ownerMode ? '/partner/dashboard' : '/admin/hotels';
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -119,7 +120,7 @@ const HotelForm = () => {
       }
     } catch (error) {
       showToast.error('Error', 'Failed to load hotel data');
-      navigate('/admin/hotels');
+      navigate(backPath);
     } finally {
       setInitialLoading(false);
     }
@@ -304,9 +305,12 @@ const HotelForm = () => {
         showToast.success('Success', 'Hotel updated successfully');
       } else {
         await hotelsApi.create(payload, menuFile || undefined);
-        showToast.success('Success', 'Hotel created successfully');
+        showToast.success(
+          ownerMode ? 'Submitted for review' : 'Success',
+          ownerMode ? "Thanks! We'll review your listing and publish it once approved." : 'Hotel created successfully'
+        );
       }
-      navigate('/admin/hotels');
+      navigate(backPath);
     } catch (error) {
       showToast.error('Error', isEditMode ? 'Failed to update hotel' : 'Failed to create hotel');
     } finally {
@@ -328,11 +332,18 @@ const HotelForm = () => {
   return (
     <div className="p-8 max-w-[920px] mx-auto font-['Inter',-apple-system,BlinkMacSystemFont,sans-serif]">
       <div className="flex flex-col gap-4 mb-6">
-        <button className="flex items-center gap-2 bg-transparent border-none text-purple-500 cursor-pointer font-medium w-fit p-0 transition-all duration-200 hover:text-purple-400 hover:-translate-x-1" onClick={() => navigate('/admin/hotels')}>
+        <button className="flex items-center gap-2 bg-transparent border-none text-purple-500 cursor-pointer font-medium w-fit p-0 transition-all duration-200 hover:text-purple-400 hover:-translate-x-1" onClick={() => navigate(backPath)}>
           <ArrowLeft size={20} />
-          <span>Back to Management</span>
+          <span>{ownerMode ? 'Back to Dashboard' : 'Back to Management'}</span>
         </button>
-        <h1 className="text-[2rem] font-bold text-gray-100 m-0 data-[theme=light]:text-gray-900">{isEditMode ? 'Edit Hotel / Restaurant' : 'Add New Hotel / Restaurant'}</h1>
+        <h1 className="text-[2rem] font-bold text-gray-100 m-0 data-[theme=light]:text-gray-900">
+          {ownerMode
+            ? (isEditMode ? 'Edit Your Restaurant' : 'Add Your Restaurant')
+            : (isEditMode ? 'Edit Hotel / Restaurant' : 'Add New Hotel / Restaurant')}
+        </h1>
+        {ownerMode && !isEditMode && (
+          <p className="text-[0.9rem] text-gray-500 -mt-2">Your listing goes live after a quick review by our team, usually within a day or two.</p>
+        )}
       </div>
 
       {/* ── Step indicator ── */}
@@ -631,23 +642,25 @@ const HotelForm = () => {
                     </div>
                   </div>
 
-                  <div className={cardCls + ' flex flex-col gap-4 mb-0'}>
-                    <h3 className={titleCls}>Visibility</h3>
-                    <label className="flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-black/20 cursor-pointer transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/5 group data-[theme=light]:bg-white data-[theme=light]:border-black/10">
-                      <input type="checkbox" className="mt-1 w-4 h-4 rounded text-purple-600 focus:ring-purple-600" name="ihmRecommended" checked={formData.ihmRecommended} onChange={handleInputChange} />
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-gray-100 text-[0.95rem] flex items-center gap-1.5 data-[theme=light]:text-gray-900 group-hover:text-purple-500"><Star size={14} /> IHM Recommended</span>
-                        <span className="text-[0.8rem] text-gray-500">Featured on homepage and top picks</span>
-                      </div>
-                    </label>
-                    <label className="flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-black/20 cursor-pointer transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/5 group data-[theme=light]:bg-white data-[theme=light]:border-black/10">
-                      <input type="checkbox" className="mt-1 w-4 h-4 rounded text-purple-600 focus:ring-purple-600" name="verified" checked={formData.verified} onChange={handleInputChange} />
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-gray-100 text-[0.95rem] flex items-center gap-1.5 data-[theme=light]:text-gray-900 group-hover:text-purple-500"><ShieldCheck size={14} /> Verified Business</span>
-                        <span className="text-[0.8rem] text-gray-500">Verified authentic local experience</span>
-                      </div>
-                    </label>
-                  </div>
+                  {!ownerMode && (
+                    <div className={cardCls + ' flex flex-col gap-4 mb-0'}>
+                      <h3 className={titleCls}>Visibility</h3>
+                      <label className="flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-black/20 cursor-pointer transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/5 group data-[theme=light]:bg-white data-[theme=light]:border-black/10">
+                        <input type="checkbox" className="mt-1 w-4 h-4 rounded text-purple-600 focus:ring-purple-600" name="ihmRecommended" checked={formData.ihmRecommended} onChange={handleInputChange} />
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-100 text-[0.95rem] flex items-center gap-1.5 data-[theme=light]:text-gray-900 group-hover:text-purple-500"><Star size={14} /> IHM Recommended</span>
+                          <span className="text-[0.8rem] text-gray-500">Featured on homepage and top picks</span>
+                        </div>
+                      </label>
+                      <label className="flex items-start gap-4 p-4 rounded-xl border border-white/10 bg-black/20 cursor-pointer transition-all duration-200 hover:border-purple-500/50 hover:bg-purple-500/5 group data-[theme=light]:bg-white data-[theme=light]:border-black/10">
+                        <input type="checkbox" className="mt-1 w-4 h-4 rounded text-purple-600 focus:ring-purple-600" name="verified" checked={formData.verified} onChange={handleInputChange} />
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-100 text-[0.95rem] flex items-center gap-1.5 data-[theme=light]:text-gray-900 group-hover:text-purple-500"><ShieldCheck size={14} /> Verified Business</span>
+                          <span className="text-[0.8rem] text-gray-500">Verified authentic local experience</span>
+                        </div>
+                      </label>
+                    </div>
+                  )}
                 </>
               )}
 
@@ -812,7 +825,7 @@ const HotelForm = () => {
           {/* ── Navigation ── */}
           <div className="flex items-center justify-between gap-4 pt-6 mt-2 border-t border-white/10 data-[theme=light]:border-black/10">
             {step === 0 ? (
-              <button type="button" onClick={() => navigate('/admin/hotels')}
+              <button type="button" onClick={() => navigate(backPath)}
                 className="flex items-center gap-2 py-3 px-6 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-transparent text-gray-400 border border-white/10 hover:bg-white/5 hover:text-white data-[theme=light]:border-black/20 data-[theme=light]:text-gray-600 data-[theme=light]:hover:text-gray-900 data-[theme=light]:hover:bg-black/5">
                 Cancel
               </button>

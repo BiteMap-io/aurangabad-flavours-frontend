@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Star, MapPin, Navigation, Loader, Clock, Route, ExternalLink, X } from 'lucide-react'
+import { ArrowLeft, Star, MapPin, Navigation, Loader, Clock, Route, ExternalLink, X, Share2 } from 'lucide-react'
 import EmbeddedMap from '../components/EmbeddedMap'
 import { useDirections } from '../hooks/useDirections'
 import { hotelsApi } from '../services/adminApi'
+import { showToast } from '../components/admin/Toast'
 
 const CSN_CENTER = [19.8762, 75.3433]
 
@@ -46,6 +47,26 @@ const PlaceMap = () => {
     window.open(`https://www.google.com/maps/dir/?api=1&destination=${coords[1]},${coords[0]}`, '_blank')
   }
 
+  // Shares a server-rendered link (not this SPA URL) so WhatsApp/Facebook/etc.
+  // link previews show the restaurant's real name and photo.
+  const handleShare = async () => {
+    const shareUrl = `${import.meta.env.VITE_API_BASE_URL}/share/restaurant/${id}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: restaurant.name, text: `Check out ${restaurant.name} on Aurangabad Flavours`, url: shareUrl })
+      } catch {
+        // User cancelled the native share sheet.
+      }
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      showToast.success('Link copied', 'Share it with your friends!')
+    } catch {
+      showToast.error('Error', 'Could not copy the link')
+    }
+  }
+
   if (loading) {
     return (
       <div className="h-[calc(100vh-64px)] flex flex-col items-center justify-center text-secondary gap-3">
@@ -60,7 +81,7 @@ const PlaceMap = () => {
       <div className="h-[calc(100vh-64px)] flex flex-col items-center justify-center text-secondary gap-4 px-6 text-center">
         <MapPin size={48} className="opacity-30" />
         <p className="m-0">We couldn't find that place.</p>
-        <button onClick={() => navigate('/explore')} className="py-2.5 px-5 bg-accent-purple text-white rounded-pill font-semibold hover:shadow-glow transition-all">
+        <button onClick={() => navigate('/explore')} className="py-2.5 px-5 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-pill font-semibold hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow transition-all">
           Back to Explore
         </button>
       </div>
@@ -149,7 +170,7 @@ const PlaceMap = () => {
             <button
               onClick={() => getDirections(restaurant)}
               disabled={routeLoading}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-accent-purple text-white rounded-xl text-[0.85rem] font-semibold transition-all hover:shadow-glow hover:-translate-y-[1px] disabled:opacity-60"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-xl text-[0.85rem] font-semibold transition-all hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[1px] disabled:opacity-60"
             >
               <Navigation size={16} /> Get directions
             </button>
@@ -159,6 +180,13 @@ const PlaceMap = () => {
               className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-glass-surface border border-glass-border text-secondary rounded-xl text-[0.85rem] font-semibold transition-all hover:border-accent-purple hover:text-primary"
             >
               <ExternalLink size={15} /> <span className="max-md:hidden">Maps</span>
+            </button>
+            <button
+              onClick={handleShare}
+              title="Share"
+              className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-glass-surface border border-glass-border text-secondary rounded-xl text-[0.85rem] font-semibold transition-all hover:border-accent-purple hover:text-primary"
+            >
+              <Share2 size={15} />
             </button>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Loader } from 'lucide-react'
 import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import { hotelsApi, galleryApi } from '../services/adminApi'
+import useSEO from '../hooks/useSEO'
 
 const Cuisines = () => {
   const [selectedCuisine, setSelectedCuisine] = useState('')
@@ -12,6 +13,11 @@ const Cuisines = () => {
   const [restaurants, setRestaurants] = useState([])
   const [slideshowImages, setSlideshowImages] = useState([])
   const [loading, setLoading] = useState(true)
+  useSEO({
+    title: 'Explore by Cuisine',
+    description: 'Browse Aurangabad restaurants by cuisine type — Marathwada, Mughlai, North Indian, South Indian and more.',
+    url: '/cuisines',
+  })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,7 +141,7 @@ const Cuisines = () => {
                   </h2>
                 )}
 
-                <div className="flex flex-col gap-md">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-md">
                   {filteredRestaurants.length > 0 ? (
                     filteredRestaurants.map((restaurant, index) => (
                       <motion.div
@@ -151,7 +157,7 @@ const Cuisines = () => {
                       </motion.div>
                     ))
                   ) : (
-                    <div className="flex flex-col items-center justify-center p-xl bg-glass-surface border border-glass-border rounded-lg text-secondary text-center gap-md min-h-[200px]">
+                    <div className="col-span-full flex flex-col items-center justify-center p-xl bg-glass-surface border border-glass-border rounded-lg text-secondary text-center gap-md min-h-[200px]">
                       <p>No restaurants found for this cuisine.</p>
                     </div>
                   )}
