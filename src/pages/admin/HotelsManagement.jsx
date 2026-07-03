@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  Plus, Search, Edit, Trash2, Eye, Star, MapPin, Loader 
+import {
+  Plus, Search, Edit, Trash2, Eye, Star, MapPin, Loader, Check, X, Clock, ShieldAlert
 } from 'lucide-react';
 import { hotelsApi } from '../../services/adminApi';
 import { showToast } from '../../components/admin/Toast';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 
+const APPROVAL_TABS = [
+  { key: 'all', label: 'All' },
+  { key: 'pending', label: 'Pending Review' },
+  { key: 'approved', label: 'Approved' },
+  { key: 'rejected', label: 'Rejected' },
+];
+
 const HotelsManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [approvalTab, setApprovalTab] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [hotels, setHotels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, hotel: null });
+  const [rejectModal, setRejectModal] = useState({ isOpen: false, hotel: null, reason: '' });
 
   useEffect(() => {
     loadHotels();
@@ -23,7 +32,8 @@ const HotelsManagement = () => {
   const loadHotels = async () => {
     try {
       setLoading(true);
-      const response = await hotelsApi.getAll();
+      // Admin token unlocks every approval status, not just public/approved listings.
+      const response = await hotelsApi.getAll('all');
       const data = Array.isArray(response) ? response : (response?.data ?? []);
       setHotels(data);
     } catch {
@@ -33,6 +43,8 @@ const HotelsManagement = () => {
     }
   };
 
+  const pendingCount = hotels.filter(h => h.approvalStatus === 'pending').length;
+
   const filteredHotels = hotels
     .filter(hotel => {
       const matchesSearch = hotel.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -40,7 +52,9 @@ const HotelsManagement = () => {
       const matchesFilter = filterStatus === 'all'
         || (filterStatus === 'featured' && hotel.ihmRecommended)
         || (filterStatus === 'verified' && hotel.verified);
-      return matchesSearch && matchesFilter;
+      const matchesApproval = approvalTab === 'all'
+        || (hotel.approvalStatus || 'approved') === approvalTab;
+      return matchesSearch && matchesFilter && matchesApproval;
     })
     .sort((a, b) => {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
@@ -59,6 +73,36 @@ const HotelsManagement = () => {
       } else showToast.error('Error', response.error || 'Delete failed');
     } catch {
       showToast.error('Error', 'Delete failed');
+    }
+  };
+
+  const handleApprove = async (hotel) => {
+    try {
+      const hotelId = hotel._id || hotel.id;
+      const response = await hotelsApi.approve(hotelId);
+      const updated = response.data || response;
+      setHotels(prev => prev.map(h => (h._id || h.id) === hotelId ? updated : h));
+      showToast.success('Approved', `${hotel.name} is now live`);
+    } catch {
+      showToast.error('Error', 'Failed to approve restaurant');
+    }
+  };
+
+  const openRejectModal = (hotel) => setRejectModal({ isOpen: true, hotel, reason: '' });
+  const closeRejectModal = () => setRejectModal({ isOpen: false, hotel: null, reason: '' });
+
+  const confirmReject = async () => {
+    const hotel = rejectModal.hotel;
+    if (!hotel) return;
+    try {
+      const hotelId = hotel._id || hotel.id;
+      const response = await hotelsApi.reject(hotelId, rejectModal.reason);
+      const updated = response.data || response;
+      setHotels(prev => prev.map(h => (h._id || h.id) === hotelId ? updated : h));
+      showToast.success('Rejected', `${hotel.name} was rejected`);
+      closeRejectModal();
+    } catch {
+      showToast.error('Error', 'Failed to reject restaurant');
     }
   };
 
@@ -89,6 +133,24 @@ const HotelsManagement = () => {
         <Link to="/admin/hotels/add" className="inline-flex items-center gap-2 py-2 px-4 border-none rounded-lg bg-gradient-to-br from-purple-500 to-[#9b59b6] text-white font-semibold cursor-pointer transition-all duration-300 no-underline hover:-translate-y-[2px] shadow-[0_4px_10px_rgba(138,43,226,0.2)] hover:shadow-[0_8px_25px_rgba(138,43,226,0.3)]">
           <Plus size={20} /> Add New Hotel
         </Link>
+      </div>
+
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {APPROVAL_TABS.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setApprovalTab(tab.key)}
+            className={`flex items-center gap-1.5 py-2 px-4 rounded-lg text-[0.85rem] font-medium border transition-all duration-200 cursor-pointer
+              ${approvalTab === tab.key
+                ? 'bg-purple-500/15 border-purple-500 text-purple-400'
+                : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 data-[theme=light]:bg-white data-[theme=light]:border-black/10'}`}
+          >
+            {tab.label}
+            {tab.key === 'pending' && pendingCount > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-black text-[0.7rem] font-bold">{pendingCount}</span>
+            )}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap gap-4 mb-8 max-md:flex-col max-md:items-stretch max-md:gap-2">
@@ -142,9 +204,16 @@ const HotelsManagement = () => {
             >
               <div className="relative h-[180px] overflow-hidden">
                 <img src={hotel.image} alt={hotel.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                <div className="absolute top-2 left-2 flex gap-1">
+                <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
                   {hotel.ihmRecommended && <span className="py-1 px-2 rounded text-[0.75rem] font-semibold text-white bg-gradient-to-br from-purple-500 to-[#9b59b6]">Featured</span>}
                   {hotel.verified && <span className="py-1 px-2 rounded text-[0.75rem] font-semibold text-white bg-gradient-to-br from-emerald-500 to-emerald-700">Verified</span>}
+                  {hotel.approvalStatus === 'pending' && (
+                    <span className="flex items-center gap-1 py-1 px-2 rounded text-[0.75rem] font-semibold text-black bg-amber-400"><Clock size={11} /> Pending</span>
+                  )}
+                  {hotel.approvalStatus === 'rejected' && (
+                    <span className="flex items-center gap-1 py-1 px-2 rounded text-[0.75rem] font-semibold text-white bg-red-500"><ShieldAlert size={11} /> Rejected</span>
+                  )}
+                  {hotel.ownerId && <span className="py-1 px-2 rounded text-[0.75rem] font-semibold text-white bg-black/60">Owner-submitted</span>}
                 </div>
               </div>
               <div className="p-4 max-[480px]:p-2">
@@ -161,7 +230,22 @@ const HotelsManagement = () => {
                     <MapPin size={14} /> <span>{hotel.area}</span>
                   </div>
                   <p className="text-gray-500 text-[0.9rem] m-0 mb-1 font-medium">{hotel.priceRange}</p>
+                  {hotel.approvalStatus === 'rejected' && hotel.rejectionReason && (
+                    <p className="text-red-400 text-[0.8rem] bg-red-500/10 border border-red-500/20 rounded-md p-2 mt-1">{hotel.rejectionReason}</p>
+                  )}
                 </div>
+
+                {hotel.approvalStatus === 'pending' && (
+                  <div className="flex gap-2 mb-2">
+                    <button onClick={() => handleApprove(hotel)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[0.85rem] font-semibold cursor-pointer hover:bg-emerald-500/25 transition-all">
+                      <Check size={15} /> Approve
+                    </button>
+                    <button onClick={() => openRejectModal(hotel)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md bg-red-500/15 border border-red-500/30 text-red-400 text-[0.85rem] font-semibold cursor-pointer hover:bg-red-500/25 transition-all">
+                      <X size={15} /> Reject
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex justify-end gap-2 mt-2 max-md:justify-center">
                   <Link to={`/admin/hotels/edit/${hotelId}`} className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-white/5 cursor-pointer text-gray-500 transition-all duration-200 no-underline hover:text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/30 data-[theme=light]:border-black/10 data-[theme=light]:bg-white/80" title="Edit">
                     <Edit size={16} />
@@ -200,6 +284,26 @@ const HotelsManagement = () => {
         cancelText="Cancel"
         type="danger"
       />
+
+      {rejectModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={e => { if (e.target === e.currentTarget) closeRejectModal(); }}>
+          <div className="w-full max-w-[420px] bg-[#171717] border border-white/10 rounded-2xl p-6 flex flex-col gap-4 data-[theme=light]:bg-white">
+            <h3 className="text-[1.1rem] font-bold text-gray-100 m-0 data-[theme=light]:text-gray-900">Reject "{rejectModal.hotel?.name}"?</h3>
+            <p className="text-gray-500 text-[0.85rem] m-0">Let the owner know what to fix (optional).</p>
+            <textarea
+              className="w-full bg-black/30 border border-white/10 rounded-xl py-2.5 px-3.5 text-white text-[0.9rem] focus:outline-none focus:border-purple-500 data-[theme=light]:bg-white data-[theme=light]:text-gray-900 data-[theme=light]:border-black/20"
+              rows={3}
+              placeholder="e.g. Photos are too blurry, please re-upload"
+              value={rejectModal.reason}
+              onChange={e => setRejectModal(prev => ({ ...prev, reason: e.target.value }))}
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={closeRejectModal} className="py-2 px-4 rounded-lg text-gray-400 border border-white/10 bg-transparent cursor-pointer hover:bg-white/5 transition-all">Cancel</button>
+              <button onClick={confirmReject} className="py-2 px-4 rounded-lg bg-red-500 text-white font-semibold border-none cursor-pointer hover:bg-red-600 transition-all">Reject</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

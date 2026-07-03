@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Globe, Github, Instagram, Facebook, Linkedin, MapPin, Award } from 'lucide-react'
+import { Globe, Github, Instagram, Facebook, Linkedin, MapPin, Award, ArrowRight, Store } from 'lucide-react'
 import { useLanguage } from '../context/LanguageContext'
 import { motion } from 'framer-motion'
 
@@ -165,10 +165,25 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* #7 — gradient divider, no flat border */}
-          <div className="relative h-[1px] mb-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-purple/20 to-transparent" />
-          </div>
+        <Link
+          to="/partner"
+          className="flex items-center justify-between gap-sm p-md bg-gradient-to-r from-accent-purple/15 to-accent-purple/5 border border-accent-purple/30 rounded-md no-underline transition-all duration-200 hover:border-accent-purple/60 hover:from-accent-purple/25 group"
+        >
+          <span className="flex items-center gap-sm min-w-0">
+            <span className="w-10 h-10 rounded-md bg-accent-purple/15 flex items-center justify-center text-accent-purple shrink-0">
+              <Store size={18} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-primary font-semibold text-[0.95rem]">Own a restaurant?</span>
+              <span className="block text-secondary text-[0.82rem] truncate">List it, manage dishes & menus, and run offers</span>
+            </span>
+          </span>
+          <span className="flex items-center gap-1 text-accent-purple font-semibold text-[0.85rem] shrink-0 transition-transform duration-200 group-hover:translate-x-1">
+            Partner Login <ArrowRight size={16} />
+          </span>
+        </Link>
+
+        <div className="h-[1px] bg-glass-border my-lg opacity-50" />
 
           {/* Bottom bar — reduced py */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-[0.75rem] py-[1.1rem]">
