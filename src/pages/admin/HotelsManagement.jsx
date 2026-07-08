@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-  Plus, Search, Edit, Trash2, Eye, Star, MapPin, Loader, Check, X, Clock, ShieldAlert
+  Plus, Search, Edit, Trash2, Eye, Star, MapPin, Loader, Check, X, Clock, ShieldAlert,
+  User, Mail, Phone, Calendar, UtensilsCrossed, Image as ImageIcon, ShieldCheck
 } from 'lucide-react';
 import { hotelsApi } from '../../services/adminApi';
 import { showToast } from '../../components/admin/Toast';
@@ -24,6 +25,7 @@ const HotelsManagement = () => {
   const [loading, setLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, hotel: null });
   const [rejectModal, setRejectModal] = useState({ isOpen: false, hotel: null, reason: '' });
+  const [viewModal, setViewModal] = useState({ isOpen: false, hotel: null, data: null, loading: false });
 
   useEffect(() => {
     loadHotels();
@@ -90,6 +92,19 @@ const HotelsManagement = () => {
 
   const openRejectModal = (hotel) => setRejectModal({ isOpen: true, hotel, reason: '' });
   const closeRejectModal = () => setRejectModal({ isOpen: false, hotel: null, reason: '' });
+
+  const openViewModal = async (hotel) => {
+    setViewModal({ isOpen: true, hotel, data: null, loading: true });
+    try {
+      const response = await hotelsApi.getAdminView(hotel._id || hotel.id);
+      const data = response.data || response;
+      setViewModal({ isOpen: true, hotel, data, loading: false });
+    } catch {
+      showToast.error('Error', 'Failed to load restaurant details');
+      setViewModal({ isOpen: true, hotel, data: null, loading: false });
+    }
+  };
+  const closeViewModal = () => setViewModal({ isOpen: false, hotel: null, data: null, loading: false });
 
   const confirmReject = async () => {
     const hotel = rejectModal.hotel;
@@ -250,7 +265,7 @@ const HotelsManagement = () => {
                   <Link to={`/admin/hotels/edit/${hotelId}`} className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-white/5 cursor-pointer text-gray-500 transition-all duration-200 no-underline hover:text-blue-500 hover:bg-blue-500/10 hover:border-blue-500/30 data-[theme=light]:border-black/10 data-[theme=light]:bg-white/80" title="Edit">
                     <Edit size={16} />
                   </Link>
-                  <button className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-transparent cursor-pointer text-gray-500 transition-all duration-200 hover:text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 data-[theme=light]:border-black/10" title="View">
+                  <button onClick={() => openViewModal(hotel)} className="w-9 h-9 flex items-center justify-center border border-white/10 rounded-md bg-transparent cursor-pointer text-gray-500 transition-all duration-200 hover:text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 data-[theme=light]:border-black/10" title="View details">
                     <Eye size={16} />
                   </button>
                   <button
@@ -301,6 +316,111 @@ const HotelsManagement = () => {
               <button onClick={closeRejectModal} className="py-2 px-4 rounded-lg text-gray-400 border border-white/10 bg-transparent cursor-pointer hover:bg-white/5 transition-all">Cancel</button>
               <button onClick={confirmReject} className="py-2 px-4 rounded-lg bg-red-500 text-white font-semibold border-none cursor-pointer hover:bg-red-600 transition-all">Reject</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* View / verification modal — who submitted it + full restaurant details */}
+      {viewModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={e => { if (e.target === e.currentTarget) closeViewModal(); }}>
+          <div className="w-full max-w-[560px] max-h-[85vh] overflow-y-auto bg-[#171717] border border-white/10 rounded-2xl p-6 flex flex-col gap-4 data-[theme=light]:bg-white">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[1.2rem] font-bold text-gray-100 m-0 data-[theme=light]:text-gray-900">{viewModal.hotel?.name}</h3>
+              <button onClick={closeViewModal} className="text-gray-500 hover:text-white bg-transparent border-none cursor-pointer"><X size={20} /></button>
+            </div>
+
+            {viewModal.loading ? (
+              <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+                <Loader size={32} className="animate-spin mb-3 text-purple-500" />
+                <p className="m-0">Loading details...</p>
+              </div>
+            ) : !viewModal.data ? (
+              <p className="text-gray-500 text-[0.9rem] m-0">Couldn't load details.</p>
+            ) : (
+              <>
+                {/* Submitted by */}
+                <div className="p-4 rounded-xl border border-white/10 bg-black/20 data-[theme=light]:bg-black/5">
+                  <h4 className="flex items-center gap-2 text-[0.8rem] font-semibold uppercase tracking-wide text-gray-500 m-0 mb-3">
+                    <User size={13} /> Submitted By
+                  </h4>
+                  {viewModal.data.owner ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2 text-gray-100 data-[theme=light]:text-gray-900 font-semibold text-[0.95rem]">
+                        <User size={14} className="text-purple-400" /> {viewModal.data.owner.name}
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-400 text-[0.85rem]">
+                        <Mail size={14} /> {viewModal.data.owner.email}
+                      </div>
+                      {viewModal.data.owner.phone && (
+                        <div className="flex items-center gap-2 text-gray-400 text-[0.85rem]">
+                          <Phone size={14} /> {viewModal.data.owner.phone}
+                        </div>
+                      )}
+                      {viewModal.data.owner.joinedAt && (
+                        <div className="flex items-center gap-2 text-gray-500 text-[0.8rem]">
+                          <Calendar size={14} /> Account created {new Date(viewModal.data.owner.joinedAt).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="flex items-center gap-2 text-gray-400 text-[0.85rem] m-0">
+                      <ShieldCheck size={14} /> Added directly by an admin (no owner account)
+                    </p>
+                  )}
+                </div>
+
+                {/* Restaurant details */}
+                <div className="p-4 rounded-xl border border-white/10 bg-black/20 data-[theme=light]:bg-black/5">
+                  <h4 className="flex items-center gap-2 text-[0.8rem] font-semibold uppercase tracking-wide text-gray-500 m-0 mb-3">
+                    <UtensilsCrossed size={13} /> Restaurant Details
+                  </h4>
+                  <div className="flex flex-col gap-2 text-[0.85rem]">
+                    {viewModal.data.restaurant.description && (
+                      <p className="text-gray-300 data-[theme=light]:text-gray-700 leading-relaxed m-0">{viewModal.data.restaurant.description}</p>
+                    )}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-1 text-gray-400">
+                      <span><strong className="text-gray-300 data-[theme=light]:text-gray-700 font-medium">Cuisine:</strong> {viewModal.data.restaurant.cuisine}</span>
+                      <span><strong className="text-gray-300 data-[theme=light]:text-gray-700 font-medium">Type:</strong> {viewModal.data.restaurant.establishmentType}</span>
+                      <span className="flex items-center gap-1"><MapPin size={12} /> {viewModal.data.restaurant.area}</span>
+                      <span><strong className="text-gray-300 data-[theme=light]:text-gray-700 font-medium">Price:</strong> {viewModal.data.restaurant.priceRange}</span>
+                    </div>
+                    {viewModal.data.restaurant.address && (
+                      <p className="text-gray-500 text-[0.8rem] m-0 mt-1">{viewModal.data.restaurant.address}</p>
+                    )}
+                  </div>
+
+                  {viewModal.data.restaurant.gallery?.length > 0 && (
+                    <div className="flex items-center gap-2 mt-3 overflow-x-auto scrollbar-none">
+                      <ImageIcon size={13} className="text-gray-500 shrink-0" />
+                      {[viewModal.data.restaurant.image, ...viewModal.data.restaurant.gallery].filter(Boolean).map((img, i) => (
+                        <img key={i} src={img} alt="" className="w-14 h-14 rounded-md object-cover shrink-0 border border-white/10" />
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="flex items-center gap-1.5 text-gray-500 text-[0.78rem] m-0 mt-3">
+                    <Calendar size={12} /> Submitted {new Date(viewModal.data.restaurant.createdAt).toLocaleString()}
+                  </p>
+                </div>
+
+                {viewModal.data.restaurant.approvalStatus === 'pending' && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { handleApprove(viewModal.hotel); closeViewModal(); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[0.9rem] font-semibold cursor-pointer hover:bg-emerald-500/25 transition-all"
+                    >
+                      <Check size={16} /> Approve
+                    </button>
+                    <button
+                      onClick={() => { closeViewModal(); openRejectModal(viewModal.hotel); }}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-[0.9rem] font-semibold cursor-pointer hover:bg-red-500/25 transition-all"
+                    >
+                      <X size={16} /> Reject
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}

@@ -81,6 +81,11 @@ export const hotelsApi = {
     return await api.get('/restaurants/mine');
   },
 
+  // Admin-only verification view: { restaurant, owner } — owner has name/email/phone.
+  async getAdminView(id) {
+    return await api.get(`/restaurants/${id}/admin-view`);
+  },
+
   async create(hotelData, menuFile = null) {
     return await api.post('/restaurants', buildHotelFormData(hotelData, menuFile), {
       headers: { 'Content-Type': 'multipart/form-data' }

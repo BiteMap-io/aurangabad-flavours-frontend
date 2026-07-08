@@ -6,7 +6,7 @@ import RestaurantCard from '../components/RestaurantCard'
 import RestaurantModal from '../components/RestaurantModal'
 import FilterBar from '../components/FilterBar'
 import { SkeletonList } from '../components/SkeletonCard'
-import { hotelsApi, galleryApi } from '../services/adminApi'
+import { hotelsApi, galleryApi, dishesApi } from '../services/adminApi'
 import { useTouristMode } from '../context/TouristModeContext'
 import { filterForTouristMode } from '../utils/diningUtils'
 import useSEO from '../hooks/useSEO'
@@ -21,6 +21,7 @@ const Explore = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [restaurants, setRestaurants] = useState([])
+  const [dishNamesByRestaurant, setDishNamesByRestaurant] = useState({})
   const [heroImage, setHeroImage] = useState("")
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
@@ -35,17 +36,30 @@ const Explore = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [hotelsRes, galleryRes] = await Promise.all([
+        const [hotelsRes, galleryRes, dishesRes] = await Promise.all([
           hotelsApi.getAll(),
-          galleryApi.getAll('explore')
+          galleryApi.getAll('explore'),
+          dishesApi.getAll().catch(() => null)
         ])
-        
+
         const hotelsData = hotelsRes.data || hotelsRes
         setRestaurants(Array.isArray(hotelsData) ? hotelsData : [])
-        
+
         const galleryData = galleryRes.data || galleryRes
         if (Array.isArray(galleryData) && galleryData.length > 0) {
           setHeroImage(galleryData[0].url)
+        }
+
+        const dishesData = dishesRes?.data || dishesRes
+        if (Array.isArray(dishesData)) {
+          const grouped = {}
+          dishesData.forEach((dish) => {
+            const rid = dish.restaurantId
+            if (!rid) return
+            if (!grouped[rid]) grouped[rid] = []
+            if (dish.name) grouped[rid].push(dish.name.toLowerCase())
+          })
+          setDishNamesByRestaurant(grouped)
         }
       } catch (error) {
         console.error('Failed to fetch explore data:', error)
@@ -86,18 +100,23 @@ const Explore = () => {
     // Search across multiple fields
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim()
-      filtered = filtered.filter((r) =>
-        r.name?.toLowerCase().includes(q) ||
-        r.cuisine?.toLowerCase().includes(q) ||
-        r.establishmentType?.toLowerCase().includes(q) ||
-        r.area?.toLowerCase().includes(q) ||
-        r.description?.toLowerCase().includes(q) ||
-        r.foodType?.toLowerCase().includes(q) ||
-        r.food?.signatureDishes?.toLowerCase().includes(q) ||
-        r.food?.specialtyDishes?.toLowerCase().includes(q) ||
-        r.environment?.uniqueFeatures?.toLowerCase().includes(q) ||
-        r.priceRange?.toLowerCase().includes(q)
-      )
+      filtered = filtered.filter((r) => {
+        const rid = r._id || r.id
+        const dishNames = dishNamesByRestaurant[rid] || []
+        return (
+          r.name?.toLowerCase().includes(q) ||
+          r.cuisine?.toLowerCase().includes(q) ||
+          r.establishmentType?.toLowerCase().includes(q) ||
+          r.area?.toLowerCase().includes(q) ||
+          r.description?.toLowerCase().includes(q) ||
+          r.foodType?.toLowerCase().includes(q) ||
+          r.food?.signatureDishes?.toLowerCase().includes(q) ||
+          r.food?.specialtyDishes?.toLowerCase().includes(q) ||
+          r.environment?.uniqueFeatures?.toLowerCase().includes(q) ||
+          r.priceRange?.toLowerCase().includes(q) ||
+          dishNames.some((name) => name.includes(q))
+        )
+      })
     }
 
     if (filters.establishmentType) {
@@ -144,7 +163,7 @@ const Explore = () => {
     }
 
     return filtered
-  }, [filters, isTouristMode, restaurants, searchQuery])
+  }, [filters, isTouristMode, restaurants, searchQuery, dishNamesByRestaurant])
 
   const handleRestaurantClick = (restaurant) => {
     setSelectedRestaurant(restaurant)
