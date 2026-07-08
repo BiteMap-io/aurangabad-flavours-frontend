@@ -32,7 +32,7 @@ const USER_ICON = {
   scale: 1,
 }
 
-const ModalMap = memo(({ position, title, directions, userLocation }) => {
+const ModalMap = memo(({ position, title, directions, userLocation, interactive = false }) => {
   const isLoaded = useGoogleMapsLoaded()
   const mapRef = useRef(null)
 
@@ -70,7 +70,7 @@ const ModalMap = memo(({ position, title, directions, userLocation }) => {
       mapContainerStyle={modalMapStyle}
       center={position}
       zoom={15}
-      options={{ disableDefaultUI: true, scrollwheel: false }}
+      options={{ disableDefaultUI: !interactive, scrollwheel: interactive, zoomControl: interactive, fullscreenControl: false }}
       onLoad={onLoad}
       onUnmount={onUnmount}
     >
@@ -107,6 +107,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [mapExpanded, setMapExpanded] = useState(false)
 
   const { userLocation, directions, routeInfo, loading: dirLoading, error: dirError, getDirections, clear: clearRoute } = useDirections()
   const { user, isLoggedIn } = useUserAuth()
@@ -239,6 +240,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
     : restaurant.foodType === 'both' ? '🟡 Veg & Non-Veg' : null
 
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[2000] flex items-end md:items-center justify-center md:p-md lg:p-xl">
@@ -324,10 +326,6 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                     )}
                   </div>
 
-                  {restaurant.description && (
-                    <p className="text-secondary leading-[1.6] m-0 text-[0.88rem] line-clamp-3 md:line-clamp-none">{restaurant.description}</p>
-                  )}
-
                   <button
                     onClick={() => {
                       const id = restaurant?._id || restaurant?.id
@@ -376,17 +374,6 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                   </div>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  const id = restaurant?._id || restaurant?.id
-                  onClose()
-                  navigate(`/place/${id}`)
-                }}
-                className="flex items-center gap-xs py-2 px-4 bg-accent-purple/10 border border-accent-purple/50 text-accent-purple rounded-full text-[0.85rem] font-semibold cursor-pointer transition-all duration-300 hover:bg-accent-purple/20 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[1px]"
-              >
-                <Navigation size={16} />
-                <span>{t('common.directions')}</span>
-              </button>
             </div>
 
             {/* ── Body ── */}
@@ -624,20 +611,32 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
                 <span className="text-[0.78rem] font-bold uppercase tracking-[0.1em] text-tertiary flex items-center gap-xs">
                   <MapPin size={14} /> Location
                 </span>
-                <div className="relative h-[160px] md:h-[180px] bg-background-secondary border border-glass-border rounded-xl overflow-hidden w-full shadow-glass light:bg-white/90 light:border-black/10">
+                <button
+                  type="button"
+                  onClick={() => setMapExpanded(true)}
+                  aria-label="Expand map"
+                  className="group relative h-[160px] md:h-[180px] bg-background-secondary border border-glass-border rounded-xl overflow-hidden w-full shadow-glass light:bg-white/90 light:border-black/10 cursor-pointer"
+                >
                   {isOpen && (
-                    <ModalMap
-                      position={
-                        restaurant.location?.coordinates
-                          ? { lat: restaurant.location.coordinates[1], lng: restaurant.location.coordinates[0] }
-                          : { lat: 19.8762, lng: 75.3433 }
-                      }
-                      title={restaurant.name}
-                      directions={directions}
-                      userLocation={userLocation}
-                    />
+                    <div className="absolute inset-0 pointer-events-none">
+                      <ModalMap
+                        position={
+                          restaurant.location?.coordinates
+                            ? { lat: restaurant.location.coordinates[1], lng: restaurant.location.coordinates[0] }
+                            : { lat: 19.8762, lng: 75.3433 }
+                        }
+                        title={restaurant.name}
+                        directions={directions}
+                        userLocation={userLocation}
+                      />
+                    </div>
                   )}
-                </div>
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-200 flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 py-1.5 px-3 bg-black/60 text-white text-[0.78rem] font-semibold rounded-full">
+                      Click to expand
+                    </span>
+                  </div>
+                </button>
                 <div className="p-sm bg-glass-surface/40 border border-glass-border rounded-xl light:bg-white/90 light:border-black/10">
                   <p className="text-[0.72rem] text-tertiary uppercase tracking-wide mb-1 flex items-center gap-1 m-0">
                     <MapPin size={11} /> Full Address
@@ -651,6 +650,7 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
           </motion.div>
         </div>
       )}
+    </AnimatePresence>
 
       {/* ── Fullscreen photo lightbox — portaled so it covers the whole viewport ── */}
       {createPortal(
@@ -716,7 +716,52 @@ const RestaurantModal = ({ restaurant, isOpen, onClose }) => {
         </AnimatePresence>,
         document.body
       )}
-    </AnimatePresence>
+
+      {/* ── Fullscreen map — portaled, larger and interactive (scroll/zoom/pan) ── */}
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && mapExpanded && (
+            <motion.div
+              className="fixed inset-0 z-[3000] flex flex-col bg-black/95 backdrop-blur-md p-md md:p-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMapExpanded(false)}
+            >
+              <div className="flex items-center justify-between mb-sm shrink-0" onClick={e => e.stopPropagation()}>
+                <span className="flex items-center gap-xs text-white font-semibold text-[0.95rem]">
+                  <MapPin size={16} className="text-accent-purple" /> {restaurant.name}
+                </span>
+                <button
+                  onClick={() => setMapExpanded(false)}
+                  aria-label="Close"
+                  className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 border border-white/15 text-white hover:bg-white/20 transition-all"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+              <div
+                className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-white/10"
+                onClick={e => e.stopPropagation()}
+              >
+                <ModalMap
+                  position={
+                    restaurant.location?.coordinates
+                      ? { lat: restaurant.location.coordinates[1], lng: restaurant.location.coordinates[0] }
+                      : { lat: 19.8762, lng: 75.3433 }
+                  }
+                  title={restaurant.name}
+                  directions={directions}
+                  userLocation={userLocation}
+                  interactive
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
   )
 }
 

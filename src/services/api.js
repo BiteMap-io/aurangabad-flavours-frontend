@@ -10,8 +10,16 @@ const api = axios.create({
 // Add a request interceptor to include the auth token
 api.interceptors.request.use(
   (config) => {
-    // Admin token takes priority, fall back to user token
-    const token = localStorage.getItem('adminToken') || localStorage.getItem('userToken');
+    // Both an admin session and a customer/owner/guest session can be present in the
+    // same browser at once (e.g. someone tested /admin/login earlier). Pick whichever
+    // token actually matches the section of the app making the request, instead of
+    // always favoring the admin token — otherwise a stale adminToken silently hijacks
+    // owner-only calls like /restaurants/mine from the partner dashboard, and every
+    // one of them 403s even though the user IS logged in as the right role.
+    const isAdminSection = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+    const token = isAdminSection
+      ? (localStorage.getItem('adminToken') || localStorage.getItem('userToken'))
+      : (localStorage.getItem('userToken') || localStorage.getItem('adminToken'));
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
