@@ -44,14 +44,20 @@ const Cuisines = () => {
     fetchData()
   }, [])
 
+  // Deduped on a trimmed, case-insensitive key — admin data entry inconsistencies
+  // (extra whitespace, different casing) would otherwise produce visually-identical
+  // "duplicate" options. The first-seen casing is kept as the display label.
   const cuisines = useMemo(() => {
-    const cuisineSet = new Set()
+    const cuisineMap = new Map()
     restaurants.forEach(r => {
       if (r.cuisine) {
-        r.cuisine.split(',').forEach(c => cuisineSet.add(c.trim()))
+        r.cuisine.split(',').forEach(c => {
+          const trimmed = c.trim()
+          if (trimmed && !cuisineMap.has(trimmed.toLowerCase())) cuisineMap.set(trimmed.toLowerCase(), trimmed)
+        })
       }
     })
-    return Array.from(cuisineSet).sort()
+    return Array.from(cuisineMap.values()).sort()
   }, [restaurants])
 
   const filteredRestaurants = useMemo(() => {

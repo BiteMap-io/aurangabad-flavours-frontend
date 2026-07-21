@@ -11,22 +11,32 @@ const FilterBar = ({ filters, onFilterChange, restaurants = [] }) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeFilter, setActiveFilter] = useState(null)
 
-  // Derive dynamic filter options from restaurant data
+  // Derive dynamic filter options from restaurant data. Values are deduped on a
+  // trimmed, case-insensitive key — admin data entry inconsistencies (extra
+  // whitespace, different casing) would otherwise produce visually-identical
+  // "duplicate" options. The first-seen casing is kept as the display label.
   const { cuisines, areas, establishmentTypes } = useMemo(() => {
-    const cuisineSet = new Set()
-    const areaSet = new Set()
-    const typeSet = new Set()
+    const addUnique = (map, raw) => {
+      const trimmed = raw.trim()
+      if (!trimmed) return
+      const key = trimmed.toLowerCase()
+      if (!map.has(key)) map.set(key, trimmed)
+    }
+
+    const cuisineMap = new Map()
+    const areaMap = new Map()
+    const typeMap = new Map()
 
     restaurants.forEach(r => {
-      if (r.cuisine) r.cuisine.split(',').forEach(c => cuisineSet.add(c.trim()))
-      if (r.area) areaSet.add(r.area)
-      if (r.establishmentType) typeSet.add(r.establishmentType)
+      if (r.cuisine) r.cuisine.split(',').forEach(c => addUnique(cuisineMap, c))
+      if (r.area) addUnique(areaMap, r.area)
+      if (r.establishmentType) addUnique(typeMap, r.establishmentType)
     })
 
     return {
-      cuisines: Array.from(cuisineSet).sort(),
-      areas: Array.from(areaSet).sort(),
-      establishmentTypes: Array.from(typeSet).sort()
+      cuisines: Array.from(cuisineMap.values()).sort(),
+      areas: Array.from(areaMap.values()).sort(),
+      establishmentTypes: Array.from(typeMap.values()).sort()
     }
   }, [restaurants])
 

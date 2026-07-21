@@ -7,10 +7,11 @@ import {
   Utensils, 
   BookOpen, 
   ChefHat, 
-  Star, 
+  Star,
   Calendar,
   Info,
   Phone,
+  Tag,
   X
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -37,6 +38,7 @@ const CardNav = ({ isOpen, onClose }) => {
         { path: '/articles', label: 'nav.articles', icon: BookOpen },
         { path: '/cuisines', label: 'nav.cuisines', icon: ChefHat },
         { path: '/top-picks', label: 'nav.topPicks', icon: Star },
+        { path: '/offers', label: 'nav.offers', icon: Tag },
         { path: '/events', label: 'nav.events', icon: Calendar },
       ]
     },

@@ -8,7 +8,7 @@ import FilterBar from '../components/FilterBar'
 import { SkeletonList } from '../components/SkeletonCard'
 import { hotelsApi, galleryApi, dishesApi } from '../services/adminApi'
 import { useTouristMode } from '../context/TouristModeContext'
-import { filterForTouristMode } from '../utils/diningUtils'
+import { filterForTouristMode, normalizeForSearch } from '../utils/diningUtils'
 import useSEO from '../hooks/useSEO'
 
 const Explore = () => {
@@ -57,7 +57,7 @@ const Explore = () => {
             const rid = dish.restaurantId
             if (!rid) return
             if (!grouped[rid]) grouped[rid] = []
-            if (dish.name) grouped[rid].push(dish.name.toLowerCase())
+            if (dish.name) grouped[rid].push(dish.name)
           })
           setDishNamesByRestaurant(grouped)
         }
@@ -97,34 +97,41 @@ const Explore = () => {
       filtered = filterForTouristMode(filtered)
     }
 
-    // Search across multiple fields
+    // Search across multiple fields — case-insensitive and whitespace-forgiving,
+    // so "7Apple", "7 apple", "7 APPLE" and "apple" all match "7 Apple".
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim()
+      const q = normalizeForSearch(searchQuery)
       filtered = filtered.filter((r) => {
         const rid = r._id || r.id
         const dishNames = dishNamesByRestaurant[rid] || []
         return (
-          r.name?.toLowerCase().includes(q) ||
-          r.cuisine?.toLowerCase().includes(q) ||
-          r.establishmentType?.toLowerCase().includes(q) ||
-          r.area?.toLowerCase().includes(q) ||
-          r.description?.toLowerCase().includes(q) ||
-          r.foodType?.toLowerCase().includes(q) ||
-          r.food?.signatureDishes?.toLowerCase().includes(q) ||
-          r.food?.specialtyDishes?.toLowerCase().includes(q) ||
-          r.environment?.uniqueFeatures?.toLowerCase().includes(q) ||
-          r.priceRange?.toLowerCase().includes(q) ||
-          dishNames.some((name) => name.includes(q))
+          normalizeForSearch(r.name).includes(q) ||
+          normalizeForSearch(r.cuisine).includes(q) ||
+          normalizeForSearch(r.establishmentType).includes(q) ||
+          normalizeForSearch(r.area).includes(q) ||
+          normalizeForSearch(r.description).includes(q) ||
+          normalizeForSearch(r.foodType).includes(q) ||
+          normalizeForSearch(r.food?.signatureDishes).includes(q) ||
+          normalizeForSearch(r.food?.specialtyDishes).includes(q) ||
+          normalizeForSearch(r.environment?.uniqueFeatures).includes(q) ||
+          normalizeForSearch(r.priceRange).includes(q) ||
+          dishNames.some((name) => normalizeForSearch(name).includes(q))
         )
       })
     }
 
     if (filters.establishmentType) {
-      filtered = filtered.filter((r) => r.establishmentType === filters.establishmentType)
+      const want = filters.establishmentType.trim().toLowerCase()
+      filtered = filtered.filter((r) => r.establishmentType?.trim().toLowerCase() === want)
     }
 
     if (filters.cuisine) {
-      filtered = filtered.filter((r) => r.cuisine === filters.cuisine)
+      // r.cuisine can be a comma-separated list (e.g. "Multi-cuisine, Continental"),
+      // so match against each trimmed token rather than the whole string.
+      const want = filters.cuisine.trim().toLowerCase()
+      filtered = filtered.filter((r) =>
+        (r.cuisine || '').split(',').some((c) => c.trim().toLowerCase() === want)
+      )
     }
 
     if (filters.priceRange) {
@@ -150,7 +157,8 @@ const Explore = () => {
     }
 
     if (filters.area) {
-      filtered = filtered.filter((r) => r.area === filters.area)
+      const want = filters.area.trim().toLowerCase()
+      filtered = filtered.filter((r) => r.area?.trim().toLowerCase() === want)
     }
 
     if (filters.nearMe) {

@@ -21,6 +21,7 @@ const MapView = lazy(() => import('./pages/MapView'))
 const PlaceMap = lazy(() => import('./pages/PlaceMap'))
 const Cuisines = lazy(() => import('./pages/Cuisines'))
 const TopPicks = lazy(() => import('./pages/TopPicks'))
+const Offers = lazy(() => import('./pages/Offers'))
 const Events = lazy(() => import('./pages/Events'))
 const FoodCulture = lazy(() => import('./pages/FoodCulture'))
 const Articles = lazy(() => import('./pages/Articles'))
@@ -148,6 +149,7 @@ function App() {
                             <Route path="/place/:id" element={<PlaceMap />} />
                             <Route path="/cuisines" element={<Cuisines />} />
                             <Route path="/top-picks" element={<TopPicks />} />
+                            <Route path="/offers" element={<Offers />} />
                             <Route path="/events" element={<Events />} />
                             <Route path="/food-culture" element={<FoodCulture />} />
                             <Route path="/articles" element={<Articles />} />

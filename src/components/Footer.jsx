@@ -146,6 +146,7 @@ const Footer = () => {
               <ul className="list-none p-0 m-0 flex flex-col gap-[0.5rem]">
                 <NavLink to="/cuisines">Cuisines</NavLink>
                 <NavLink to="/food-culture">Food Culture</NavLink>
+                <NavLink to="/offers">Offers</NavLink>
                 <NavLink to="/events">Events</NavLink>
                 <NavLink to="/articles">Articles</NavLink>
               </ul>

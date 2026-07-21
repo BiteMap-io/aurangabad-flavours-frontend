@@ -325,6 +325,10 @@ export const foodTrailsApi = {
 // tiers: [{ minSpend, discountPercent }]  audience: 'all' | 'student'
 
 export const offersApi = {
+  async getAll() {
+    return await api.get('/offers');
+  },
+
   async getByRestaurant(restaurantId) {
     return await api.get(`/offers?restaurantId=${restaurantId}`);
   },
