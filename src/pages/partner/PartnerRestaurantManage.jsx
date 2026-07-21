@@ -8,6 +8,7 @@ import {
 import { hotelsApi, dishesApi, offersApi, mediaApi } from '../../services/adminApi'
 import { showToast } from '../../components/admin/Toast'
 import ConfirmModal from '../../components/admin/ConfirmModal'
+import { OFFER_TYPES, getOfferBadge } from '../../utils/offerUtils'
 
 const inputCls = 'w-full bg-glass-surface border border-glass-border rounded-md py-2.5 px-3.5 text-primary text-[0.9rem] focus:outline-none focus:border-accent-purple transition-all'
 const labelCls = 'text-[0.82rem] text-secondary font-medium mb-1 block'
@@ -252,8 +253,11 @@ const DishesTab = ({ restaurantId }) => {
 
 // ── Offers tab ────────────────────────────────────────────────────────────────
 const EMPTY_OFFER = {
-  title: '', description: '', startDate: '', endDate: '', startTime: '', endTime: '',
-  tiers: [{ minSpend: 1000, discountPercent: 10 }], audience: 'all', active: true,
+  offerType: 'percentage',
+  title: '', description: '', highlightText: '', startDate: '', endDate: '', startTime: '', endTime: '',
+  tiers: [{ minSpend: 1000, discountPercent: 10 }],
+  flatTiers: [{ minSpend: 1000, amount: 100 }],
+  audience: 'all', active: true,
 }
 
 const OffersTab = ({ restaurantId }) => {
@@ -282,11 +286,13 @@ const OffersTab = ({ restaurantId }) => {
   const openEditor = (offer = null) => {
     if (offer) {
       setForm({
-        title: offer.title || '', description: offer.description || '',
+        offerType: offer.offerType || 'percentage',
+        title: offer.title || '', description: offer.description || '', highlightText: offer.highlightText || '',
         startDate: offer.startDate ? offer.startDate.slice(0, 10) : '',
         endDate: offer.endDate ? offer.endDate.slice(0, 10) : '',
         startTime: offer.startTime || '', endTime: offer.endTime || '',
         tiers: offer.tiers?.length ? offer.tiers : [{ minSpend: 1000, discountPercent: 10 }],
+        flatTiers: offer.flatTiers?.length ? offer.flatTiers : [{ minSpend: 1000, amount: 100 }],
         audience: offer.audience || 'all', active: offer.active !== false,
       })
     } else {
@@ -301,6 +307,12 @@ const OffersTab = ({ restaurantId }) => {
   }
   const addTier = () => setForm(f => ({ ...f, tiers: [...f.tiers, { minSpend: 0, discountPercent: 0 }] }))
   const removeTier = (i) => setForm(f => ({ ...f, tiers: f.tiers.filter((_, idx) => idx !== i) }))
+
+  const updateFlatTier = (i, field, value) => {
+    setForm(f => ({ ...f, flatTiers: f.flatTiers.map((t, idx) => idx === i ? { ...t, [field]: Number(value) || 0 } : t) }))
+  }
+  const addFlatTier = () => setForm(f => ({ ...f, flatTiers: [...f.flatTiers, { minSpend: 0, amount: 0 }] }))
+  const removeFlatTier = (i) => setForm(f => ({ ...f, flatTiers: f.flatTiers.filter((_, idx) => idx !== i) }))
 
   const handleSave = async (e) => {
     e.preventDefault()
@@ -371,7 +383,7 @@ const OffersTab = ({ restaurantId }) => {
                     {offer.startTime && ` · ${offer.startTime}–${offer.endTime || ''}`}
                   </p>
                   <p className="text-secondary text-[0.82rem] m-0">
-                    {offer.tiers?.map(t => `₹${t.minSpend}+ → ${t.discountPercent}% off`).join('  ·  ')}
+                    {getOfferBadge(offer)}
                   </p>
                 </div>
                 <div className="flex gap-1.5 shrink-0">
@@ -410,6 +422,26 @@ const OffersTab = ({ restaurantId }) => {
                 <textarea className={inputCls} rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
 
+              <div>
+                <label className={labelCls}>Offer type</label>
+                <div className="flex flex-col gap-2">
+                  {OFFER_TYPES.map(ot => (
+                    <button key={ot.value} type="button" onClick={() => setForm(f => ({ ...f, offerType: ot.value }))}
+                      className={`text-left py-2 px-3 rounded-md border transition-all ${form.offerType === ot.value ? 'bg-accent-purple/15 border-accent-purple' : 'bg-glass-surface border-glass-border'}`}>
+                      <span className={`block text-[0.85rem] font-semibold ${form.offerType === ot.value ? 'text-accent-purple' : 'text-primary'}`}>{ot.label}</span>
+                      <span className="block text-[0.76rem] text-secondary mt-0.5">{ot.hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {form.offerType === 'custom' && (
+                <div>
+                  <label className={labelCls}>Badge text (optional)</label>
+                  <input className={inputCls} value={form.highlightText} onChange={e => setForm(f => ({ ...f, highlightText: e.target.value }))} placeholder="e.g. Buy 1 Get 1 Free" />
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className={labelCls}>Start date</label>
@@ -444,6 +476,7 @@ const OffersTab = ({ restaurantId }) => {
                 </div>
               </div>
 
+              {form.offerType === 'percentage' && (
               <div>
                 <label className={labelCls}>Discount tiers — minimum bill → % off</label>
                 <div className="flex flex-col gap-2">
@@ -464,6 +497,30 @@ const OffersTab = ({ restaurantId }) => {
                   </button>
                 </div>
               </div>
+              )}
+
+              {form.offerType === 'flat' && (
+              <div>
+                <label className={labelCls}>Flat discount — minimum bill → ₹ off</label>
+                <div className="flex flex-col gap-2">
+                  {form.flatTiers.map((t, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-secondary text-[0.85rem]">₹</span>
+                      <input type="number" min="0" className={inputCls} value={t.minSpend} onChange={e => updateFlatTier(i, 'minSpend', e.target.value)} placeholder="1000" />
+                      <span className="text-secondary text-[0.85rem]">→ ₹</span>
+                      <input type="number" min="0" className={inputCls} value={t.amount} onChange={e => updateFlatTier(i, 'amount', e.target.value)} placeholder="200" />
+                      <span className="text-secondary text-[0.85rem]">off</span>
+                      {form.flatTiers.length > 1 && (
+                        <button type="button" onClick={() => removeFlatTier(i)} className="text-secondary hover:text-red-400 bg-transparent border-none cursor-pointer"><X size={16} /></button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={addFlatTier} className="self-start text-accent-purple text-[0.82rem] font-medium bg-transparent border-none cursor-pointer flex items-center gap-1">
+                    <Plus size={13} /> Add another tier
+                  </button>
+                </div>
+              </div>
+              )}
 
               <label className="flex items-center gap-2 text-[0.85rem] text-secondary">
                 <input type="checkbox" checked={form.active} onChange={e => setForm(f => ({ ...f, active: e.target.checked }))} />

@@ -138,23 +138,38 @@ const MapView = () => {
   }, [directToId, loading, restaurants])
 
   // ── Area stats ─────────────────────────────────────────────────────────────
+  // Deduped on a trimmed, case-insensitive key — admin data entry inconsistencies
+  // (extra whitespace, different casing) would otherwise create separate stats
+  // entries that look like duplicate areas. First-seen casing is kept as the label.
   const areaStats = useMemo(() => {
-    const stats = {}
-    restaurants.forEach(r => { if (r.area) stats[r.area] = (stats[r.area] || 0) + 1 })
-    return Object.entries(stats).map(([name, count]) => ({ name, count }))
+    const stats = new Map() // normalized key -> { name, count }
+    restaurants.forEach(r => {
+      if (!r.area) return
+      const trimmed = r.area.trim()
+      if (!trimmed) return
+      const key = trimmed.toLowerCase()
+      const existing = stats.get(key)
+      if (existing) existing.count += 1
+      else stats.set(key, { name: trimmed, count: 1 })
+    })
+    return Array.from(stats.values())
   }, [restaurants])
 
   // ── Cuisine list ───────────────────────────────────────────────────────────
   const cuisineList = useMemo(() => {
-    const set = new Set()
-    restaurants.forEach(r => r.cuisine?.split(',').forEach(c => set.add(c.trim())))
-    return Array.from(set).sort()
+    const map = new Map()
+    restaurants.forEach(r => r.cuisine?.split(',').forEach(c => {
+      const trimmed = c.trim()
+      if (trimmed && !map.has(trimmed.toLowerCase())) map.set(trimmed.toLowerCase(), trimmed)
+    }))
+    return Array.from(map.values()).sort()
   }, [restaurants])
 
   // ── Displayed restaurants (filters + sort) ─────────────────────────────────
   const displayedRestaurants = useMemo(() => {
+    const wantArea = selectedArea.trim().toLowerCase()
     let list = nearMeActive ? nearbyRestaurants
-      : selectedArea ? restaurants.filter(r => r.area === selectedArea)
+      : selectedArea ? restaurants.filter(r => r.area?.trim().toLowerCase() === wantArea)
       : restaurants
 
     if (filterRating) list = list.filter(r => (r.rating || 0) >= parseFloat(filterRating))
@@ -672,8 +687,10 @@ const MapView = () => {
             </div>
           </div>
 
-          {/* Map container */}
-          <div className="bg-glass-surface border border-glass-border rounded-xl overflow-hidden relative h-full">
+          {/* Map container — explicit height on mobile since the grid row collapses to
+              content height there (max-lg:h-auto), which would otherwise leave nothing
+              for `h-full` to resolve against and render a barely-visible map. */}
+          <div className="bg-glass-surface border border-glass-border rounded-xl overflow-hidden relative h-full max-lg:h-[60vh] max-lg:min-h-[420px]">
             {loading ? (
               <div className="w-full h-full flex items-center justify-center text-accent-purple">
                 <Loader size={48} className="animate-spin" />

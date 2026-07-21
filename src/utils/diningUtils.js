@@ -1,3 +1,8 @@
+// Normalizes text for "forgiving" search matching: lowercases and strips all
+// whitespace, so case, extra spaces, and missing/extra spaces between words
+// ("7 Apple", "7Apple", "7 APPLE ") all collapse to the same comparable string.
+export const normalizeForSearch = (s) => (s || '').toLowerCase().replace(/\s+/g, '')
+
 // Time-based dining suggestions
 export const getCurrentMealTime = () => {
   const hour = new Date().getHours()

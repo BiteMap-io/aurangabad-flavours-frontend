@@ -275,7 +275,7 @@ const HotelForm = ({ ownerMode = false }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     // Re-check every step's requirements; jump to the first problem if any.
     for (let s = 0; s < STEPS.length; s++) {
@@ -384,7 +384,7 @@ const HotelForm = ({ ownerMode = false }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <form onSubmit={handleSubmit}>
+        <div>
           <div className="mb-6">
             <h2 className="text-[1.4rem] font-bold text-gray-100 data-[theme=light]:text-gray-900 m-0">{STEPS[step].label}</h2>
             <p className="text-[0.9rem] text-gray-500 mt-1">{STEPS[step].blurb}</p>
@@ -839,7 +839,7 @@ const HotelForm = ({ ownerMode = false }) => {
             <span className="text-[0.82rem] text-gray-600 max-md:hidden">Step {step + 1} of {STEPS.length}</span>
 
             {isLastStep ? (
-              <button type="submit" disabled={loading}
+              <button type="button" onClick={handleSubmit} disabled={loading}
                 className="flex items-center gap-2 py-3 px-6 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-purple-500 text-white border-none hover:bg-purple-600 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(168,85,247,0.3)] disabled:opacity-70 disabled:cursor-not-allowed">
                 {loading ? <Loader size={18} className="animate-spin" /> : <Save size={18} />}
                 {isEditMode ? 'Update Hotel' : 'Save Hotel'}
@@ -851,7 +851,7 @@ const HotelForm = ({ ownerMode = false }) => {
               </button>
             )}
           </div>
-        </form>
+        </div>
       </motion.div>
     </div>
   );
