@@ -6,7 +6,7 @@
 const DEFAULTS = {
   about: {
     title: 'About Aurangabad Flavors',
-    subtitle: 'Developed by School of Engineering & Technology (SOET) for Institute of Hotel Management (IHM), MGM University',
+    subtitle: 'Curated by Institute of Hotel Management (IHM) and School of Engineering & Technology (SOET), MGM University',
     section1Title: 'Heritage & Culture',
     section1Content: 'Aurangabad, known as the "City of Gates," is a magnificent blend of Mughal architecture and Marathi culture. Home to the world-famous Ajanta and Ellora Caves, this historic city offers an incredible journey through time.',
     section2Title: 'Culinary Legacy',

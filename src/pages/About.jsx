@@ -7,7 +7,7 @@ const About = () => {
   const c = getPageContent('about')
   useSEO({
     title: 'About Us',
-    description: 'Learn about the Aurangabad Flavors Guide, developed by School of Engineering & Technology (SOET) for Institute of Hotel Management (IHM) at MGM University.',
+    description: 'Learn about the Aurangabad Flavors Guide, curated by the Institute of Hotel Management and School of Engineering & Technology at MGM University.',
     url: '/about',
   })
 
@@ -40,7 +40,7 @@ const About = () => {
                 Institute of Hotel Management (IHM)
               </h2>
               <p className="text-secondary leading-relaxed text-[0.95rem]">
-                Curated by hospitality veterans, culinary faculty, and students at IHM MGM University. Every featured restaurant, food trail, cuisine insight, and dish recommendation is evaluated through professional hospitality standards and local heritage.
+                Curated by hospitality veterans, culinary faculty, and students at IHM MGM University. Every featured restaurant, food trail, cuisine insight, and dish recommendation is evaluated through professional hospitality standards and local culinary heritage.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-tertiary text-[0.82rem]">
@@ -55,13 +55,13 @@ const About = () => {
                 <Code2 size={24} />
               </div>
               <span className="text-[0.7rem] uppercase tracking-wider font-bold text-accent-purple block mb-1">
-                Platform Architecture & Engineering
+                Digital & Technical Curation
               </span>
               <h2 className="text-[1.4rem] text-primary mb-3 font-semibold">
                 School of Engineering & Technology (SOET)
               </h2>
               <p className="text-secondary leading-relaxed text-[0.95rem]">
-                Designed, developed, and engineered by the technologists and developers at SOET MGM University. Built specifically for IHM to empower tourists, food enthusiasts, and restaurant partners with modern discovery and dining tools.
+                Curated in collaboration with the School of Engineering & Technology (SOET), MGM University. Bringing technological expertise, interactive map curation, and digital platform design to showcase the culinary excellence of the region.
               </p>
             </div>
             <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-tertiary text-[0.82rem]">

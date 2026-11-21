@@ -98,7 +98,7 @@ const Home = () => {
             Discover Aurangabad's Culinary Treasures
           </h1>
           <p className="text-[1rem] md:text-[1.1rem] xl:text-[1.25rem] text-white/90 mb-lg drop-shadow-md opacity-95">
-            Curated by Institute of Hotel Management · Developed by School of Engineering & Technology, MGM University
+            Curated by Institute of Hotel Management and School of Engineering & Technology, MGM University
           </p>
           <div className="flex flex-wrap items-center justify-center gap-sm mt-0">
             <Link to="/explore" className="inline-flex items-center gap-xs py-sm px-lg bg-white/10 backdrop-blur-[10px] border border-white/20 rounded-pill text-white font-semibold transition-all duration-300 shadow-glass hover:bg-white/15 hover:border-accent-purple hover:shadow-glow hover:-translate-y-[2px]">
@@ -147,13 +147,13 @@ const Home = () => {
           </div>
           <div className="w-px h-4 bg-glass-border hidden md:block" />
           <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
-            <Award size={16} className="text-accent-purple" />
-            <span><strong className="text-primary">IHM</strong> Curation</span>
+            <MapPin size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">Aurangabad</strong>, Maharashtra</span>
           </div>
           <div className="w-px h-4 bg-glass-border hidden md:block" />
           <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">
-            <Code2 size={16} className="text-accent-purple" />
-            <span><strong className="text-primary">SOET</strong> Engineering</span>
+            <Award size={16} className="text-accent-purple" />
+            <span><strong className="text-primary">IHM & SOET</strong> Curated</span>
           </div>
           <div className="w-px h-4 bg-glass-border hidden md:block" />
           <div className="flex items-center gap-xs text-secondary text-[0.9rem] font-medium">

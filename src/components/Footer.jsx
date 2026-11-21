@@ -93,34 +93,24 @@ const Footer = () => {
                 Your trusted guide to the best dining experiences in Aurangabad — curated with passion and expertise.
               </p>
 
-              {/* Joint Initiative Card — IHM & SOET */}
+              {/* Joint Curation Card — IHM & SOET */}
               <motion.div
-                className="relative rounded-[0.875rem] p-[0.875rem_1rem] bg-glass-surface backdrop-blur-[12px] border border-accent-purple/20 shadow-[0_4px_20px_rgba(124,58,237,0.09),inset_0_1px_0_rgba(255,255,255,0.04)] cursor-default flex flex-col gap-[0.65rem]"
+                className="relative rounded-[0.875rem] p-[0.875rem_1rem] bg-glass-surface backdrop-blur-[12px] border border-accent-purple/20 shadow-[0_4px_20px_rgba(124,58,237,0.09),inset_0_1px_0_rgba(255,255,255,0.04)] cursor-default flex flex-col gap-[0.55rem]"
                 whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(124,58,237,0.16), inset 0 1px 0 rgba(255,255,255,0.06)' }}
                 transition={{ duration: 0.22 }}
               >
                 <div className="absolute top-0 left-[18%] right-[18%] h-[1px] bg-gradient-to-r from-transparent via-accent-purple/45 to-transparent rounded-full" />
                 
-                <div className="flex items-start gap-[0.65rem]">
-                  <div className="w-6 h-6 rounded-md bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center shrink-0 mt-[1px]">
+                <div className="flex items-center gap-[0.65rem]">
+                  <div className="w-6 h-6 rounded-md bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center shrink-0">
                     <Award size={12} className="text-accent-purple" />
                   </div>
-                  <div>
-                    <p className="text-[0.62rem] font-bold text-accent-purple/80 uppercase tracking-[0.1em] m-0 mb-[1px]">Curated by</p>
-                    <p className="text-primary text-[0.82rem] font-semibold m-0 leading-[1.3]">Institute of Hotel Management (IHM)</p>
-                  </div>
+                  <p className="text-[0.65rem] font-bold text-accent-purple/80 uppercase tracking-[0.1em] m-0">Curated by</p>
                 </div>
 
-                <div className="h-[1px] bg-white/[0.06] w-full" />
-
-                <div className="flex items-start gap-[0.65rem]">
-                  <div className="w-6 h-6 rounded-md bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center shrink-0 mt-[1px]">
-                    <Code2 size={12} className="text-accent-purple" />
-                  </div>
-                  <div>
-                    <p className="text-[0.62rem] font-bold text-accent-purple/80 uppercase tracking-[0.1em] m-0 mb-[1px]">Developed by</p>
-                    <p className="text-primary text-[0.82rem] font-semibold m-0 leading-[1.3]">School of Engineering & Technology (SOET)</p>
-                  </div>
+                <div className="flex flex-col gap-1 pl-1">
+                  <p className="text-primary text-[0.82rem] font-semibold m-0 leading-[1.3]">Institute of Hotel Management (IHM)</p>
+                  <p className="text-primary text-[0.82rem] font-semibold m-0 leading-[1.3]">School of Engineering & Technology (SOET)</p>
                 </div>
 
                 <div className="pt-[0.25rem] border-t border-white/[0.04]">
@@ -205,7 +195,7 @@ const Footer = () => {
           {/* Bottom bar — reduced py */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-[0.75rem] py-[1.1rem]">
             <p className="text-tertiary/60 text-[0.8rem] m-0 tracking-[0.01em]">
-              &copy; {new Date().getFullYear()} Aurangabad Flavors Guide. Developed by SOET for IHM, MGM University.
+              &copy; {new Date().getFullYear()} Aurangabad Flavors Guide. Curated by IHM & SOET, MGM University.
             </p>
             {/* Language switcher */}
             <motion.div
