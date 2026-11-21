@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 const SITE_NAME = 'Aurangabad Flavors Guide'
-const DEFAULT_DESC = 'Discover the best restaurants, cuisines, and food culture in Aurangabad. Curated by Institute of Hotel Management, MGM University.'
+const DEFAULT_DESC = 'Discover the best restaurants, cuisines, and food culture in Aurangabad. Curated by Institute of Hotel Management (IHM) & Developed by School of Engineering & Technology (SOET), MGM University.'
 const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&auto=format&fit=crop'
 const SITE_URL = 'https://aurangabadflavors.com'
 
@@ -16,7 +16,7 @@ const SITE_URL = 'https://aurangabadflavors.com'
  */
 const useSEO = ({ title, description = DEFAULT_DESC, image = DEFAULT_IMAGE, url = '', type = 'website' }) => {
   useEffect(() => {
-    const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | IHM MGM University`
+    const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | IHM × SOET MGM University`
     const canonical = `${SITE_URL}${url}`
 
     // --- Title ---

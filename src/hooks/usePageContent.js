@@ -5,8 +5,8 @@
 
 const DEFAULTS = {
   about: {
-    title: 'About CSN',
-    subtitle: 'Discover the rich heritage and culinary traditions of Chhatrapati Sambhajinagar',
+    title: 'About Aurangabad Flavors',
+    subtitle: 'Developed by School of Engineering & Technology (SOET) for Institute of Hotel Management (IHM), MGM University',
     section1Title: 'Heritage & Culture',
     section1Content: 'Aurangabad, known as the "City of Gates," is a magnificent blend of Mughal architecture and Marathi culture. Home to the world-famous Ajanta and Ellora Caves, this historic city offers an incredible journey through time.',
     section2Title: 'Culinary Legacy',

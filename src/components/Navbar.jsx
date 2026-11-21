@@ -32,15 +32,20 @@ const Navbar = () => {
         transition={{ duration: 0.6, ease: 'easeOut' }}
       >
         <div className="max-w-[1400px] mx-auto flex items-center justify-between h-[60px] gap-sm md:gap-md lg:gap-lg">
-          <Link to="/" className="font-serif text-[1.1rem] md:text-[1.35rem] font-bold text-primary whitespace-nowrap transition-all duration-300">
-            <motion.span
-              className="bg-gradient-to-br from-primary via-accent-purple to-secondary bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] light:drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
-            >
-              Aurangabad Flavors
-            </motion.span>
-          </Link>
+          <div className="flex items-center gap-2.5">
+            <Link to="/" className="font-serif text-[1.1rem] md:text-[1.35rem] font-bold text-primary whitespace-nowrap transition-all duration-300">
+              <motion.span
+                className="bg-gradient-to-br from-primary via-accent-purple to-secondary bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] light:drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                Aurangabad Flavors
+              </motion.span>
+            </Link>
+            <span className="hidden sm:inline-flex items-center text-[0.65rem] font-semibold text-secondary/70 bg-white/5 border border-white/10 rounded-full px-2 py-0.5 tracking-wide whitespace-nowrap">
+              IHM × SOET
+            </span>
+          </div>
 
           <div className="flex items-center gap-xs md:gap-md">
             <div className="hidden md:flex items-center gap-sm">
